@@ -10,19 +10,20 @@ const base = {
   dialect: 'postgres',
 };
 
+// SSL is opt-in via DB_SSL=true (Railway internal Postgres does not use SSL).
+const useSsl = process.env.DB_SSL === 'true';
+const sslOptions = useSsl ? { ssl: { require: true, rejectUnauthorized: false } } : {};
+
 const fromUrl = process.env.DATABASE_URL
   ? {
       use_env_variable: 'DATABASE_URL',
       dialect: 'postgres',
-      dialectOptions: { ssl: { require: true, rejectUnauthorized: false } },
+      dialectOptions: sslOptions,
     }
   : null;
 
 module.exports = {
   development: fromUrl || base,
   test: fromUrl || { ...base, database: `${base.database}_test` },
-  production: fromUrl || {
-    ...base,
-    dialectOptions: { ssl: { require: true, rejectUnauthorized: false } },
-  },
+  production: fromUrl || { ...base, dialectOptions: sslOptions },
 };

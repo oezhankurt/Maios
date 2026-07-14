@@ -18,21 +18,24 @@ const commonOptions = {
   },
 };
 
+// SSL is opt-in via DB_SSL=true. Managed/public Postgres URLs usually require
+// it; Railway's internal Postgres does NOT, so leave DB_SSL unset there.
+const useSsl = process.env.DB_SSL === 'true';
+const sslDialectOptions = useSsl ? { ssl: { require: true, rejectUnauthorized: false } } : {};
+
 let sequelize;
 
 if (config.db.url) {
   sequelize = new Sequelize(config.db.url, {
     ...commonOptions,
-    dialectOptions:
-      config.env === 'production'
-        ? { ssl: { require: true, rejectUnauthorized: false } }
-        : {},
+    dialectOptions: sslDialectOptions,
   });
 } else {
   sequelize = new Sequelize(config.db.name, config.db.user, config.db.password, {
     ...commonOptions,
     host: config.db.host,
     port: config.db.port,
+    dialectOptions: sslDialectOptions,
   });
 }
 
