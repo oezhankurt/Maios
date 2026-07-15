@@ -30,6 +30,8 @@ async function fullDataSync() {
         unitsSold: sales.unitsSold,
         price: sales.price,
         grossRevenue: sales.grossRevenue,
+        refunds: sales.refunds,
+        refundedAmount: sales.refundedAmount,
         referralFee: sales.referralFee,
         fbaFee: sales.fbaFee,
         ppcSpend: sales.ppcSpend,

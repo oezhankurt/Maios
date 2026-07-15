@@ -28,15 +28,20 @@ const list = asyncHandler(async (req, res) => {
 });
 
 const create = asyncHandler(async (req, res) => {
-  const { asin, ean, title, category, price, costPerUnit, status } = req.body;
+  const { asin, ean, sku, title, category, imageUrl, price, costPerUnit, fbaStock, fbmStock, status } =
+    req.body;
   const product = await Product.create({
     userId: req.user.id,
     asin,
     ean,
+    sku,
     title,
     category,
+    imageUrl,
     price,
     costPerUnit,
+    fbaStock,
+    fbmStock,
     status,
   });
   res.status(201).json({ success: true, data: product });
@@ -49,7 +54,10 @@ const getOne = asyncHandler(async (req, res) => {
 
 const update = asyncHandler(async (req, res) => {
   const product = await ownedProduct(req.user.id, req.params.id);
-  const fields = ['asin', 'ean', 'title', 'category', 'price', 'costPerUnit', 'status'];
+  const fields = [
+    'asin', 'ean', 'sku', 'title', 'category', 'imageUrl',
+    'price', 'costPerUnit', 'fbaStock', 'fbmStock', 'status',
+  ];
   const patch = {};
   fields.forEach((f) => {
     if (req.body[f] !== undefined) patch[f] = req.body[f];

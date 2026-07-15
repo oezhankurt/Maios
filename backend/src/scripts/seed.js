@@ -32,9 +32,9 @@ async function seed() {
   logger.info(`Created demo user ${DEMO_EMAIL} / demo1234`);
 
   const productDefs = [
-    { asin: 'B0DEMO0001', title: 'Organic Green Tea 100 Bags', category: 'Grocery', price: 14.99, costPerUnit: 4.2 },
-    { asin: 'B0DEMO0002', title: 'Stainless Steel Water Bottle 1L', category: 'Sports', price: 24.99, costPerUnit: 7.5 },
-    { asin: 'B0DEMO0003', title: 'Bamboo Cutting Board Set', category: 'Kitchen', price: 32.5, costPerUnit: 11.0 },
+    { asin: 'B0DEMO0001', sku: 'GT-100', title: 'Organic Green Tea 100 Bags', category: 'Grocery', price: 14.99, costPerUnit: 4.2, fbaStock: 328, fbmStock: 0 },
+    { asin: 'B0DEMO0002', sku: 'WB-1L', title: 'Stainless Steel Water Bottle 1L', category: 'Sports', price: 24.99, costPerUnit: 7.5, fbaStock: 119, fbmStock: 40 },
+    { asin: 'B0DEMO0003', sku: 'BC-SET', title: 'Bamboo Cutting Board Set', category: 'Kitchen', price: 32.5, costPerUnit: 11.0, fbaStock: 75, fbmStock: 12 },
   ];
 
   for (const def of productDefs) {
@@ -74,6 +74,8 @@ async function seed() {
         unitsSold: sales.unitsSold,
         price: sales.price,
         grossRevenue: sales.grossRevenue,
+        refunds: sales.refunds,
+        refundedAmount: sales.refundedAmount,
         referralFee: sales.referralFee,
         fbaFee: sales.fbaFee,
         ppcSpend: sales.ppcSpend,

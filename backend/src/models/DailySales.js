@@ -21,6 +21,10 @@ module.exports = (sequelize) => {
       price: { type: DataTypes.DECIMAL(10, 2), defaultValue: 0 },
       grossRevenue: { type: DataTypes.DECIMAL(12, 2), defaultValue: 0 },
 
+      // Refunds (Erstattungen) — sellerboard-style tracking.
+      refunds: { type: DataTypes.INTEGER, defaultValue: 0 },
+      refundedAmount: { type: DataTypes.DECIMAL(12, 2), defaultValue: 0 },
+
       referralFee: { type: DataTypes.DECIMAL(12, 2), defaultValue: 0 },
       fbaFee: { type: DataTypes.DECIMAL(12, 2), defaultValue: 0 },
       ppcSpend: { type: DataTypes.DECIMAL(12, 2), defaultValue: 0 },

@@ -67,12 +67,17 @@ async function getSalesData(asin, date = new Date()) {
     const units = Math.round(5 + r * 40);
     const price = Number((15 + seeded(asin) * 40).toFixed(2));
     const gross = Number((units * price).toFixed(2));
+    // A small share of orders get refunded.
+    const refunds = Math.round(units * (r * 0.06));
+    const refundedAmount = Number((refunds * price).toFixed(2));
     return {
       asin,
       date: dateStr,
       unitsSold: units,
       price,
       grossRevenue: gross,
+      refunds,
+      refundedAmount,
       referralFee: Number((gross * 0.15).toFixed(2)),
       fbaFee: Number((units * 3.2).toFixed(2)),
       ppcSpend: Number((gross * (0.08 + r * 0.12)).toFixed(2)),

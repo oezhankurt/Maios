@@ -23,6 +23,8 @@ async function calculateDailyProfit(productId, salesData) {
     unitsSold = 0,
     price = product.price,
     grossRevenue,
+    refunds = 0,
+    refundedAmount = 0,
     referralFee = 0,
     fbaFee = 0,
     ppcSpend = 0,
@@ -30,8 +32,10 @@ async function calculateDailyProfit(productId, salesData) {
 
   const gross = grossRevenue != null ? Number(grossRevenue) : Number(price) * unitsSold;
   const cogs = Number(product.costPerUnit) * unitsSold;
-  const totalCosts = cogs + Number(referralFee) + Number(fbaFee) + Number(ppcSpend);
-  const netRevenue = gross - Number(referralFee) - Number(fbaFee);
+  // Refunds return money to the buyer, so they count as a cost against profit.
+  const totalCosts =
+    cogs + Number(referralFee) + Number(fbaFee) + Number(ppcSpend) + Number(refundedAmount);
+  const netRevenue = gross - Number(referralFee) - Number(fbaFee) - Number(refundedAmount);
   const profit = gross - totalCosts;
   const profitMargin = calculateMargin(gross, totalCosts);
   const acos = gross > 0 ? Number(((Number(ppcSpend) / gross) * 100).toFixed(2)) : 0;
@@ -44,6 +48,8 @@ async function calculateDailyProfit(productId, salesData) {
       unitsSold,
       price,
       grossRevenue: gross,
+      refunds,
+      refundedAmount,
       referralFee,
       fbaFee,
       ppcSpend,

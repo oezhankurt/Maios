@@ -12,11 +12,17 @@ module.exports = (sequelize) => {
       userId: { type: DataTypes.UUID, allowNull: false },
       asin: { type: DataTypes.STRING },
       ean: { type: DataTypes.STRING },
+      sku: { type: DataTypes.STRING },
       title: { type: DataTypes.STRING, allowNull: false },
       category: { type: DataTypes.STRING },
+      imageUrl: { type: DataTypes.STRING },
 
       price: { type: DataTypes.DECIMAL(10, 2), defaultValue: 0 },
       costPerUnit: { type: DataTypes.DECIMAL(10, 2), defaultValue: 0 },
+
+      // Inventory levels (Lager) — FBA (Amazon-fulfilled) and FBM (merchant).
+      fbaStock: { type: DataTypes.INTEGER, defaultValue: 0 },
+      fbmStock: { type: DataTypes.INTEGER, defaultValue: 0 },
 
       status: {
         type: DataTypes.ENUM('active', 'inactive', 'archived'),
