@@ -97,6 +97,21 @@ export const PPCAPI = {
   update: (id, payload) => unwrap(api.put(`/ppc/campaigns/${id}`, payload)),
   performance: (id, params) => unwrap(api.get(`/ppc/campaigns/${id}/performance`, { params })),
   optimize: (payload) => unwrap(api.post('/ppc/optimize', payload)),
+
+  // Smart Portfolios (Adference-style)
+  portfolios: () => unwrap(api.get('/ppc/portfolios')),
+  createPortfolio: (payload) => unwrap(api.post('/ppc/portfolios', payload)),
+  updatePortfolio: (id, payload) => unwrap(api.put(`/ppc/portfolios/${id}`, payload)),
+  deletePortfolio: (id) => unwrap(api.delete(`/ppc/portfolios/${id}`)),
+  optimizePortfolios: (payload) => unwrap(api.post('/ppc/portfolios/optimize', payload || {})),
+
+  // Campaign-Mover rules
+  ruleFields: () => unwrap(api.get('/ppc/rules/fields')),
+  rules: () => unwrap(api.get('/ppc/rules')),
+  createRule: (payload) => unwrap(api.post('/ppc/rules', payload)),
+  updateRule: (id, payload) => unwrap(api.put(`/ppc/rules/${id}`, payload)),
+  deleteRule: (id) => unwrap(api.delete(`/ppc/rules/${id}`)),
+  runRules: () => unwrap(api.post('/ppc/rules/run')),
 };
 
 export const DashboardAPI = {

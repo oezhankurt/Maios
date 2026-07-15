@@ -6,7 +6,9 @@
  * Usage: node src/scripts/seed.js
  */
 require('dotenv').config();
-const { sequelize, User, Product, Keyword, Competitor, PPCCampaign } = require('../models');
+const {
+  sequelize, User, Product, Keyword, Competitor, PPCCampaign, SmartPortfolio, AutomationRule,
+} = require('../models');
 const amazonService = require('../services/amazonService');
 const profitService = require('../services/profitService');
 const ppcService = require('../services/ppcService');
@@ -92,6 +94,35 @@ async function seed() {
     }
     logger.info(`Seeded product ${def.title} with 30 days of data`);
   }
+
+  // Smart Portfolios + Campaign-Mover rules (Adference-style demo).
+  const portfolios = await SmartPortfolio.bulkCreate([
+    { userId: user.id, name: 'DE - ACoS Performance | 0-15%', targetAcos: 15, dailyBudget: 500, campaignTypes: ['sp'], staEnabled: true, pboEnabled: true },
+    { userId: user.id, name: 'DE - Eigenmarke', targetAcos: 10, dailyBudget: 300, campaignTypes: ['sp', 'sb'], staEnabled: true, pboEnabled: false },
+    { userId: user.id, name: 'DE - Starter', targetAcos: 25, dailyBudget: 100, campaignTypes: ['sp'], staEnabled: false, pboEnabled: false },
+    { userId: user.id, name: 'No Performer', targetAcos: 8, dailyBudget: 50, campaignTypes: ['sp'], staEnabled: false, pboEnabled: false },
+  ], { returning: true });
+
+  await AutomationRule.bulkCreate([
+    {
+      userId: user.id, name: 'Gute Performer → Performance-Portfolio', targetPortfolioId: portfolios[0].id, logic: 'all',
+      conditions: [{ field: 'acos30', operator: 'lte', value: 15 }, { field: 'clicks30', operator: 'gte', value: 20 }],
+    },
+    {
+      userId: user.id, name: 'Verschwender → No Performer', targetPortfolioId: portfolios[3].id, logic: 'all',
+      conditions: [{ field: 'acos30', operator: 'gt', value: 40 }],
+    },
+    {
+      userId: user.id, name: 'Eigenmarken-Kampagnen bündeln', targetPortfolioId: portfolios[1].id, logic: 'all',
+      conditions: [{ field: 'campaignName', operator: 'contains', value: 'Brand' }],
+    },
+  ]);
+
+  // Assign existing campaigns into the Starter portfolio, then run the rules.
+  await PPCCampaign.update({ smartPortfolioId: portfolios[2].id }, { where: {} });
+  const smartPortfolioService = require('../services/smartPortfolioService');
+  await smartPortfolioService.applyRules(user.id);
+  logger.info('Seeded Smart Portfolios + automation rules');
 
   // Generate alerts from the seeded data.
   await autoBot.run();
