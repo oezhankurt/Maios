@@ -119,6 +119,10 @@ export const PPCAPI = {
   runRules: () => unwrap(api.post('/ppc/rules/run')),
 };
 
+export const ChannelAPI = {
+  list: () => unwrap(api.get('/channels')),
+};
+
 export const DashboardAPI = {
   overview: () => unwrap(api.get('/dashboard/overview')),
   profitChart: (params) => unwrap(api.get('/dashboard/profit-chart', { params })),

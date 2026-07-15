@@ -9,6 +9,7 @@ const TITLES = {
   '/keywords': 'Keyword Research & Tracking',
   '/ppc': 'PPC Campaign Management',
   '/listings': 'Multi-Channel Listings',
+  '/channels': 'Kanäle & Marktplätze',
   '/analytics': 'Analytics',
   '/settings': 'Settings',
 };

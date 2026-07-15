@@ -7,6 +7,7 @@ import Dashboard from './pages/Dashboard.jsx';
 import Keywords from './pages/Keywords.jsx';
 import PPC from './pages/PPC.jsx';
 import Listings from './pages/Listings.jsx';
+import Channels from './pages/Channels.jsx';
 import Analytics from './pages/Analytics.jsx';
 import Settings from './pages/Settings.jsx';
 
@@ -33,6 +34,7 @@ export default function App() {
         <Route path="/keywords" element={<Keywords />} />
         <Route path="/ppc" element={<PPC />} />
         <Route path="/listings" element={<Listings />} />
+        <Route path="/channels" element={<Channels />} />
         <Route path="/analytics" element={<Analytics />} />
         <Route path="/settings" element={<Settings />} />
       </Route>

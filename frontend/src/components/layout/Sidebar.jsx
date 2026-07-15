@@ -5,6 +5,7 @@ const links = [
   { to: '/keywords', label: 'Keywords', icon: '🔑' },
   { to: '/ppc', label: 'PPC', icon: '🎯' },
   { to: '/listings', label: 'Listings', icon: '📦' },
+  { to: '/channels', label: 'Marktplätze', icon: '🌐' },
   { to: '/analytics', label: 'Analytics', icon: '📈' },
   { to: '/settings', label: 'Settings', icon: '⚙️' },
 ];
