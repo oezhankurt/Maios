@@ -34,12 +34,13 @@ const list = asyncHandler(async (req, res) => {
 });
 
 const create = asyncHandler(async (req, res) => {
-  const { productId, campaignName, campaignType, dailyBudget, targetAcos, status } = req.body;
+  const { productId, campaignName, campaignType, adPlatform, dailyBudget, targetAcos, status } = req.body;
   await assertOwnsProduct(req.user.id, productId);
   const campaign = await PPCCampaign.create({
     productId,
     campaignName,
     campaignType,
+    adPlatform,
     dailyBudget,
     targetAcos,
     status,

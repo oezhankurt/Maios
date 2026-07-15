@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ProductAPI, PPCAPI } from '../api/api';
+import { ProductAPI, PPCAPI, ChannelAPI } from '../api/api';
 import CampaignList from '../components/ppc/CampaignList.jsx';
 import BidOptimizer from '../components/ppc/BidOptimizer.jsx';
 import PerformanceMetrics from '../components/ppc/PerformanceMetrics.jsx';
@@ -8,13 +8,14 @@ import AutomationRules from '../components/ppc/AutomationRules.jsx';
 import PPCKpis from '../components/ppc/PPCKpis.jsx';
 import Loading from '../components/layout/Loading.jsx';
 
-const EMPTY = { productId: '', campaignName: '', campaignType: 'sp', dailyBudget: 20, targetAcos: 25 };
+const EMPTY = { productId: '', campaignName: '', campaignType: 'sp', adPlatform: 'amazon_ads', dailyBudget: 20, targetAcos: 25 };
 
 export default function PPC() {
   const [products, setProducts] = useState([]);
   const [campaigns, setCampaigns] = useState([]);
   const [portfolios, setPortfolios] = useState([]);
   const [rules, setRules] = useState([]);
+  const [adPlatforms, setAdPlatforms] = useState([{ id: 'amazon_ads', label: 'Amazon Ads' }]);
   const [selected, setSelected] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
@@ -36,6 +37,7 @@ export default function PPC() {
 
   useEffect(() => {
     load();
+    ChannelAPI.list().then((d) => setAdPlatforms(d.adPlatforms || [])).catch(() => {});
   }, []);
 
   const create = async (e) => {
@@ -105,6 +107,14 @@ export default function PPC() {
               <div className="field">
                 <label>Campaign Name</label>
                 <input className="input" value={form.campaignName} onChange={set('campaignName')} required />
+              </div>
+              <div className="field">
+                <label>Ads-Plattform</label>
+                <select className="select" value={form.adPlatform} onChange={set('adPlatform')}>
+                  {adPlatforms.map((a) => (
+                    <option key={a.id} value={a.id}>{a.label}</option>
+                  ))}
+                </select>
               </div>
               <div className="field">
                 <label>Type</label>

@@ -10,11 +10,8 @@ module.exports = (sequelize) => {
         primaryKey: true,
       },
       productId: { type: DataTypes.UUID, allowNull: false },
-      marketplace: {
-        type: DataTypes.ENUM('amazon', 'ebay', 'kaufland', 'otto'),
-        allowNull: false,
-        defaultValue: 'amazon',
-      },
+      // Config-driven marketplace id (see config/channels.js).
+      marketplace: { type: DataTypes.STRING, allowNull: false, defaultValue: 'amazon' },
       saleDate: { type: DataTypes.DATEONLY, allowNull: false },
 
       unitsSold: { type: DataTypes.INTEGER, defaultValue: 0 },

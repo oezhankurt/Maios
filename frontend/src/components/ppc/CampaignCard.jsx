@@ -2,6 +2,12 @@ import { currency, percent } from '../../utils/format';
 
 const STATUS_BADGE = { active: 'badge-success', paused: 'badge-warning', archived: 'badge-muted' };
 
+const platformLabel = (id) =>
+  (id || 'amazon_ads')
+    .replace(/_/g, ' ')
+    .replace('microsoft ads', 'Microsoft (Bing)')
+    .replace(/\b\w/g, (c) => c.toUpperCase());
+
 export default function CampaignCard({ campaign, onSelect, selected }) {
   return (
     <div
@@ -14,6 +20,9 @@ export default function CampaignCard({ campaign, onSelect, selected }) {
         <span className={`badge ${STATUS_BADGE[campaign.status] || 'badge-muted'}`}>
           {campaign.status}
         </span>
+      </div>
+      <div className="mt-2">
+        <span className="badge badge-info">{platformLabel(campaign.adPlatform)}</span>
       </div>
       <div className="row between mt-2" style={{ fontSize: 13 }}>
         <span className="text-muted">Type {campaign.campaignType?.toUpperCase()}</span>

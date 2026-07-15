@@ -11,6 +11,8 @@ module.exports = (sequelize) => {
       },
       productId: { type: DataTypes.UUID, allowNull: false },
       smartPortfolioId: { type: DataTypes.UUID },
+      // Advertising platform id (see config/channels.js adPlatforms).
+      adPlatform: { type: DataTypes.STRING, defaultValue: 'amazon_ads' },
       campaignName: { type: DataTypes.STRING, allowNull: false },
       campaignType: {
         type: DataTypes.ENUM('sp', 'sb', 'sd'),

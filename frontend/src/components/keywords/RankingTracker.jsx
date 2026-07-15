@@ -1,6 +1,11 @@
+import { useEffect, useState } from 'react';
 import Table from '../layout/Table.jsx';
+import { ChannelAPI } from '../../api/api';
 
-const MARKETPLACES = ['amazon', 'ebay', 'kaufland', 'otto'];
+const FALLBACK = [
+  { id: 'amazon', label: 'Amazon' }, { id: 'ebay', label: 'eBay' },
+  { id: 'kaufland', label: 'Kaufland' }, { id: 'otto', label: 'Otto' },
+];
 
 function changeCell(change) {
   if (!change || change.direction === 'new') return <span className="badge badge-muted">new</span>;
@@ -10,6 +15,11 @@ function changeCell(change) {
 }
 
 export default function RankingTracker({ rankings = [], marketplace, onMarketplaceChange, onSelectKeyword }) {
+  const [marketplaces, setMarketplaces] = useState(FALLBACK);
+  useEffect(() => {
+    ChannelAPI.list().then((d) => setMarketplaces(d.marketplaces || FALLBACK)).catch(() => {});
+  }, []);
+
   const columns = [
     {
       key: 'keyword',
@@ -42,13 +52,13 @@ export default function RankingTracker({ rankings = [], marketplace, onMarketpla
         </div>
         <select
           className="select"
-          style={{ width: 160 }}
+          style={{ width: 180 }}
           value={marketplace}
           onChange={(e) => onMarketplaceChange(e.target.value)}
         >
-          {MARKETPLACES.map((m) => (
-            <option key={m} value={m}>
-              {m.charAt(0).toUpperCase() + m.slice(1)}
+          {marketplaces.map((m) => (
+            <option key={m.id} value={m.id}>
+              {m.label}
             </option>
           ))}
         </select>

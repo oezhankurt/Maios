@@ -10,11 +10,7 @@ module.exports = (sequelize) => {
         primaryKey: true,
       },
       productId: { type: DataTypes.UUID, allowNull: false },
-      marketplace: {
-        type: DataTypes.ENUM('amazon', 'ebay', 'kaufland', 'otto'),
-        allowNull: false,
-        defaultValue: 'amazon',
-      },
+      marketplace: { type: DataTypes.STRING, allowNull: false, defaultValue: 'amazon' },
       competitorAsin: { type: DataTypes.STRING },
       competitorTitle: { type: DataTypes.STRING },
       lastChecked: { type: DataTypes.DATE },
