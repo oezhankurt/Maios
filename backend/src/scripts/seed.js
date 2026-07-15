@@ -34,9 +34,27 @@ async function seed() {
   logger.info(`Created demo user ${DEMO_EMAIL} / demo1234`);
 
   const productDefs = [
-    { asin: 'B0DEMO0001', sku: 'GT-100', title: 'Organic Green Tea 100 Bags', category: 'Grocery', price: 14.99, costPerUnit: 4.2, fbaStock: 328, fbmStock: 0 },
-    { asin: 'B0DEMO0002', sku: 'WB-1L', title: 'Stainless Steel Water Bottle 1L', category: 'Sports', price: 24.99, costPerUnit: 7.5, fbaStock: 119, fbmStock: 40 },
-    { asin: 'B0DEMO0003', sku: 'BC-SET', title: 'Bamboo Cutting Board Set', category: 'Kitchen', price: 32.5, costPerUnit: 11.0, fbaStock: 75, fbmStock: 12 },
+    {
+      asin: 'B0DEMO0001', sku: 'GT-100', title: 'Organic Green Tea 100 Bags', category: 'Grocery',
+      price: 14.99, costPerUnit: 4.2, fbaStock: 328, fbmStock: 0,
+      bullets: ['100 tea bags of organic green tea', 'Rich in antioxidants', 'Natural and vegan'],
+      description: 'Premium organic green tea, sustainably sourced. 100 bags per pack.',
+      backendKeywords: 'matcha bio tee antioxidant detox',
+    },
+    {
+      asin: 'B0DEMO0002', sku: 'WB-1L', title: 'Stainless Steel Water Bottle 1L', category: 'Sports',
+      price: 24.99, costPerUnit: 7.5, fbaStock: 119, fbmStock: 40,
+      bullets: ['1 liter stainless steel bottle', 'Keeps drinks cold 24h', 'BPA-free and leakproof'],
+      description: 'Insulated stainless steel water bottle, 1L, perfect for sports and travel.',
+      backendKeywords: 'thermos flask insulated reusable',
+    },
+    {
+      asin: 'B0DEMO0003', sku: 'BC-SET', title: 'Bamboo Cutting Board Set', category: 'Kitchen',
+      price: 32.5, costPerUnit: 11.0, fbaStock: 75, fbmStock: 12,
+      bullets: ['Set of 3 bamboo cutting boards', 'Eco-friendly and durable'],
+      description: 'Premium bamboo cutting board set for your kitchen.',
+      backendKeywords: 'chopping board wood kitchen',
+    },
   ];
 
   for (const def of productDefs) {

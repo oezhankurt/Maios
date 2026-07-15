@@ -3,6 +3,7 @@ import { ProductAPI } from '../api/api';
 import ProductList from '../components/listings/ProductList.jsx';
 import PriceOptimizer from '../components/listings/PriceOptimizer.jsx';
 import CompetitorComparison from '../components/listings/CompetitorComparison.jsx';
+import ListingAnalysis from '../components/listings/ListingAnalysis.jsx';
 import StockSync from '../components/listings/StockSync.jsx';
 import Loading from '../components/layout/Loading.jsx';
 
@@ -98,13 +99,18 @@ export default function Listings() {
       </div>
 
       {selected && (
-        <div className="grid" style={{ gridTemplateColumns: '1fr 1fr' }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-            <PriceOptimizer product={selected} onApply={load} />
-            <StockSync product={selected} />
+        <>
+          <div style={{ marginBottom: 20 }}>
+            <ListingAnalysis product={selected} />
           </div>
-          <CompetitorComparison product={selected} />
-        </div>
+          <div className="grid" style={{ gridTemplateColumns: '1fr 1fr' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+              <PriceOptimizer product={selected} onApply={load} />
+              <StockSync product={selected} />
+            </div>
+            <CompetitorComparison product={selected} />
+          </div>
+        </>
       )}
 
       {showModal && (

@@ -61,6 +61,7 @@ export const ProductAPI = {
   remove: (id) => unwrap(api.delete(`/products/${id}`)),
   stats: (id) => unwrap(api.get(`/products/${id}/stats`)),
   analysis: (id) => unwrap(api.get(`/products/${id}/analysis`)),
+  listingAnalysis: (id) => unwrap(api.get(`/products/${id}/listing-analysis`)),
   priceRecommendation: (id, params) =>
     unwrap(api.get(`/products/${id}/price-recommendation`, { params })),
   competitors: (id) => unwrap(api.get(`/products/${id}/competitors`)),

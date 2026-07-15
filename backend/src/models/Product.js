@@ -17,6 +17,11 @@ module.exports = (sequelize) => {
       category: { type: DataTypes.STRING },
       imageUrl: { type: DataTypes.STRING },
 
+      // Listing content (for keyword-gap / listing-score analysis).
+      bullets: { type: DataTypes.JSONB, defaultValue: [] },
+      description: { type: DataTypes.TEXT },
+      backendKeywords: { type: DataTypes.TEXT },
+
       price: { type: DataTypes.DECIMAL(10, 2), defaultValue: 0 },
       costPerUnit: { type: DataTypes.DECIMAL(10, 2), defaultValue: 0 },
 
