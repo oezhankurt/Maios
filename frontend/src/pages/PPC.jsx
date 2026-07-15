@@ -3,6 +3,8 @@ import { ProductAPI, PPCAPI } from '../api/api';
 import CampaignList from '../components/ppc/CampaignList.jsx';
 import BidOptimizer from '../components/ppc/BidOptimizer.jsx';
 import PerformanceMetrics from '../components/ppc/PerformanceMetrics.jsx';
+import SmartPortfolios from '../components/ppc/SmartPortfolios.jsx';
+import AutomationRules from '../components/ppc/AutomationRules.jsx';
 import Loading from '../components/layout/Loading.jsx';
 
 const EMPTY = { productId: '', campaignName: '', campaignType: 'sp', dailyBudget: 20, targetAcos: 25 };
@@ -10,6 +12,8 @@ const EMPTY = { productId: '', campaignName: '', campaignType: 'sp', dailyBudget
 export default function PPC() {
   const [products, setProducts] = useState([]);
   const [campaigns, setCampaigns] = useState([]);
+  const [portfolios, setPortfolios] = useState([]);
+  const [rules, setRules] = useState([]);
   const [selected, setSelected] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
@@ -18,9 +22,13 @@ export default function PPC() {
   const [error, setError] = useState(null);
 
   const load = async () => {
-    const [prods, camps] = await Promise.all([ProductAPI.list(), PPCAPI.campaigns()]);
+    const [prods, camps, pfs, rls] = await Promise.all([
+      ProductAPI.list(), PPCAPI.campaigns(), PPCAPI.portfolios(), PPCAPI.rules(),
+    ]);
     setProducts(prods);
     setCampaigns(camps);
+    setPortfolios(pfs);
+    setRules(rls);
     setSelected((prev) => camps.find((c) => c.id === prev?.id) || camps[0] || null);
     setLoading(false);
   };
@@ -56,6 +64,11 @@ export default function PPC() {
         <button className="btn btn-primary" onClick={() => setShowModal(true)}>
           + New Campaign
         </button>
+      </div>
+
+      <div className="grid" style={{ gridTemplateColumns: '1fr 1fr', marginBottom: 20 }}>
+        <SmartPortfolios portfolios={portfolios} onChange={load} />
+        <AutomationRules rules={rules} portfolios={portfolios} onChange={load} />
       </div>
 
       <div style={{ marginBottom: 20 }}>
