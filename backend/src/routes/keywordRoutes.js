@@ -8,6 +8,7 @@ const router = express.Router();
 router.use(authenticate);
 
 router.get('/product/:productId', keywordController.listForProduct);
+router.get('/master/:productId', keywordController.master);
 
 router.post(
   '/',
@@ -15,6 +16,8 @@ router.post(
   validate,
   keywordController.create
 );
+
+router.post('/bulk', keywordController.bulkCreate);
 
 router.post(
   '/research',

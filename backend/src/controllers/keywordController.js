@@ -1,7 +1,8 @@
-const { Keyword, Product } = require('../models');
+const { Keyword, Product, KeywordRanking } = require('../models');
 const asyncHandler = require('../utils/asyncHandler');
 const ApiError = require('../utils/ApiError');
 const keywordService = require('../services/keywordService');
+const rankingService = require('../services/rankingService');
 
 async function assertOwnsProduct(userId, productId) {
   const product = await Product.findOne({ where: { id: productId, userId } });
@@ -73,4 +74,71 @@ const suggestions = asyncHandler(async (req, res) => {
   res.json({ success: true, data: related });
 });
 
-module.exports = { listForProduct, create, update, remove, research, suggestions };
+/**
+ * Keyword Master view: every tracked keyword for a product, enriched with
+ * difficulty tier, opportunity score, current rank and ranking trend.
+ */
+const master = asyncHandler(async (req, res) => {
+  await assertOwnsProduct(req.user.id, req.params.productId);
+  const marketplace = req.query.marketplace || 'amazon';
+  const keywords = await Keyword.findAll({ where: { productId: req.params.productId } });
+
+  const data = [];
+  for (const kw of keywords) {
+    // eslint-disable-next-line no-await-in-loop
+    const latest = await KeywordRanking.findOne({
+      where: { keywordId: kw.id, marketplace },
+      order: [['rankDate', 'DESC']],
+    });
+    // eslint-disable-next-line no-await-in-loop
+    const hist = await rankingService.getHistoricalRankings(kw.id, 30, marketplace);
+    const trend = rankingService.analyzeTrend(hist);
+    data.push({
+      id: kw.id,
+      keyword: kw.keyword,
+      keywordType: kw.keywordType,
+      searchVolume: kw.searchVolume,
+      cpc: Number(kw.cpc),
+      difficultyScore: kw.difficultyScore,
+      difficultyTier: keywordService.difficultyTier(kw.difficultyScore),
+      opportunity: keywordService.opportunity(kw.searchVolume, kw.difficultyScore),
+      rank: latest ? latest.rankingPosition : null,
+      trend: trend.label,
+    });
+  }
+  data.sort((a, b) => b.opportunity - a.opportunity);
+  res.json({ success: true, data });
+});
+
+/** Bulk-add keywords to a product (from the research/ideas panel). */
+const bulkCreate = asyncHandler(async (req, res) => {
+  const { productId, keywords } = req.body;
+  if (!productId || !Array.isArray(keywords) || keywords.length === 0) {
+    throw ApiError.badRequest('productId and a non-empty keywords array are required');
+  }
+  await assertOwnsProduct(req.user.id, productId);
+
+  // Skip keywords already tracked for this product.
+  const existing = new Set(
+    (await Keyword.findAll({ where: { productId }, attributes: ['keyword'] })).map((k) =>
+      k.keyword.toLowerCase()
+    )
+  );
+  const rows = keywords
+    .filter((k) => k.keyword && !existing.has(String(k.keyword).toLowerCase()))
+    .map((k) => {
+      const m = keywordService.metricsFor(k.keyword);
+      return {
+        productId,
+        keyword: k.keyword,
+        keywordType: k.keywordType || 'organic',
+        searchVolume: k.searchVolume ?? m.searchVolume,
+        cpc: k.cpc ?? m.cpc,
+        difficultyScore: k.difficultyScore ?? m.difficultyScore,
+      };
+    });
+  const created = rows.length ? await Keyword.bulkCreate(rows) : [];
+  res.status(201).json({ success: true, data: { added: created.length } });
+});
+
+module.exports = { listForProduct, create, update, remove, research, suggestions, master, bulkCreate };

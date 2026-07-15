@@ -2,11 +2,9 @@ import { useEffect, useState } from 'react';
 import { ProductAPI, KeywordAPI, RankingAPI } from '../api/api';
 import { useFilterStore } from '../store/filterStore';
 import ProductPicker from '../components/layout/ProductPicker.jsx';
-import KeywordSearch from '../components/keywords/KeywordSearch.jsx';
-import KeywordTable from '../components/keywords/KeywordTable.jsx';
+import KeywordMaster from '../components/keywords/KeywordMaster.jsx';
 import RankingTracker from '../components/keywords/RankingTracker.jsx';
 import RankingTrend from '../components/keywords/RankingTrend.jsx';
-import CompetitorAnalysis from '../components/keywords/CompetitorAnalysis.jsx';
 import Loading from '../components/layout/Loading.jsx';
 
 export default function Keywords() {
@@ -74,12 +72,7 @@ export default function Keywords() {
         <div className="card empty">Create a product first to research and track keywords.</div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-          <KeywordSearch product={product} onAdd={addKeyword} />
-
-          <div className="grid" style={{ gridTemplateColumns: '3fr 2fr' }}>
-            <KeywordTable keywords={keywords} onRemove={removeKeyword} />
-            <CompetitorAnalysis keywords={keywords} />
-          </div>
+          <KeywordMaster product={product} onSelectKeyword={setSelectedKeyword} />
 
           <div className="grid" style={{ gridTemplateColumns: '3fr 2fr' }}>
             <RankingTracker

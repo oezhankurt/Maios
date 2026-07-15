@@ -71,7 +71,9 @@ export const ProductAPI = {
 
 export const KeywordAPI = {
   forProduct: (productId) => unwrap(api.get(`/keywords/product/${productId}`)),
+  master: (productId, params) => unwrap(api.get(`/keywords/master/${productId}`, { params })),
   create: (payload) => unwrap(api.post('/keywords', payload)),
+  bulkCreate: (payload) => unwrap(api.post('/keywords/bulk', payload)),
   update: (id, payload) => unwrap(api.put(`/keywords/${id}`, payload)),
   remove: (id) => unwrap(api.delete(`/keywords/${id}`)),
   research: (payload) => unwrap(api.post('/keywords/research', payload)),

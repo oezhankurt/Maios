@@ -11,6 +11,30 @@ const MODIFIERS = [
   'for women', 'set', 'bundle', 'refill', 'xl', 'natural', 'bulk', 'travel',
 ];
 
+function difficultyTier(score) {
+  if (score > 66) return 'hard';
+  if (score > 33) return 'medium';
+  return 'easy';
+}
+
+/**
+ * Opportunity score 0-100: rewards high search volume and low difficulty —
+ * the keywords worth prioritising (high demand, easier to rank).
+ */
+function opportunity(searchVolume, difficultyScore) {
+  const volScore = Math.min(1, Math.log10(searchVolume + 1) / Math.log10(50000)); // 0..1
+  const easeScore = 1 - Math.min(1, difficultyScore / 100); // 0..1 (easier = higher)
+  return Math.round((volScore * 0.6 + easeScore * 0.4) * 100);
+}
+
+function enrich(row) {
+  return {
+    ...row,
+    difficultyTier: difficultyTier(row.difficultyScore),
+    opportunity: opportunity(row.searchVolume, row.difficultyScore),
+  };
+}
+
 function metricsFor(keyword) {
   const r = amazonService.seeded(keyword.toLowerCase());
   const searchVolume = Math.round(200 + r * 40000);
@@ -41,8 +65,8 @@ async function researchKeywords(productTitle, category = '') {
   return Array.from(candidates)
     .filter((k) => k.length > 2)
     .slice(0, 25)
-    .map((keyword) => ({ keyword, keywordType: 'organic', ...metricsFor(keyword) }))
-    .sort((a, b) => b.searchVolume - a.searchVolume);
+    .map((keyword) => enrich({ keyword, keywordType: 'organic', ...metricsFor(keyword) }))
+    .sort((a, b) => b.opportunity - a.opportunity);
 }
 
 function analyzeDifficulty(keyword) {
@@ -63,8 +87,8 @@ async function findRelatedKeywords(keyword) {
   related.add(`buy ${keyword}`);
   return Array.from(related)
     .slice(0, 15)
-    .map((k) => ({ keyword: k, ...metricsFor(k) }))
-    .sort((a, b) => b.searchVolume - a.searchVolume);
+    .map((k) => enrich({ keyword: k, keywordType: 'organic', ...metricsFor(k) }))
+    .sort((a, b) => b.opportunity - a.opportunity);
 }
 
 async function getSuggestions(productKeywords = []) {
@@ -86,6 +110,8 @@ async function getSuggestions(productKeywords = []) {
 
 module.exports = {
   metricsFor,
+  difficultyTier,
+  opportunity,
   researchKeywords,
   analyzeDifficulty,
   findRelatedKeywords,
