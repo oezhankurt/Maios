@@ -1,11 +1,12 @@
 const schedule = require('node-schedule');
 const logger = require('../utils/logger');
-const { Product, PPCCampaign, Keyword } = require('../models');
+const { Product, PPCCampaign, Keyword, User } = require('../models');
 const amazonService = require('../services/amazonService');
 const profitService = require('../services/profitService');
 const ppcService = require('../services/ppcService');
 const rankingService = require('../services/rankingService');
 const priceOptimizer = require('../services/priceOptimizer');
+const smartPortfolioService = require('../services/smartPortfolioService');
 const autoBot = require('../services/autoBot');
 const config = require('../config');
 
@@ -85,10 +86,25 @@ async function optimizePrices() {
   }
 }
 
-/** Every 4 hours: optimize PPC bids across all active campaigns. */
+/**
+ * Every 4 hours: run the Smart Portfolio automation per user (apply
+ * Campaign-Mover rules, then target-ACoS optimize each portfolio), and
+ * optimize any remaining loose campaigns.
+ */
 async function optimizePPC() {
-  logger.info('Scheduler: optimizing PPC bids');
+  logger.info('Scheduler: running Smart Portfolio automation + PPC bids');
   try {
+    const users = await User.findAll({ where: { status: 'active' }, attributes: ['id'] });
+    for (const u of users) {
+      try {
+        // eslint-disable-next-line no-await-in-loop
+        await smartPortfolioService.applyRules(u.id);
+        // eslint-disable-next-line no-await-in-loop
+        await smartPortfolioService.optimizeAllPortfolios(u.id);
+      } catch (err) {
+        logger.error(`Smart Portfolio automation failed for user ${u.id}: ${err.message}`);
+      }
+    }
     await ppcService.optimizeAll(null);
   } catch (err) {
     logger.error(`PPC optimization failed: ${err.message}`);
