@@ -60,6 +60,7 @@ export const ProductAPI = {
   update: (id, payload) => unwrap(api.put(`/products/${id}`, payload)),
   remove: (id) => unwrap(api.delete(`/products/${id}`)),
   stats: (id) => unwrap(api.get(`/products/${id}/stats`)),
+  analysis: (id) => unwrap(api.get(`/products/${id}/analysis`)),
   priceRecommendation: (id, params) =>
     unwrap(api.get(`/products/${id}/price-recommendation`, { params })),
   competitors: (id) => unwrap(api.get(`/products/${id}/competitors`)),

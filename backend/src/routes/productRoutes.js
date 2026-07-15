@@ -24,6 +24,7 @@ router.get('/:id', productController.getOne);
 router.put('/:id', productController.update);
 router.delete('/:id', productController.remove);
 router.get('/:id/stats', productController.stats);
+router.get('/:id/analysis', productController.analysis);
 router.get('/:id/price-recommendation', productController.priceRecommendation);
 router.get('/:id/competitors', productController.competitors);
 router.post('/:id/competitors', productController.addCompetitor);

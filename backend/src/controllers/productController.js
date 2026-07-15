@@ -4,6 +4,7 @@ const asyncHandler = require('../utils/asyncHandler');
 const ApiError = require('../utils/ApiError');
 const profitService = require('../services/profitService');
 const priceOptimizer = require('../services/priceOptimizer');
+const diagnosticsService = require('../services/diagnosticsService');
 
 /** Load a product scoped to the authenticated user or throw 404. */
 async function ownedProduct(userId, id) {
@@ -104,6 +105,12 @@ const stats = asyncHandler(async (req, res) => {
   });
 });
 
+const analysis = asyncHandler(async (req, res) => {
+  const result = await diagnosticsService.analyzeProduct(req.params.id, req.user.id);
+  if (!result) throw ApiError.notFound('Product not found');
+  res.json({ success: true, data: result });
+});
+
 const priceRecommendation = asyncHandler(async (req, res) => {
   await ownedProduct(req.user.id, req.params.id);
   const marketplace = req.query.marketplace || 'amazon';
@@ -155,6 +162,7 @@ module.exports = {
   update,
   remove,
   stats,
+  analysis,
   priceRecommendation,
   competitors,
   addCompetitor,

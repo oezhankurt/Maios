@@ -4,6 +4,7 @@ import { useAuthStore } from '../store/authStore';
 import ProductPicker from '../components/layout/ProductPicker.jsx';
 import Chart from '../components/layout/Chart.jsx';
 import Loading from '../components/layout/Loading.jsx';
+import ProductDiagnostics from '../components/listings/ProductDiagnostics.jsx';
 import { currency, number, percent, shortDate } from '../utils/format';
 
 export default function Analytics() {
@@ -54,6 +55,12 @@ export default function Analytics() {
           </select>
         </div>
       </div>
+
+      {productId && (
+        <div style={{ marginBottom: 20 }}>
+          <ProductDiagnostics productId={productId} ccy={ccy} />
+        </div>
+      )}
 
       <div className="grid grid-3" style={{ marginBottom: 20 }}>
         <Summary label="Total Revenue" value={currency(sum(chart, 'revenue'), ccy)} />
