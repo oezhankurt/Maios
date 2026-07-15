@@ -91,6 +91,7 @@ export const ProfitAPI = {
 };
 
 export const PPCAPI = {
+  overview: (params) => unwrap(api.get('/ppc/overview', { params })),
   campaigns: (params) => unwrap(api.get('/ppc/campaigns', { params })),
   create: (payload) => unwrap(api.post('/ppc/campaigns', payload)),
   get: (id) => unwrap(api.get(`/ppc/campaigns/${id}`)),

@@ -22,6 +22,7 @@ router.put('/rules/:id', spController.updateRule);
 router.delete('/rules/:id', spController.deleteRule);
 router.post('/rules/run', spController.runRules);
 
+router.get('/overview', ppcController.overview);
 router.get('/campaigns', ppcController.list);
 router.post(
   '/campaigns',

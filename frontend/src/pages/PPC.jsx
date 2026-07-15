@@ -5,6 +5,7 @@ import BidOptimizer from '../components/ppc/BidOptimizer.jsx';
 import PerformanceMetrics from '../components/ppc/PerformanceMetrics.jsx';
 import SmartPortfolios from '../components/ppc/SmartPortfolios.jsx';
 import AutomationRules from '../components/ppc/AutomationRules.jsx';
+import PPCKpis from '../components/ppc/PPCKpis.jsx';
 import Loading from '../components/layout/Loading.jsx';
 
 const EMPTY = { productId: '', campaignName: '', campaignType: 'sp', dailyBudget: 20, targetAcos: 25 };
@@ -65,6 +66,8 @@ export default function PPC() {
           + New Campaign
         </button>
       </div>
+
+      <PPCKpis />
 
       <div className="grid" style={{ gridTemplateColumns: '1fr 1fr', marginBottom: 20 }}>
         <SmartPortfolios portfolios={portfolios} onChange={load} />

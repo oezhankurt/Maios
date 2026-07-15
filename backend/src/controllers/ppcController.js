@@ -1,5 +1,5 @@
 const { Op } = require('sequelize');
-const { PPCCampaign, PPCPerformance, Product } = require('../models');
+const { PPCCampaign, PPCPerformance, Product, DailySales } = require('../models');
 const asyncHandler = require('../utils/asyncHandler');
 const ApiError = require('../utils/ApiError');
 const ppcService = require('../services/ppcService');
@@ -90,4 +90,72 @@ const optimize = asyncHandler(async (req, res) => {
   return res.json({ success: true, data: results });
 });
 
-module.exports = { list, create, getOne, update, performance, optimize };
+/**
+ * Account-level advertising KPIs — the Adference "Zeitvergleich" dashboard:
+ * ACoS, ROAS, TACoS, CTR, CPC, CVR, ad vs. organic sales, plus a daily series.
+ */
+const overview = asyncHandler(async (req, res) => {
+  const days = parseInt(req.query.days, 10) || 30;
+  const since = new Date();
+  since.setDate(since.getDate() - (days - 1));
+  const sinceStr = since.toISOString().slice(0, 10);
+
+  const productIds = (
+    await Product.findAll({ where: { userId: req.user.id }, attributes: ['id'] })
+  ).map((p) => p.id);
+
+  const campaigns = productIds.length
+    ? await PPCCampaign.findAll({ where: { productId: { [Op.in]: productIds } }, attributes: ['id'] })
+    : [];
+  const campaignIds = campaigns.map((c) => c.id);
+
+  const perf = campaignIds.length
+    ? await PPCPerformance.findAll({
+        where: { campaignId: { [Op.in]: campaignIds }, performanceDate: { [Op.gte]: sinceStr } },
+      })
+    : [];
+
+  const ad = perf.reduce(
+    (a, r) => {
+      a.impressions += r.impressions;
+      a.clicks += r.clicks;
+      a.spend += Number(r.spend);
+      a.sales += Number(r.sales);
+      a.conversions += r.unitsSold;
+      return a;
+    },
+    { impressions: 0, clicks: 0, spend: 0, sales: 0, conversions: 0 }
+  );
+
+  // Total revenue (ad + organic) for TACoS.
+  const dailyRows = productIds.length
+    ? await DailySales.findAll({
+        where: { productId: { [Op.in]: productIds }, saleDate: { [Op.gte]: sinceStr } },
+      })
+    : [];
+  const totalRevenue = dailyRows.reduce((s, r) => s + Number(r.grossRevenue), 0);
+  const organicSales = Math.max(0, totalRevenue - ad.sales);
+
+  const round = (n, d = 2) => Number(n.toFixed(d));
+  res.json({
+    success: true,
+    data: {
+      windowDays: days,
+      adSpend: round(ad.spend),
+      adSales: round(ad.sales),
+      organicSales: round(organicSales),
+      totalSales: round(totalRevenue),
+      impressions: ad.impressions,
+      clicks: ad.clicks,
+      conversions: ad.conversions,
+      acos: ad.sales > 0 ? round((ad.spend / ad.sales) * 100, 1) : 0,
+      roas: ad.spend > 0 ? round(ad.sales / ad.spend, 2) : 0,
+      tacos: totalRevenue > 0 ? round((ad.spend / totalRevenue) * 100, 1) : 0,
+      ctr: ad.impressions > 0 ? round((ad.clicks / ad.impressions) * 100, 2) : 0,
+      cpc: ad.clicks > 0 ? round(ad.spend / ad.clicks, 2) : 0,
+      cvr: ad.clicks > 0 ? round((ad.conversions / ad.clicks) * 100, 1) : 0,
+    },
+  });
+});
+
+module.exports = { list, create, getOne, update, performance, optimize, overview };
