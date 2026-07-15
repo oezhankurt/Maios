@@ -12,6 +12,7 @@ const PPCCampaign = require('./PPCCampaign')(sequelize);
 const PPCPerformance = require('./PPCPerformance')(sequelize);
 const SmartPortfolio = require('./SmartPortfolio')(sequelize);
 const AutomationRule = require('./AutomationRule')(sequelize);
+const ChangeEvent = require('./ChangeEvent')(sequelize);
 const Alert = require('./Alert')(sequelize);
 
 // ── Associations ─────────────────────────────────────────────────────
@@ -22,6 +23,9 @@ User.hasMany(Alert, { foreignKey: 'userId', as: 'alerts', onDelete: 'CASCADE' })
 Alert.belongsTo(User, { foreignKey: 'userId', as: 'user' });
 Product.hasMany(Alert, { foreignKey: 'productId', as: 'alerts', onDelete: 'CASCADE' });
 Alert.belongsTo(Product, { foreignKey: 'productId', as: 'product' });
+
+Product.hasMany(ChangeEvent, { foreignKey: 'productId', as: 'changes', onDelete: 'CASCADE' });
+ChangeEvent.belongsTo(Product, { foreignKey: 'productId', as: 'product' });
 
 Product.hasMany(Keyword, { foreignKey: 'productId', as: 'keywords', onDelete: 'CASCADE' });
 Keyword.belongsTo(Product, { foreignKey: 'productId', as: 'product' });
@@ -82,6 +86,7 @@ const db = {
   PPCPerformance,
   SmartPortfolio,
   AutomationRule,
+  ChangeEvent,
   Alert,
 };
 

@@ -1,5 +1,5 @@
 const { Op } = require('sequelize');
-const { Product, DailySales, Keyword, Competitor, CompetitorPriceHistory } = require('../models');
+const { Product, DailySales, Keyword, Competitor, CompetitorPriceHistory, ChangeEvent } = require('../models');
 const asyncHandler = require('../utils/asyncHandler');
 const ApiError = require('../utils/ApiError');
 const profitService = require('../services/profitService');
@@ -59,13 +59,41 @@ const update = asyncHandler(async (req, res) => {
   const fields = [
     'asin', 'ean', 'sku', 'title', 'category', 'imageUrl',
     'price', 'costPerUnit', 'fbaStock', 'fbmStock', 'status',
+    'bullets', 'description', 'backendKeywords',
   ];
   const patch = {};
   fields.forEach((f) => {
     if (req.body[f] !== undefined) patch[f] = req.body[f];
   });
+
+  // Log changes to listing/price-relevant fields for before/after tracking.
+  const tracked = ['title', 'price', 'bullets', 'description', 'backendKeywords'];
+  const toStr = (v) => (v == null ? '' : typeof v === 'object' ? JSON.stringify(v) : String(v));
+  const isChanged = (f) =>
+    f === 'price' ? Number(patch[f]) !== Number(product[f]) : toStr(patch[f]) !== toStr(product[f]);
+  const changeEvents = [];
+  tracked.forEach((f) => {
+    if (patch[f] !== undefined && isChanged(f)) {
+      changeEvents.push({
+        userId: req.user.id, productId: product.id, field: f,
+        oldValue: toStr(product[f]).slice(0, 2000), newValue: toStr(patch[f]).slice(0, 2000),
+      });
+    }
+  });
+
   await product.update(patch);
+  if (changeEvents.length) await ChangeEvent.bulkCreate(changeEvents);
   res.json({ success: true, data: product });
+});
+
+const changes = asyncHandler(async (req, res) => {
+  await ownedProduct(req.user.id, req.params.id);
+  const rows = await ChangeEvent.findAll({
+    where: { productId: req.params.id },
+    order: [['createdAt', 'DESC']],
+    limit: parseInt(req.query.limit, 10) || 30,
+  });
+  res.json({ success: true, data: rows });
 });
 
 const remove = asyncHandler(async (req, res) => {
@@ -169,6 +197,7 @@ module.exports = {
   update,
   remove,
   stats,
+  changes,
   analysis,
   listingAnalysis,
   priceRecommendation,

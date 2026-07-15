@@ -4,6 +4,7 @@ import ProductList from '../components/listings/ProductList.jsx';
 import PriceOptimizer from '../components/listings/PriceOptimizer.jsx';
 import CompetitorComparison from '../components/listings/CompetitorComparison.jsx';
 import ListingAnalysis from '../components/listings/ListingAnalysis.jsx';
+import ChangeHistory from '../components/listings/ChangeHistory.jsx';
 import StockSync from '../components/listings/StockSync.jsx';
 import Loading from '../components/layout/Loading.jsx';
 
@@ -108,7 +109,10 @@ export default function Listings() {
               <PriceOptimizer product={selected} onApply={load} />
               <StockSync product={selected} />
             </div>
-            <CompetitorComparison product={selected} />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+              <CompetitorComparison product={selected} />
+              <ChangeHistory product={selected} refreshKey={selected.updatedAt} />
+            </div>
           </div>
         </>
       )}
