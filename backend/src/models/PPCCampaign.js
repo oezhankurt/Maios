@@ -10,6 +10,7 @@ module.exports = (sequelize) => {
         primaryKey: true,
       },
       productId: { type: DataTypes.UUID, allowNull: false },
+      smartPortfolioId: { type: DataTypes.UUID },
       campaignName: { type: DataTypes.STRING, allowNull: false },
       campaignType: {
         type: DataTypes.ENUM('sp', 'sb', 'sd'),

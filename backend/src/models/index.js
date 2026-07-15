@@ -10,6 +10,8 @@ const Competitor = require('./Competitor')(sequelize);
 const CompetitorPriceHistory = require('./CompetitorPriceHistory')(sequelize);
 const PPCCampaign = require('./PPCCampaign')(sequelize);
 const PPCPerformance = require('./PPCPerformance')(sequelize);
+const SmartPortfolio = require('./SmartPortfolio')(sequelize);
+const AutomationRule = require('./AutomationRule')(sequelize);
 const Alert = require('./Alert')(sequelize);
 
 // ── Associations ─────────────────────────────────────────────────────
@@ -55,6 +57,17 @@ PPCCampaign.hasMany(PPCPerformance, {
 });
 PPCPerformance.belongsTo(PPCCampaign, { foreignKey: 'campaignId', as: 'campaign' });
 
+// Smart Portfolios & Campaign-Mover automation rules.
+User.hasMany(SmartPortfolio, { foreignKey: 'userId', as: 'smartPortfolios', onDelete: 'CASCADE' });
+SmartPortfolio.belongsTo(User, { foreignKey: 'userId', as: 'user' });
+SmartPortfolio.hasMany(PPCCampaign, { foreignKey: 'smartPortfolioId', as: 'campaigns' });
+PPCCampaign.belongsTo(SmartPortfolio, { foreignKey: 'smartPortfolioId', as: 'smartPortfolio' });
+
+User.hasMany(AutomationRule, { foreignKey: 'userId', as: 'automationRules', onDelete: 'CASCADE' });
+AutomationRule.belongsTo(User, { foreignKey: 'userId', as: 'user' });
+SmartPortfolio.hasMany(AutomationRule, { foreignKey: 'targetPortfolioId', as: 'rules', onDelete: 'CASCADE' });
+AutomationRule.belongsTo(SmartPortfolio, { foreignKey: 'targetPortfolioId', as: 'targetPortfolio' });
+
 const db = {
   sequelize,
   User,
@@ -67,6 +80,8 @@ const db = {
   CompetitorPriceHistory,
   PPCCampaign,
   PPCPerformance,
+  SmartPortfolio,
+  AutomationRule,
   Alert,
 };
 
