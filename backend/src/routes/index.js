@@ -3,6 +3,7 @@ const express = require('express');
 const router = express.Router();
 
 router.use('/auth', require('./authRoutes'));
+router.use('/auth/2fa', require('./twoFactorRoutes'));
 router.use('/products', require('./productRoutes'));
 router.use('/keywords', require('./keywordRoutes'));
 router.use('/rankings', require('./rankingRoutes'));

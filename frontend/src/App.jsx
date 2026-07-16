@@ -30,6 +30,7 @@ import Terms from './pages/Terms.jsx';
 import VerifyEmail from './pages/VerifyEmail.jsx';
 import ForgotPassword from './pages/ForgotPassword.jsx';
 import ResetPassword from './pages/ResetPassword.jsx';
+import TwoFactorSettings from './pages/TwoFactorSettings.jsx';
 
 function ProtectedRoute({ children }) {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
@@ -94,6 +95,7 @@ export default function App() {
         <Route path="/analytics" element={<Analytics />} />
         <Route path="/audience" element={<Audience />} />
         <Route path="/settings" element={<Settings />} />
+        <Route path="/settings/2fa" element={<TwoFactorSettings />} />
         <Route path="/login-history" element={<LoginHistory />} />
       </Route>
 

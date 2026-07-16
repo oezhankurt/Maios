@@ -5,6 +5,7 @@ const LoginHistory = require('./LoginHistory')(sequelize);
 const EmailVerification = require('./EmailVerification')(sequelize);
 const PasswordReset = require('./PasswordReset')(sequelize);
 const AuditLog = require('./AuditLog')(sequelize);
+const TwoFactorAuth = require('./TwoFactorAuth')(sequelize);
 const Product = require('./Product')(sequelize);
 const Keyword = require('./Keyword')(sequelize);
 const KeywordRanking = require('./KeywordRanking')(sequelize);
@@ -31,6 +32,9 @@ PasswordReset.belongsTo(User, { foreignKey: 'userId', as: 'user' });
 
 User.hasMany(AuditLog, { foreignKey: 'userId', as: 'auditLogs', onDelete: 'CASCADE' });
 AuditLog.belongsTo(User, { foreignKey: 'userId', as: 'user' });
+
+User.hasOne(TwoFactorAuth, { foreignKey: 'userId', as: 'twoFactorAuth', onDelete: 'CASCADE' });
+TwoFactorAuth.belongsTo(User, { foreignKey: 'userId', as: 'user' });
 
 User.hasMany(Product, { foreignKey: 'userId', as: 'products', onDelete: 'CASCADE' });
 Product.belongsTo(User, { foreignKey: 'userId', as: 'user' });
@@ -95,6 +99,7 @@ const db = {
   EmailVerification,
   PasswordReset,
   AuditLog,
+  TwoFactorAuth,
   Product,
   Keyword,
   KeywordRanking,
