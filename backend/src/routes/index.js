@@ -12,6 +12,11 @@ router.use('/dashboard', require('./dashboardRoutes'));
 router.use('/channels', require('./channelsRoutes'));
 router.use('/research', require('./researchRoutes'));
 router.use('/cerebro', require('./cerebroRoutes'));
+router.use('/listings/builder', require('./listingBuilderRoutes'));
+router.use('/listings/analyzer', require('./listingAnalyzerRoutes'));
+router.use('/listings/index', require('./indexCheckerRoutes'));
+router.use('/listings/scribbles', require('./scribbleRoutes'));
+router.use('/audience', require('./audienceRoutes'));
 
 router.get('/health', (req, res) => {
   res.json({ success: true, status: 'ok', timestamp: new Date().toISOString() });

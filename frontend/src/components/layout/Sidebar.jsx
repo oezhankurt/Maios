@@ -34,6 +34,10 @@ const NAV = [
     label: 'Listings', icon: '📦', children: [
       { label: 'Produkte & Preis', to: '/listings' },
       { label: 'Listing-Analyse', to: '/listings/score' },
+      { label: 'Listing Builder', to: '/listings/builder' },
+      { label: 'Listing Analyzer', to: '/listings/analyzer' },
+      { label: 'Index Checker', to: '/listings/index' },
+      { label: 'Scribbles', to: '/listings/scribbles' },
     ],
   },
   {
@@ -45,6 +49,7 @@ const NAV = [
     ],
   },
   { label: 'Analytics', icon: '📈', to: '/analytics' },
+  { label: 'Audience', icon: '👥', to: '/audience' },
   { label: 'Einstellungen', icon: '⚙️', to: '/settings' },
 ];
 

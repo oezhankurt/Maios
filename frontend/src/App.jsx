@@ -9,8 +9,13 @@ import Keywords from './pages/Keywords.jsx';
 import Cerebro from './pages/Cerebro.jsx';
 import PPC from './pages/PPC.jsx';
 import Listings from './pages/Listings.jsx';
+import ListingBuilder from './pages/ListingBuilder.jsx';
+import ListingAnalyzer from './pages/ListingAnalyzer.jsx';
+import IndexChecker from './pages/IndexChecker.jsx';
+import Scribbles from './pages/Scribbles.jsx';
 import Channels from './pages/Channels.jsx';
 import Analytics from './pages/Analytics.jsx';
+import Audience from './pages/Audience.jsx';
 import Settings from './pages/Settings.jsx';
 
 function ProtectedRoute({ children }) {
@@ -48,11 +53,16 @@ export default function App() {
         <Route path="/ppc/automation" element={<PPC view="automation" />} />
         <Route path="/listings" element={<Listings view="products" />} />
         <Route path="/listings/score" element={<Listings view="score" />} />
+        <Route path="/listings/builder" element={<ListingBuilder />} />
+        <Route path="/listings/analyzer" element={<ListingAnalyzer />} />
+        <Route path="/listings/index" element={<IndexChecker />} />
+        <Route path="/listings/scribbles" element={<Scribbles />} />
         <Route path="/channels" element={<Channels view="overview" />} />
         <Route path="/channels/marketplaces" element={<Channels view="marketplaces" />} />
         <Route path="/channels/search" element={<Channels view="search" />} />
         <Route path="/channels/ads" element={<Channels view="ads" />} />
         <Route path="/analytics" element={<Analytics />} />
+        <Route path="/audience" element={<Audience />} />
         <Route path="/settings" element={<Settings />} />
       </Route>
 

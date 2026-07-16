@@ -21,11 +21,16 @@ const TITLES = {
   '/ppc/automation': 'Advertising · Automation',
   '/listings': 'Produkte & Preis',
   '/listings/score': 'Listing-Analyse',
+  '/listings/builder': 'Listing Builder',
+  '/listings/analyzer': 'Listing Analyzer',
+  '/listings/index': 'Index Checker',
+  '/listings/scribbles': 'Scribbles',
   '/channels': 'Kanäle · Übersicht',
   '/channels/marketplaces': 'Marktplätze',
   '/channels/search': 'Suchmaschinen',
   '/channels/ads': 'Advertising-Plattformen (DACH)',
   '/analytics': 'Analytics',
+  '/audience': 'Audience',
   '/settings': 'Settings',
 };
 
