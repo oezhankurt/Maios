@@ -5,6 +5,7 @@ const ApiError = require('../utils/ApiError');
 const amazonService = require('../services/amazonService');
 const authService = require('../services/authService');
 const emailAuthService = require('../services/emailAuthService');
+const auditService = require('../services/auditService');
 const { validatePassword } = require('../utils/passwordValidator');
 
 function publicUser(user) {
@@ -135,6 +136,18 @@ const resetPassword = asyncHandler(async (req, res) => {
   res.json({ success: true, message: result.message });
 });
 
+const getAuditLog = asyncHandler(async (req, res) => {
+  const limit = Math.min(parseInt(req.query.limit) || 50, 100);
+  const offset = parseInt(req.query.offset) || 0;
+
+  const { count, rows } = await auditService.getAuditLog(req.user.id, limit, offset);
+
+  res.json({
+    success: true,
+    data: { auditLog: rows, total: count, limit, offset },
+  });
+});
+
 module.exports = {
   register,
   login,
@@ -146,4 +159,5 @@ module.exports = {
   verifyEmail,
   sendPasswordResetEmail,
   resetPassword,
+  getAuditLog,
 };

@@ -4,6 +4,7 @@ const User = require('./User')(sequelize);
 const LoginHistory = require('./LoginHistory')(sequelize);
 const EmailVerification = require('./EmailVerification')(sequelize);
 const PasswordReset = require('./PasswordReset')(sequelize);
+const AuditLog = require('./AuditLog')(sequelize);
 const Product = require('./Product')(sequelize);
 const Keyword = require('./Keyword')(sequelize);
 const KeywordRanking = require('./KeywordRanking')(sequelize);
@@ -27,6 +28,9 @@ EmailVerification.belongsTo(User, { foreignKey: 'userId', as: 'user' });
 
 User.hasMany(PasswordReset, { foreignKey: 'userId', as: 'passwordResets', onDelete: 'CASCADE' });
 PasswordReset.belongsTo(User, { foreignKey: 'userId', as: 'user' });
+
+User.hasMany(AuditLog, { foreignKey: 'userId', as: 'auditLogs', onDelete: 'CASCADE' });
+AuditLog.belongsTo(User, { foreignKey: 'userId', as: 'user' });
 
 User.hasMany(Product, { foreignKey: 'userId', as: 'products', onDelete: 'CASCADE' });
 Product.belongsTo(User, { foreignKey: 'userId', as: 'user' });
@@ -90,6 +94,7 @@ const db = {
   LoginHistory,
   EmailVerification,
   PasswordReset,
+  AuditLog,
   Product,
   Keyword,
   KeywordRanking,

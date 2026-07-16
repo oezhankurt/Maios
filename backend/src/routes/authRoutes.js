@@ -39,6 +39,7 @@ router.post(
 router.post('/logout', authenticate, authController.logout);
 router.get('/me', authenticate, authController.me);
 router.get('/login-history', authenticate, authController.getLoginHistory);
+router.get('/audit-log', authenticate, authController.getAuditLog);
 
 router.post(
   '/amazon-connect',
