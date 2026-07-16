@@ -22,6 +22,7 @@ const Alert = require('./Alert')(sequelize);
 const Listing = require('./Listing')(sequelize);
 const ListingVersion = require('./ListingVersion')(sequelize);
 const ListingPublishLog = require('./ListingPublishLog')(sequelize);
+const ListingTemplate = require('./ListingTemplate')(sequelize);
 
 // ── Associations ─────────────────────────────────────────────────────
 User.hasMany(LoginHistory, { foreignKey: 'userId', as: 'loginHistory', onDelete: 'CASCADE' });
@@ -99,6 +100,9 @@ AutomationRule.belongsTo(SmartPortfolio, { foreignKey: 'targetPortfolioId', as: 
 User.hasMany(Listing, { foreignKey: 'userId', as: 'listings', onDelete: 'CASCADE' });
 Listing.belongsTo(User, { foreignKey: 'userId', as: 'user' });
 
+User.hasMany(ListingTemplate, { foreignKey: 'userId', as: 'listingTemplates', onDelete: 'CASCADE' });
+ListingTemplate.belongsTo(User, { foreignKey: 'userId', as: 'user' });
+
 Listing.hasMany(ListingVersion, { foreignKey: 'listingId', as: 'versions', onDelete: 'CASCADE' });
 ListingVersion.belongsTo(Listing, { foreignKey: 'listingId', as: 'listing' });
 
@@ -129,6 +133,7 @@ const db = {
   Listing,
   ListingVersion,
   ListingPublishLog,
+  ListingTemplate,
 };
 
 module.exports = db;
