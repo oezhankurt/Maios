@@ -253,9 +253,132 @@ table.data tr:hover td { background: rgba(255, 255, 255, 0.02); }
 .modal { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; width: 100%; max-width: 460px; }
 .modal h2 { margin-bottom: 16px; }
 
-@media (max-width: 900px) {
-  .sidebar { transform: translateX(-100%); }
+/* ── Mobile Tablet (768px and below) ──────────────────── */
+@media (max-width: 768px) {
+  :root {
+    --sidebar-w: 100%;
+  }
+
+  .sidebar {
+    width: 100%;
+    height: 100%;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    z-index: 40;
+  }
   .sidebar.open { transform: translateX(0); }
+
   .main { margin-left: 0; }
   .hamburger { display: block; }
+
+  .header { padding: 0 16px; }
+  .header .title { font-size: 16px; }
+  .content { padding: 16px; }
+  .page-header { margin-bottom: 16px; }
+  .page-header h1 { font-size: 18px; }
+
+  .card { padding: 16px; }
+  .btn { padding: 11px 14px; min-height: 44px; }
+  .btn-sm { padding: 8px 12px; min-height: auto; }
+
+  .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+
+  table.data { font-size: 13px; }
+  table.data th, table.data td { padding: 10px 8px; }
+
+  .modal { margin: 0; }
+}
+
+/* ── Mobile Phone (480px and below) ──────────────────── */
+@media (max-width: 480px) {
+  :root {
+    --header-h: 56px;
+  }
+
+  body { font-size: 14px; }
+
+  .sidebar {
+    padding: 16px 10px;
+  }
+  .sidebar .brand { font-size: 18px; padding: 0 8px 16px; }
+  .nav-link {
+    padding: 10px 10px;
+    gap: 10px;
+    font-size: 13px;
+  }
+  .nav-icon { width: 16px; }
+  .nav-children { padding-left: 26px; }
+  .nav-child {
+    padding: 8px 10px;
+    font-size: 13px;
+  }
+
+  .header { height: var(--header-h); padding: 0 12px; }
+  .header .title { font-size: 14px; }
+  .content { padding: 12px; }
+  .page-header { margin-bottom: 12px; }
+  .page-header h1 { font-size: 16px; }
+
+  .card { padding: 12px; }
+  .btn { padding: 12px 12px; min-height: 44px; font-size: 13px; }
+  .btn-sm { padding: 8px 10px; font-size: 12px; }
+
+  .input, .select { padding: 10px 10px; font-size: 14px; }
+  .field label { font-size: 12px; margin-bottom: 4px; }
+
+  table.data { font-size: 12px; }
+  table.data th { font-size: 11px; }
+  table.data th, table.data td { padding: 8px 6px; }
+
+  .stat-value { font-size: 24px; }
+  .stat-label { font-size: 12px; }
+
+  .badge { padding: 2px 7px; font-size: 11px; }
+
+  .modal { width: 100%; max-width: none; margin: 0; }
+  .modal-overlay { padding: 12px; }
+
+  .grid { gap: 12px; }
+
+  .avatar { width: 32px; height: 32px; font-size: 13px; }
+  .hamburger { font-size: 20px; }
+
+  .auth-card { margin: 0 auto; }
+  .auth-wrap { padding: 16px; }
+
+  /* Stack pagination controls */
+  .pagination { flex-direction: column; }
+  .pagination button { width: 100%; }
+
+  /* Make tables scroll easier on mobile */
+  .table-wrap {
+    -webkit-overflow-scrolling: touch;
+    margin-right: -12px;
+    margin-left: -12px;
+    padding-right: 12px;
+    padding-left: 12px;
+  }
+
+  /* Chips are smaller on mobile */
+  .chip {
+    padding: 5px 10px;
+    font-size: 12px;
+  }
+}
+
+/* ── Extra small phones (360px and below) ──────────── */
+@media (max-width: 360px) {
+  :root {
+    font-size: 13px;
+  }
+
+  .sidebar .brand { font-size: 16px; padding: 0 6px 12px; }
+  .header .title { font-size: 13px; }
+  .page-header h1 { font-size: 14px; }
+
+  .card { padding: 10px; }
+  .btn { padding: 10px 10px; }
+  .input, .select { padding: 8px 8px; font-size: 13px; }
+
+  table.data th, table.data td { padding: 6px 4px; }
 }
