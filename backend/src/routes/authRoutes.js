@@ -26,6 +26,7 @@ router.post(
 
 router.post('/logout', authenticate, authController.logout);
 router.get('/me', authenticate, authController.me);
+router.get('/login-history', authenticate, authController.getLoginHistory);
 
 router.post(
   '/amazon-connect',

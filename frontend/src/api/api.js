@@ -51,6 +51,7 @@ export const AuthAPI = {
   logout: () => unwrap(api.post('/auth/logout')),
   me: () => unwrap(api.get('/auth/me')),
   amazonConnect: (payload) => unwrap(api.post('/auth/amazon-connect', payload)),
+  getLoginHistory: (params) => unwrap(api.get('/auth/login-history', { params })),
 };
 
 export const ProductAPI = {

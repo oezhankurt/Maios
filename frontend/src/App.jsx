@@ -19,6 +19,7 @@ import Audience from './pages/Audience.jsx';
 import GoogleAds from './pages/GoogleAds.jsx';
 import BingAds from './pages/BingAds.jsx';
 import Settings from './pages/Settings.jsx';
+import LoginHistory from './pages/LoginHistory.jsx';
 
 function ProtectedRoute({ children }) {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
@@ -73,6 +74,7 @@ export default function App() {
         <Route path="/analytics" element={<Analytics />} />
         <Route path="/audience" element={<Audience />} />
         <Route path="/settings" element={<Settings />} />
+        <Route path="/login-history" element={<LoginHistory />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />

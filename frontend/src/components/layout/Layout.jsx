@@ -38,6 +38,7 @@ const TITLES = {
   '/bing-ads/performance': 'Bing Ads · Performance',
   '/analytics': 'Analytics',
   '/audience': 'Audience',
+  '/login-history': 'Login Verlauf',
   '/settings': 'Settings',
 };
 

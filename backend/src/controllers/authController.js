@@ -3,6 +3,7 @@ const { signToken } = require('../utils/jwt');
 const asyncHandler = require('../utils/asyncHandler');
 const ApiError = require('../utils/ApiError');
 const amazonService = require('../services/amazonService');
+const authService = require('../services/authService');
 
 function publicUser(user) {
   const json = user.toJSON();
@@ -36,6 +37,8 @@ const login = asyncHandler(async (req, res) => {
 
   if (user.status !== 'active') throw ApiError.forbidden('Account is inactive');
 
+  await authService.logLoginEvent(user.id, req);
+
   const token = signToken({ sub: user.id, email: user.email });
   res.json({ success: true, data: { user: publicUser(user), token } });
 });
@@ -43,6 +46,9 @@ const login = asyncHandler(async (req, res) => {
 // JWT is stateless; logout is a client-side token discard. Endpoint exists for
 // symmetry and future token-blacklist support.
 const logout = asyncHandler(async (req, res) => {
+  if (req.user) {
+    await authService.logLogoutEvent(req.user.id, req);
+  }
   res.json({ success: true, message: 'Logged out' });
 });
 
@@ -72,4 +78,16 @@ const amazonConnect = asyncHandler(async (req, res) => {
   });
 });
 
-module.exports = { register, login, logout, me, amazonConnect };
+const getLoginHistory = asyncHandler(async (req, res) => {
+  const limit = Math.min(parseInt(req.query.limit) || 50, 100);
+  const offset = parseInt(req.query.offset) || 0;
+
+  const { count, rows } = await authService.getLoginHistory(req.user.id, limit, offset);
+
+  res.json({
+    success: true,
+    data: { history: rows, total: count, limit, offset },
+  });
+});
+
+module.exports = { register, login, logout, me, amazonConnect, getLoginHistory };

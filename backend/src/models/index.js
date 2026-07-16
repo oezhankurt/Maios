@@ -1,6 +1,7 @@
 const { sequelize } = require('../config/database');
 
 const User = require('./User')(sequelize);
+const LoginHistory = require('./LoginHistory')(sequelize);
 const Product = require('./Product')(sequelize);
 const Keyword = require('./Keyword')(sequelize);
 const KeywordRanking = require('./KeywordRanking')(sequelize);
@@ -16,6 +17,9 @@ const ChangeEvent = require('./ChangeEvent')(sequelize);
 const Alert = require('./Alert')(sequelize);
 
 // ── Associations ─────────────────────────────────────────────────────
+User.hasMany(LoginHistory, { foreignKey: 'userId', as: 'loginHistory', onDelete: 'CASCADE' });
+LoginHistory.belongsTo(User, { foreignKey: 'userId', as: 'user' });
+
 User.hasMany(Product, { foreignKey: 'userId', as: 'products', onDelete: 'CASCADE' });
 Product.belongsTo(User, { foreignKey: 'userId', as: 'user' });
 
@@ -75,6 +79,7 @@ AutomationRule.belongsTo(SmartPortfolio, { foreignKey: 'targetPortfolioId', as: 
 const db = {
   sequelize,
   User,
+  LoginHistory,
   Product,
   Keyword,
   KeywordRanking,
