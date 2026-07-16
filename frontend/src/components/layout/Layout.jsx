@@ -6,6 +6,9 @@ import { useAuthStore } from '../../store/authStore';
 
 const TITLES = {
   '/': 'Dashboard',
+  '/research': 'Black Box · Produktrecherche',
+  '/research/keywords': 'Black Box · Keyword-Recherche',
+  '/research/competitors': 'Black Box · Wettbewerber',
   '/keywords': 'Keyword Master',
   '/keywords/rankings': 'Ranking Tracker',
   '/ppc': 'Advertising · Zeitvergleich',

@@ -4,6 +4,7 @@ import Layout from './components/layout/Layout.jsx';
 import Login from './pages/Login.jsx';
 import Register from './pages/Register.jsx';
 import Dashboard from './pages/Dashboard.jsx';
+import ProductResearch from './pages/ProductResearch.jsx';
 import Keywords from './pages/Keywords.jsx';
 import PPC from './pages/PPC.jsx';
 import Listings from './pages/Listings.jsx';
@@ -31,6 +32,9 @@ export default function App() {
         }
       >
         <Route path="/" element={<Dashboard />} />
+        <Route path="/research" element={<ProductResearch view="products" />} />
+        <Route path="/research/keywords" element={<ProductResearch view="keywords" />} />
+        <Route path="/research/competitors" element={<ProductResearch view="competitors" />} />
         <Route path="/keywords" element={<Keywords view="master" />} />
         <Route path="/keywords/rankings" element={<Keywords view="rankings" />} />
         <Route path="/ppc" element={<PPC view="overview" />} />

@@ -6,6 +6,13 @@ import { NavLink, useLocation } from 'react-router-dom';
 const NAV = [
   { label: 'Dashboard', icon: '📊', to: '/' },
   {
+    label: 'Produktrecherche', icon: '🔍', children: [
+      { label: 'Black Box · Produkte', to: '/research' },
+      { label: 'Keyword-Recherche', to: '/research/keywords' },
+      { label: 'Wettbewerber', to: '/research/competitors' },
+    ],
+  },
+  {
     label: 'Keywords', icon: '🔑', children: [
       { label: 'Keyword Master', to: '/keywords' },
       { label: 'Rankings', to: '/keywords/rankings' },

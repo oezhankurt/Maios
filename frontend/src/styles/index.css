@@ -181,6 +181,22 @@ table.data tr:hover td { background: rgba(255, 255, 255, 0.02); }
 .nav-child:hover { background: rgba(255, 255, 255, 0.04); color: var(--text); }
 .nav-child.active { color: #fff; background: rgba(99, 102, 241, 0.18); }
 
+/* Filter chips (Black Box research filters) */
+.chip {
+  border: 1px solid var(--border);
+  background: var(--bg-elevated);
+  color: var(--text-muted);
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.12s ease;
+  white-space: nowrap;
+}
+.chip:hover { border-color: var(--primary); color: var(--text); }
+.chip-active { background: var(--primary); border-color: var(--primary); color: #fff; }
+
 .main { flex: 1; margin-left: var(--sidebar-w); display: flex; flex-direction: column; }
 .header {
   height: var(--header-h);

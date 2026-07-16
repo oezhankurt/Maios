@@ -10,6 +10,7 @@ router.use('/profit', require('./profitRoutes'));
 router.use('/ppc', require('./ppcRoutes'));
 router.use('/dashboard', require('./dashboardRoutes'));
 router.use('/channels', require('./channelsRoutes'));
+router.use('/research', require('./researchRoutes'));
 
 router.get('/health', (req, res) => {
   res.json({ success: true, status: 'ok', timestamp: new Date().toISOString() });

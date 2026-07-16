@@ -123,6 +123,14 @@ export const ChannelAPI = {
   list: () => unwrap(api.get('/channels')),
 };
 
+// Black Box — product & keyword market research
+export const ResearchAPI = {
+  meta: () => unwrap(api.get('/research/meta')),
+  products: (filters) => unwrap(api.post('/research/products', filters || {})),
+  competitors: (payload) => unwrap(api.post('/research/competitors', payload || {})),
+  keywords: (filters) => unwrap(api.post('/research/keywords', filters || {})),
+};
+
 export const DashboardAPI = {
   overview: () => unwrap(api.get('/dashboard/overview')),
   profitChart: (params) => unwrap(api.get('/dashboard/profit-chart', { params })),
