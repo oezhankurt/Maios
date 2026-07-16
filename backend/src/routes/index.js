@@ -17,6 +17,8 @@ router.use('/listings/analyzer', require('./listingAnalyzerRoutes'));
 router.use('/listings/index', require('./indexCheckerRoutes'));
 router.use('/listings/scribbles', require('./scribbleRoutes'));
 router.use('/audience', require('./audienceRoutes'));
+router.use('/google-ads', require('./googleAdsRoutes'));
+router.use('/bing-ads', require('./bingAdsRoutes'));
 
 router.get('/health', (req, res) => {
   res.json({ success: true, status: 'ok', timestamp: new Date().toISOString() });

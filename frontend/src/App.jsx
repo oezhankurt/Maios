@@ -16,6 +16,8 @@ import Scribbles from './pages/Scribbles.jsx';
 import Channels from './pages/Channels.jsx';
 import Analytics from './pages/Analytics.jsx';
 import Audience from './pages/Audience.jsx';
+import GoogleAds from './pages/GoogleAds.jsx';
+import BingAds from './pages/BingAds.jsx';
 import Settings from './pages/Settings.jsx';
 
 function ProtectedRoute({ children }) {
@@ -61,6 +63,13 @@ export default function App() {
         <Route path="/channels/marketplaces" element={<Channels view="marketplaces" />} />
         <Route path="/channels/search" element={<Channels view="search" />} />
         <Route path="/channels/ads" element={<Channels view="ads" />} />
+        <Route path="/google-ads" element={<GoogleAds view="overview" />} />
+        <Route path="/google-ads/campaigns" element={<GoogleAds view="campaigns" />} />
+        <Route path="/google-ads/keywords" element={<GoogleAds view="keywords" />} />
+        <Route path="/google-ads/budget" element={<GoogleAds view="budget" />} />
+        <Route path="/bing-ads" element={<BingAds view="overview" />} />
+        <Route path="/bing-ads/campaigns" element={<BingAds view="campaigns" />} />
+        <Route path="/bing-ads/performance" element={<BingAds view="performance" />} />
         <Route path="/analytics" element={<Analytics />} />
         <Route path="/audience" element={<Audience />} />
         <Route path="/settings" element={<Settings />} />

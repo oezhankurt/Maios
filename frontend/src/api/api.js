@@ -181,6 +181,27 @@ export const AudienceAPI = {
   insights: (id) => unwrap(api.get(`/audience/${id}/insights`)),
 };
 
+// Google Ads — campaign & keyword management
+export const GoogleAdsAPI = {
+  getCampaigns: (params) => unwrap(api.get('/google-ads/campaigns', { params })),
+  getCampaign: (id) => unwrap(api.get(`/google-ads/campaigns/${id}`)),
+  getKeywords: (campaignId) => unwrap(api.get('/google-ads/keywords', { params: { campaignId } })),
+  optimizeKeywords: (payload) => unwrap(api.post('/google-ads/keywords/optimize', payload)),
+  getBudgetAllocation: () => unwrap(api.get('/google-ads/budget')),
+  getPerformance: (campaignId, dateRange) =>
+    unwrap(api.get('/google-ads/performance', { params: { campaignId, dateRange } })),
+};
+
+// Bing Ads — campaign management
+export const BingAdsAPI = {
+  getCampaigns: (params) => unwrap(api.get('/bing-ads/campaigns', { params })),
+  getCampaign: (id) => unwrap(api.get(`/bing-ads/campaigns/${id}`)),
+  getKeywords: (campaignId) => unwrap(api.get('/bing-ads/keywords', { params: { campaignId } })),
+  getPerformance: (campaignId, dateRange) =>
+    unwrap(api.get('/bing-ads/performance', { params: { campaignId, dateRange } })),
+  suggestOptimizations: (payload) => unwrap(api.post('/bing-ads/optimize', payload)),
+};
+
 export const DashboardAPI = {
   overview: () => unwrap(api.get('/dashboard/overview')),
   profitChart: (params) => unwrap(api.get('/dashboard/profit-chart', { params })),
