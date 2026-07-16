@@ -1,9 +1,8 @@
 const express = require('express');
-const { body } = require('express-validator');
 const rateLimit = require('express-rate-limit');
 const authController = require('../controllers/authController');
 const { authenticate } = require('../middleware/auth');
-const { validate } = require('../middleware/validator');
+const { authSchemas, validate: validateSchema } = require('../utils/schemas');
 
 const router = express.Router();
 
@@ -16,71 +15,37 @@ const authLimiter = rateLimit({
   skipSuccessfulRequests: true,
 });
 
-router.post(
-  '/register',
-  authLimiter,
-  [
-    body('email').isEmail().withMessage('Valid email required'),
-    body('password').isLength({ min: 8 }).withMessage('Password must be at least 8 characters'),
-    body('username').notEmpty().withMessage('Username required'),
-  ],
-  validate,
-  authController.register
-);
+router.post('/register', authLimiter, validateSchema(authSchemas.register), authController.register);
 
-router.post(
-  '/login',
-  authLimiter,
-  [body('email').isEmail(), body('password').notEmpty()],
-  validate,
-  authController.login
-);
+router.post('/login', authLimiter, validateSchema(authSchemas.login), authController.login);
 
 router.post('/logout', authenticate, authController.logout);
 router.get('/me', authenticate, authController.me);
 router.get('/login-history', authenticate, authController.getLoginHistory);
 router.get('/audit-log', authenticate, authController.getAuditLog);
 
-router.post(
-  '/amazon-connect',
-  authenticate,
-  [body('refreshToken').notEmpty().withMessage('refreshToken required')],
-  validate,
-  authController.amazonConnect
-);
+router.post('/amazon-connect', authenticate, validateSchema(authSchemas.amazonConnect), authController.amazonConnect);
 
 router.post(
   '/send-verification-email',
   authLimiter,
-  [body('email').isEmail().withMessage('Valid email required')],
-  validate,
+  validateSchema(authSchemas.sendVerificationEmail),
   authController.sendVerificationEmail
 );
 
-router.post(
-  '/verify-email',
-  authLimiter,
-  [body('token').notEmpty().withMessage('Token required')],
-  validate,
-  authController.verifyEmail
-);
+router.post('/verify-email', authLimiter, validateSchema(authSchemas.verifyEmail), authController.verifyEmail);
 
 router.post(
   '/send-password-reset',
   authLimiter,
-  [body('email').isEmail().withMessage('Valid email required')],
-  validate,
+  validateSchema(authSchemas.sendPasswordReset),
   authController.sendPasswordResetEmail
 );
 
 router.post(
   '/reset-password',
   authLimiter,
-  [
-    body('token').notEmpty().withMessage('Token required'),
-    body('newPassword').isLength({ min: 8 }).withMessage('Password must be at least 8 characters'),
-  ],
-  validate,
+  validateSchema(authSchemas.resetPassword),
   authController.resetPassword
 );
 
