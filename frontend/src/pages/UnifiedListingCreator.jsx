@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { api } from '../api/api';
 import { useToast } from '../hooks/useToast';
+import ListingOptimizer from '../components/ListingOptimizer';
 
 export default function UnifiedListingCreator() {
   const { success: showSuccess, error: showError } = useToast();
@@ -204,6 +205,17 @@ export default function UnifiedListingCreator() {
               ))}
             </div>
           </div>
+
+          {/* AI Optimizer */}
+          {Object.values(selectedPlatforms).some((p) => p) && (
+            <div style={{ marginBottom: '30px' }}>
+              <ListingOptimizer
+                listingData={listingData}
+                platform={Object.keys(selectedPlatforms).find((p) => selectedPlatforms[p])}
+                onUpdate={setListingData}
+              />
+            </div>
+          )}
 
           {/* Central Input Form */}
           <div style={{ background: '#1a2347', padding: '20px', borderRadius: '8px', marginBottom: '30px' }}>
