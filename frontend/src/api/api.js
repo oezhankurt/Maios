@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { setCSRFHeader } from '../utils/csrf';
 
 const baseURL = import.meta.env.VITE_API_BASE_URL || '/api';
 
@@ -6,12 +7,15 @@ const api = axios.create({
   baseURL,
   headers: { 'Content-Type': 'application/json' },
   timeout: 20000,
+  withCredentials: true,
 });
 
 // Attach the JWT from localStorage to every request.
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('maios_token');
   if (token) config.headers.Authorization = `Bearer ${token}`;
+  // Add CSRF token for state-changing requests
+  setCSRFHeader(config);
   return config;
 });
 
