@@ -6,6 +6,7 @@ import Register from './pages/Register.jsx';
 import Dashboard from './pages/Dashboard.jsx';
 import ProductResearch from './pages/ProductResearch.jsx';
 import Keywords from './pages/Keywords.jsx';
+import Cerebro from './pages/Cerebro.jsx';
 import PPC from './pages/PPC.jsx';
 import Listings from './pages/Listings.jsx';
 import Channels from './pages/Channels.jsx';
@@ -39,6 +40,7 @@ export default function App() {
         <Route path="/research/targeting" element={<ProductResearch view="targeting" />} />
         <Route path="/research/analytics" element={<ProductResearch view="analytics" />} />
         <Route path="/keywords" element={<Keywords view="master" />} />
+        <Route path="/keywords/cerebro" element={<Cerebro />} />
         <Route path="/keywords/rankings" element={<Keywords view="rankings" />} />
         <Route path="/ppc" element={<PPC view="overview" />} />
         <Route path="/ppc/campaigns" element={<PPC view="campaigns" />} />

@@ -18,6 +18,7 @@ const NAV = [
   {
     label: 'Keywords', icon: '🔑', children: [
       { label: 'Keyword Master', to: '/keywords' },
+      { label: 'Cerebro · Reverse-ASIN', to: '/keywords/cerebro' },
       { label: 'Rankings', to: '/keywords/rankings' },
     ],
   },

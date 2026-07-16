@@ -197,6 +197,16 @@ table.data tr:hover td { background: rgba(255, 255, 255, 0.02); }
 .chip:hover { border-color: var(--primary); color: var(--text); }
 .chip-active { background: var(--primary); border-color: var(--primary); color: #fff; }
 
+.linklike {
+  background: none;
+  border: none;
+  color: var(--primary);
+  cursor: pointer;
+  padding: 0;
+  font: inherit;
+}
+.linklike:hover { text-decoration: underline; }
+
 .main { flex: 1; margin-left: var(--sidebar-w); display: flex; flex-direction: column; }
 .header {
   height: var(--header-h);

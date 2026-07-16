@@ -134,6 +134,12 @@ export const ResearchAPI = {
   analytics: (payload) => unwrap(api.post('/research/analytics', payload || {})),
 };
 
+// Cerebro — reverse-ASIN & keyword expansion
+export const CerebroAPI = {
+  search: (payload) => unwrap(api.post('/cerebro/search', payload || {})),
+  analyze: (payload) => unwrap(api.post('/cerebro/analyze', payload || {})),
+};
+
 export const DashboardAPI = {
   overview: () => unwrap(api.get('/dashboard/overview')),
   profitChart: (params) => unwrap(api.get('/dashboard/profit-chart', { params })),

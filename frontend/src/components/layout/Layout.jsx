@@ -13,6 +13,7 @@ const TITLES = {
   '/research/targeting': 'Black Box · Produkt-Targeting',
   '/research/analytics': 'Black Box · Elite Analytics',
   '/keywords': 'Keyword Master',
+  '/keywords/cerebro': 'Cerebro · Reverse-ASIN',
   '/keywords/rankings': 'Ranking Tracker',
   '/ppc': 'Advertising · Zeitvergleich',
   '/ppc/campaigns': 'Advertising · Kampagnen',
