@@ -109,6 +109,51 @@ export default function UnifiedListingCreator() {
     }
   };
 
+  const saveListing = async () => {
+    if (!listingData.name || !listingData.price) {
+      showError('Produktname und Preis sind erforderlich');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const res = await api.post('/listings', {
+        listingData: {
+          name: listingData.name,
+          description: listingData.description,
+          price: listingData.price,
+          sku: listingData.sku,
+          ean: listingData.ean,
+          asin: listingData.asin,
+          keywords: listingData.keywords,
+          bulletPoints: listingData.bulletPoints,
+          images: listingData.images,
+        },
+      });
+
+      showSuccess('Listing gespeichert!');
+      // Reset form
+      setListingData({
+        name: '',
+        title: '',
+        description: '',
+        price: '',
+        quantity: 1,
+        sku: '',
+        ean: '',
+        asin: '',
+        category: '',
+        images: [],
+        keywords: [],
+        bulletPoints: [],
+      });
+    } catch (err) {
+      showError(err.response?.data?.error?.message || 'Fehler beim Speichern');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const platformColors = {
     amazon: '#FF9900',
     ebay: '#E53238',
@@ -498,6 +543,24 @@ export default function UnifiedListingCreator() {
 
           {/* Action Buttons */}
           <div style={{ display: 'flex', gap: '10px' }}>
+            <button
+              onClick={saveListing}
+              disabled={loading}
+              style={{
+                padding: '12px 24px',
+                background: '#10b981',
+                border: 'none',
+                borderRadius: '6px',
+                color: '#fff',
+                cursor: loading ? 'not-allowed' : 'pointer',
+                fontSize: '14px',
+                fontWeight: '500',
+                opacity: loading ? 0.6 : 1,
+              }}
+            >
+              {loading ? '⏳ Wird gespeichert...' : '💾 Listing speichern'}
+            </button>
+
             <button
               onClick={generatePreview}
               disabled={loading}

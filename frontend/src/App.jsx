@@ -34,6 +34,7 @@ import TwoFactorSettings from './pages/TwoFactorSettings.jsx';
 import AdminDashboard from './pages/AdminDashboard.jsx';
 import EmailPreview from './pages/EmailPreview.jsx';
 import UnifiedListingCreator from './pages/UnifiedListingCreator.jsx';
+import ListingsManager from './pages/ListingsManager.jsx';
 
 function ProtectedRoute({ children }) {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
@@ -79,6 +80,7 @@ export default function App() {
         <Route path="/ppc/portfolios" element={<PPC view="portfolios" />} />
         <Route path="/ppc/automation" element={<PPC view="automation" />} />
         <Route path="/listings" element={<UnifiedListingCreator />} />
+        <Route path="/listings/manager" element={<ListingsManager />} />
         <Route path="/listings/products" element={<Listings view="products" />} />
         <Route path="/listings/score" element={<Listings view="score" />} />
         <Route path="/listings/builder" element={<ListingBuilder />} />

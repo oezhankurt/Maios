@@ -19,6 +19,9 @@ const SmartPortfolio = require('./SmartPortfolio')(sequelize);
 const AutomationRule = require('./AutomationRule')(sequelize);
 const ChangeEvent = require('./ChangeEvent')(sequelize);
 const Alert = require('./Alert')(sequelize);
+const Listing = require('./Listing')(sequelize);
+const ListingVersion = require('./ListingVersion')(sequelize);
+const ListingPublishLog = require('./ListingPublishLog')(sequelize);
 
 // ── Associations ─────────────────────────────────────────────────────
 User.hasMany(LoginHistory, { foreignKey: 'userId', as: 'loginHistory', onDelete: 'CASCADE' });
@@ -92,6 +95,16 @@ AutomationRule.belongsTo(User, { foreignKey: 'userId', as: 'user' });
 SmartPortfolio.hasMany(AutomationRule, { foreignKey: 'targetPortfolioId', as: 'rules', onDelete: 'CASCADE' });
 AutomationRule.belongsTo(SmartPortfolio, { foreignKey: 'targetPortfolioId', as: 'targetPortfolio' });
 
+// Listings
+User.hasMany(Listing, { foreignKey: 'userId', as: 'listings', onDelete: 'CASCADE' });
+Listing.belongsTo(User, { foreignKey: 'userId', as: 'user' });
+
+Listing.hasMany(ListingVersion, { foreignKey: 'listingId', as: 'versions', onDelete: 'CASCADE' });
+ListingVersion.belongsTo(Listing, { foreignKey: 'listingId', as: 'listing' });
+
+Listing.hasMany(ListingPublishLog, { foreignKey: 'listingId', as: 'publishLogs', onDelete: 'CASCADE' });
+ListingPublishLog.belongsTo(Listing, { foreignKey: 'listingId', as: 'listing' });
+
 const db = {
   sequelize,
   User,
@@ -113,6 +126,9 @@ const db = {
   AutomationRule,
   ChangeEvent,
   Alert,
+  Listing,
+  ListingVersion,
+  ListingPublishLog,
 };
 
 module.exports = db;
