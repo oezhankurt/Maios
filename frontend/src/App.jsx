@@ -3,6 +3,7 @@ import { useAuthStore } from './store/authStore';
 import Layout from './components/layout/Layout.jsx';
 import PublicLayout from './components/layout/PublicLayout.jsx';
 import ToastContainer from './components/Toast/Toast.jsx';
+import ThemeToggle from './components/ThemeToggle.jsx';
 import Login from './pages/Login.jsx';
 import Register from './pages/Register.jsx';
 import Dashboard from './pages/Dashboard.jsx';
@@ -40,6 +41,7 @@ export default function App() {
   return (
     <>
       <ToastContainer />
+      <ThemeToggle />
       <Routes>
       <Route path="/login" element={<PublicLayout><Login /></PublicLayout>} />
       <Route path="/register" element={<PublicLayout><Register /></PublicLayout>} />
