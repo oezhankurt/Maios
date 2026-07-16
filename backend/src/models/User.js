@@ -37,6 +37,11 @@ module.exports = (sequelize) => {
         defaultValue: false,
         field: 'email_verified',
       },
+      isAdmin: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
+        field: 'is_admin',
+      },
     },
     {
       tableName: 'users',

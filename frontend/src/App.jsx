@@ -31,6 +31,7 @@ import VerifyEmail from './pages/VerifyEmail.jsx';
 import ForgotPassword from './pages/ForgotPassword.jsx';
 import ResetPassword from './pages/ResetPassword.jsx';
 import TwoFactorSettings from './pages/TwoFactorSettings.jsx';
+import AdminDashboard from './pages/AdminDashboard.jsx';
 
 function ProtectedRoute({ children }) {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
@@ -97,6 +98,7 @@ export default function App() {
         <Route path="/settings" element={<Settings />} />
         <Route path="/settings/2fa" element={<TwoFactorSettings />} />
         <Route path="/login-history" element={<LoginHistory />} />
+        <Route path="/admin" element={<AdminDashboard />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />
