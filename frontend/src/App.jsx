@@ -20,6 +20,10 @@ import GoogleAds from './pages/GoogleAds.jsx';
 import BingAds from './pages/BingAds.jsx';
 import Settings from './pages/Settings.jsx';
 import LoginHistory from './pages/LoginHistory.jsx';
+import FAQ from './pages/FAQ.jsx';
+import Impressum from './pages/Impressum.jsx';
+import PrivacyPolicy from './pages/PrivacyPolicy.jsx';
+import Terms from './pages/Terms.jsx';
 
 function ProtectedRoute({ children }) {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
@@ -32,6 +36,10 @@ export default function App() {
     <Routes>
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
+      <Route path="/faq" element={<FAQ />} />
+      <Route path="/impressum" element={<Impressum />} />
+      <Route path="/privacy" element={<PrivacyPolicy />} />
+      <Route path="/terms" element={<Terms />} />
 
       <Route
         element={
