@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { api } from '../api/api';
 import { useToast } from '../hooks/useToast';
+import BulkImportCSV from '../components/BulkImportCSV';
+import BulkOperationsPanel from '../components/BulkOperationsPanel';
 
 export default function ListingsManager() {
   const { success: showSuccess, error: showError } = useToast();
@@ -8,6 +10,8 @@ export default function ListingsManager() {
   const [loading, setLoading] = useState(false);
   const [filterStatus, setFilterStatus] = useState('all');
   const [selectedListing, setSelectedListing] = useState(null);
+  const [selectedListings, setSelectedListings] = useState([]);
+  const [showImportModal, setShowImportModal] = useState(false);
 
   useEffect(() => {
     loadListings();
@@ -51,6 +55,26 @@ export default function ListingsManager() {
     }
   };
 
+  const toggleListingSelection = (listingId) => {
+    setSelectedListings((prev) =>
+      prev.includes(listingId)
+        ? prev.filter((id) => id !== listingId)
+        : [...prev, listingId]
+    );
+  };
+
+  const toggleAllListings = () => {
+    if (selectedListings.length === listings.length) {
+      setSelectedListings([]);
+    } else {
+      setSelectedListings(listings.map((l) => l.id));
+    }
+  };
+
+  const handleImportSuccess = () => {
+    loadListings();
+  };
+
   const statusColors = {
     draft: '#8b94a8',
     published: '#10b981',
@@ -69,8 +93,8 @@ export default function ListingsManager() {
     <div style={{ padding: '20px' }}>
       <h1>📋 Listings Manager</h1>
 
-      {/* Filter */}
-      <div style={{ marginBottom: '20px', display: 'flex', gap: '10px' }}>
+      {/* Filter and Actions */}
+      <div style={{ marginBottom: '20px', display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
         {['all', 'draft', 'published', 'archived', 'scheduled'].map((status) => (
           <button
             key={status}
@@ -89,6 +113,22 @@ export default function ListingsManager() {
             {status === 'all' ? 'Alle' : statusLabels[status]}
           </button>
         ))}
+        <button
+          onClick={() => setShowImportModal(true)}
+          style={{
+            marginLeft: 'auto',
+            padding: '8px 16px',
+            background: '#10b981',
+            border: '1px solid #059669',
+            borderRadius: '6px',
+            color: '#fff',
+            cursor: 'pointer',
+            fontSize: '13px',
+            fontWeight: '500',
+          }}
+        >
+          📥 CSV Import
+        </button>
       </div>
 
       {/* Listings Table */}
@@ -110,6 +150,14 @@ export default function ListingsManager() {
           >
             <thead>
               <tr style={{ background: '#0a0e27', borderBottom: '1px solid #2d3e5f' }}>
+                <th style={{ padding: '12px', textAlign: 'center', color: '#8b94a8', width: '40px' }}>
+                  <input
+                    type="checkbox"
+                    checked={selectedListings.length === listings.length && listings.length > 0}
+                    onChange={toggleAllListings}
+                    style={{ cursor: 'pointer' }}
+                  />
+                </th>
                 <th style={{ padding: '12px', textAlign: 'left', color: '#8b94a8' }}>Produktname</th>
                 <th style={{ padding: '12px', textAlign: 'left', color: '#8b94a8' }}>SKU</th>
                 <th style={{ padding: '12px', textAlign: 'left', color: '#8b94a8' }}>Status</th>
@@ -124,12 +172,26 @@ export default function ListingsManager() {
                   key={listing.id}
                   style={{
                     borderBottom: '1px solid #2d3e5f',
-                    cursor: 'pointer',
                     background: selectedListing?.id === listing.id ? '#2d3e5f' : 'transparent',
                   }}
-                  onClick={() => setSelectedListing(listing)}
                 >
-                  <td style={{ padding: '12px' }}>{listing.productName}</td>
+                  <td style={{ padding: '12px', textAlign: 'center' }}>
+                    <input
+                      type="checkbox"
+                      checked={selectedListings.includes(listing.id)}
+                      onChange={(e) => {
+                        e.stopPropagation();
+                        toggleListingSelection(listing.id);
+                      }}
+                      style={{ cursor: 'pointer' }}
+                    />
+                  </td>
+                  <td
+                    style={{ padding: '12px', cursor: 'pointer' }}
+                    onClick={() => setSelectedListing(listing)}
+                  >
+                    {listing.productName}
+                  </td>
                   <td style={{ padding: '12px', color: '#8b94a8' }}>{listing.sku || '-'}</td>
                   <td style={{ padding: '12px' }}>
                     <span
@@ -304,6 +366,23 @@ export default function ListingsManager() {
           </div>
         </div>
       )}
+
+      {/* CSV Import Modal */}
+      {showImportModal && (
+        <BulkImportCSV
+          onImportSuccess={handleImportSuccess}
+          onClose={() => setShowImportModal(false)}
+        />
+      )}
+
+      {/* Bulk Operations Panel */}
+      <BulkOperationsPanel
+        selectedListings={selectedListings}
+        onOperationComplete={() => {
+          setSelectedListings([]);
+          loadListings();
+        }}
+      />
     </div>
   );
 }
