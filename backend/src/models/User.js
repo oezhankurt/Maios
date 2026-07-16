@@ -32,6 +32,11 @@ module.exports = (sequelize) => {
         type: DataTypes.ENUM('active', 'inactive'),
         defaultValue: 'active',
       },
+      emailVerified: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
+        field: 'email_verified',
+      },
     },
     {
       tableName: 'users',

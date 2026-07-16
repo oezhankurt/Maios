@@ -48,4 +48,39 @@ router.post(
   authController.amazonConnect
 );
 
+router.post(
+  '/send-verification-email',
+  authLimiter,
+  [body('email').isEmail().withMessage('Valid email required')],
+  validate,
+  authController.sendVerificationEmail
+);
+
+router.post(
+  '/verify-email',
+  authLimiter,
+  [body('token').notEmpty().withMessage('Token required')],
+  validate,
+  authController.verifyEmail
+);
+
+router.post(
+  '/send-password-reset',
+  authLimiter,
+  [body('email').isEmail().withMessage('Valid email required')],
+  validate,
+  authController.sendPasswordResetEmail
+);
+
+router.post(
+  '/reset-password',
+  authLimiter,
+  [
+    body('token').notEmpty().withMessage('Token required'),
+    body('newPassword').isLength({ min: 8 }).withMessage('Password must be at least 8 characters'),
+  ],
+  validate,
+  authController.resetPassword
+);
+
 module.exports = router;

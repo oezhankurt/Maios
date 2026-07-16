@@ -4,6 +4,7 @@ const asyncHandler = require('../utils/asyncHandler');
 const ApiError = require('../utils/ApiError');
 const amazonService = require('../services/amazonService');
 const authService = require('../services/authService');
+const emailAuthService = require('../services/emailAuthService');
 const { validatePassword } = require('../utils/passwordValidator');
 
 function publicUser(user) {
@@ -98,4 +99,51 @@ const getLoginHistory = asyncHandler(async (req, res) => {
   });
 });
 
-module.exports = { register, login, logout, me, amazonConnect, getLoginHistory };
+const sendVerificationEmail = asyncHandler(async (req, res) => {
+  const { email } = req.body;
+
+  const existing = await User.findOne({ where: { email } });
+  if (!existing) throw ApiError.notFound('Benutzer nicht gefunden');
+
+  const result = await emailAuthService.sendVerificationEmail(existing.id, email);
+  res.json({ success: true, message: result.message });
+});
+
+const verifyEmail = asyncHandler(async (req, res) => {
+  const { token } = req.body;
+
+  const result = await emailAuthService.verifyEmail(token);
+  res.json({ success: true, message: result.message });
+});
+
+const sendPasswordResetEmail = asyncHandler(async (req, res) => {
+  const { email } = req.body;
+
+  const result = await emailAuthService.sendPasswordResetEmail(email);
+  res.json({ success: true, message: result.message });
+});
+
+const resetPassword = asyncHandler(async (req, res) => {
+  const { token, newPassword } = req.body;
+
+  const pwValidation = validatePassword(newPassword);
+  if (!pwValidation.isValid) {
+    throw ApiError.badRequest(pwValidation.errors.join('. '));
+  }
+
+  const result = await emailAuthService.resetPassword(token, newPassword);
+  res.json({ success: true, message: result.message });
+});
+
+module.exports = {
+  register,
+  login,
+  logout,
+  me,
+  amazonConnect,
+  getLoginHistory,
+  sendVerificationEmail,
+  verifyEmail,
+  sendPasswordResetEmail,
+  resetPassword,
+};

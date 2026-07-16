@@ -2,6 +2,8 @@ const { sequelize } = require('../config/database');
 
 const User = require('./User')(sequelize);
 const LoginHistory = require('./LoginHistory')(sequelize);
+const EmailVerification = require('./EmailVerification')(sequelize);
+const PasswordReset = require('./PasswordReset')(sequelize);
 const Product = require('./Product')(sequelize);
 const Keyword = require('./Keyword')(sequelize);
 const KeywordRanking = require('./KeywordRanking')(sequelize);
@@ -19,6 +21,12 @@ const Alert = require('./Alert')(sequelize);
 // ── Associations ─────────────────────────────────────────────────────
 User.hasMany(LoginHistory, { foreignKey: 'userId', as: 'loginHistory', onDelete: 'CASCADE' });
 LoginHistory.belongsTo(User, { foreignKey: 'userId', as: 'user' });
+
+User.hasMany(EmailVerification, { foreignKey: 'userId', as: 'emailVerifications', onDelete: 'CASCADE' });
+EmailVerification.belongsTo(User, { foreignKey: 'userId', as: 'user' });
+
+User.hasMany(PasswordReset, { foreignKey: 'userId', as: 'passwordResets', onDelete: 'CASCADE' });
+PasswordReset.belongsTo(User, { foreignKey: 'userId', as: 'user' });
 
 User.hasMany(Product, { foreignKey: 'userId', as: 'products', onDelete: 'CASCADE' });
 Product.belongsTo(User, { foreignKey: 'userId', as: 'user' });
@@ -80,6 +88,8 @@ const db = {
   sequelize,
   User,
   LoginHistory,
+  EmailVerification,
+  PasswordReset,
   Product,
   Keyword,
   KeywordRanking,
