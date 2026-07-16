@@ -8,11 +8,11 @@ export default function Impressum() {
         <p>
           <strong>Maios – Amazon Seller Analytics</strong>
           <br />
-          AscopharmGmbH
+          [DEINE UG HIER EINTRAGEN]
           <br />
-          Musterstraße 123
+          [STRASZE UND HAUSNUMMER]
           <br />
-          12345 Berlin
+          [POSTLEITZAHL STADT]
           <br />
           Deutschland
         </p>
@@ -21,9 +21,9 @@ export default function Impressum() {
       <section style={{ marginBottom: 30 }}>
         <h2 style={{ fontSize: 18, marginBottom: 12, color: 'var(--text)' }}>Kontaktinformationen</h2>
         <p>
-          <strong>Telefon:</strong> +49 (0) 30 12345-0
+          <strong>Telefon:</strong> [DEINE TELEFONNUMMER]
           <br />
-          <strong>E-Mail:</strong> info@maios.de
+          <strong>E-Mail:</strong> [DEINE EMAIL]
           <br />
           <strong>Support:</strong> support@maios.de
         </p>
@@ -31,21 +31,29 @@ export default function Impressum() {
 
       <section style={{ marginBottom: 30 }}>
         <h2 style={{ fontSize: 18, marginBottom: 12, color: 'var(--text)' }}>Geschäftsführung</h2>
-        <p>Geschäftsführer: Oezhan Kurt</p>
+        <p>Geschäftsführer/in: [DEIN NAME]</p>
       </section>
 
       <section style={{ marginBottom: 30 }}>
         <h2 style={{ fontSize: 18, marginBottom: 12, color: 'var(--text)' }}>Handelsregister</h2>
         <p>
-          <strong>Amtsgericht:</strong> Berlin
+          <strong>Amtsgericht:</strong> [DEIN AMTSGERICHT]
           <br />
-          <strong>Handelsregister-Nr.:</strong> HRB 123456
+          <strong>Handelsregister-Nr.:</strong> [DEINE HRB NUMMER]
         </p>
       </section>
 
       <section style={{ marginBottom: 30 }}>
         <h2 style={{ fontSize: 18, marginBottom: 12, color: 'var(--text)' }}>Umsatzsteuer-Identifikationsnummer</h2>
-        <p>Umsatzsteuer-ID: DE123456789</p>
+        <p>Umsatzsteuer-ID: [DEINE USTID]</p>
+      </section>
+
+      <section style={{ marginBottom: 30 }}>
+        <h2 style={{ fontSize: 18, marginBottom: 12, color: 'var(--text)' }}>Unabhängigkeit</h2>
+        <p>
+          Maios ist ein eigenständiges Produkt und steht in keiner Verbindung zu anderen Unternehmen
+          oder Organisationen. Es wird unabhängig entwickelt und betrieben.
+        </p>
       </section>
 
       <section style={{ marginBottom: 30 }}>
