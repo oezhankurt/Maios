@@ -36,6 +36,7 @@ import EmailPreview from './pages/EmailPreview.jsx';
 import UnifiedListingCreator from './pages/UnifiedListingCreator.jsx';
 import ListingsManager from './pages/ListingsManager.jsx';
 import ListingsSchedule from './pages/ListingsSchedule.jsx';
+import ListingsAnalyticsDashboard from './pages/ListingsAnalyticsDashboard.jsx';
 
 function ProtectedRoute({ children }) {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
@@ -83,6 +84,7 @@ export default function App() {
         <Route path="/listings" element={<UnifiedListingCreator />} />
         <Route path="/listings/manager" element={<ListingsManager />} />
         <Route path="/listings/schedule" element={<ListingsSchedule />} />
+        <Route path="/listings/analytics" element={<ListingsAnalyticsDashboard />} />
         <Route path="/listings/products" element={<Listings view="products" />} />
         <Route path="/listings/score" element={<Listings view="score" />} />
         <Route path="/listings/builder" element={<ListingBuilder />} />

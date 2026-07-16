@@ -19,6 +19,7 @@ router.use('/listings/multi-platform', require('./listingsMultiPlatformRoutes'))
 router.use('/listings/bulk', require('./bulkListingsRoutes'));
 router.use('/listings/schedule', require('./listingScheduleRoutes'));
 router.use('/listings/templates', require('./listingTemplateRoutes'));
+router.use('/listings/analytics', require('./listingAnalyticsRoutes'));
 router.use('/ai/optimize', require('./aiOptimizationRoutes'));
 router.use('/listings/builder', require('./listingBuilderRoutes'));
 router.use('/listings/analyzer', require('./listingAnalyzerRoutes'));
