@@ -1,6 +1,26 @@
+import { useNavigate } from 'react-router-dom';
+
 export default function PrivacyPolicy() {
+  const navigate = useNavigate();
+
   return (
     <div style={{ padding: '20px', maxWidth: '900px', margin: '0 auto', lineHeight: 1.8 }}>
+      <button
+        onClick={() => navigate(-1)}
+        style={{
+          marginBottom: '20px',
+          padding: '8px 12px',
+          background: 'rgba(99, 102, 241, 0.1)',
+          border: '1px solid rgba(99, 102, 241, 0.3)',
+          borderRadius: '6px',
+          color: '#6366f1',
+          cursor: 'pointer',
+          fontSize: '13px',
+          fontWeight: '500',
+        }}
+      >
+        ← Zurück
+      </button>
       <h1 style={{ marginBottom: 30, fontSize: 28 }}>Datenschutzerklärung</h1>
 
       <section style={{ marginBottom: 30 }}>
