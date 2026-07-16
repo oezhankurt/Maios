@@ -129,6 +129,9 @@ export const ResearchAPI = {
   products: (filters) => unwrap(api.post('/research/products', filters || {})),
   competitors: (payload) => unwrap(api.post('/research/competitors', payload || {})),
   keywords: (filters) => unwrap(api.post('/research/keywords', filters || {})),
+  niche: (payload) => unwrap(api.post('/research/niche', payload || {})),
+  targeting: (payload) => unwrap(api.post('/research/targeting', payload || {})),
+  analytics: (payload) => unwrap(api.post('/research/analytics', payload || {})),
 };
 
 export const DashboardAPI = {

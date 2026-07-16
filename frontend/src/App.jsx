@@ -35,6 +35,9 @@ export default function App() {
         <Route path="/research" element={<ProductResearch view="products" />} />
         <Route path="/research/keywords" element={<ProductResearch view="keywords" />} />
         <Route path="/research/competitors" element={<ProductResearch view="competitors" />} />
+        <Route path="/research/niche" element={<ProductResearch view="niche" />} />
+        <Route path="/research/targeting" element={<ProductResearch view="targeting" />} />
+        <Route path="/research/analytics" element={<ProductResearch view="analytics" />} />
         <Route path="/keywords" element={<Keywords view="master" />} />
         <Route path="/keywords/rankings" element={<Keywords view="rankings" />} />
         <Route path="/ppc" element={<PPC view="overview" />} />

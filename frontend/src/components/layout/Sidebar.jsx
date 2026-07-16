@@ -10,6 +10,9 @@ const NAV = [
       { label: 'Black Box · Produkte', to: '/research' },
       { label: 'Keyword-Recherche', to: '/research/keywords' },
       { label: 'Wettbewerber', to: '/research/competitors' },
+      { label: 'Nische', to: '/research/niche' },
+      { label: 'Produkt-Targeting', to: '/research/targeting' },
+      { label: 'Elite Analytics', to: '/research/analytics' },
     ],
   },
   {
