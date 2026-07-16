@@ -4,6 +4,7 @@ const ApiError = require('../utils/ApiError');
 
 const emailAuthService = {
   async sendVerificationEmail(userId, email) {
+    const user = await User.findByPk(userId);
     const token = emailService.generateVerificationToken();
     const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24h
 
@@ -14,7 +15,7 @@ const emailAuthService = {
       expiresAt,
     });
 
-    await emailService.sendVerificationEmail(email, token);
+    await emailService.sendVerificationEmail(email, token, user?.username);
     return { success: true, message: 'Verifikations-E-Mail gesendet' };
   },
 
@@ -60,7 +61,7 @@ const emailAuthService = {
       expiresAt,
     });
 
-    await emailService.sendPasswordResetEmail(email, token);
+    await emailService.sendPasswordResetEmail(email, token, user.username);
     return { success: true, message: 'Passwort-Reset-Link gesendet' };
   },
 
