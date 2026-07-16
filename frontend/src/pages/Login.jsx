@@ -1,17 +1,26 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
+import { useToast } from '../hooks/useToast';
 
 export default function Login() {
   const navigate = useNavigate();
   const { login, loading, error } = useAuthStore();
+  const { error: showError, success: showSuccess } = useToast();
   const [email, setEmail] = useState('demo@maios.app');
   const [password, setPassword] = useState('demo1234');
+
+  useEffect(() => {
+    if (error) showError(error);
+  }, [error, showError]);
 
   const submit = async (e) => {
     e.preventDefault();
     const ok = await login(email, password);
-    if (ok) navigate('/');
+    if (ok) {
+      showSuccess('Erfolgreich angemeldet');
+      navigate('/');
+    }
   };
 
   return (
@@ -21,8 +30,6 @@ export default function Login() {
           Ma<span style={{ color: 'var(--primary)' }}>ios</span>
         </h1>
         <p className="auth-sub">Sign in to your seller dashboard</p>
-
-        {error && <div className="error-banner">{error}</div>}
 
         <form onSubmit={submit}>
           <div className="field">

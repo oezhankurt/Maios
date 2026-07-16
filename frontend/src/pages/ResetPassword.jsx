@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { api } from '../api/api';
+import { useToast } from '../hooks/useToast';
 
 export default function ResetPassword() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const { success: showSuccess, error: showError } = useToast();
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
@@ -18,17 +20,23 @@ export default function ResetPassword() {
     setError('');
 
     if (!token) {
-      setError('Kein Token vorhanden');
+      const msg = 'Kein Token vorhanden';
+      setError(msg);
+      showError(msg);
       return;
     }
 
     if (newPassword !== confirmPassword) {
-      setError('Passwörter stimmen nicht überein');
+      const msg = 'Passwörter stimmen nicht überein';
+      setError(msg);
+      showError(msg);
       return;
     }
 
     if (newPassword.length < 8) {
-      setError('Passwort muss mindestens 8 Zeichen lang sein');
+      const msg = 'Passwort muss mindestens 8 Zeichen lang sein';
+      setError(msg);
+      showError(msg);
       return;
     }
 
@@ -37,9 +45,12 @@ export default function ResetPassword() {
     try {
       const response = await api.post('/auth/reset-password', { token, newPassword });
       setMessage(response.data.message);
+      showSuccess(response.data.message);
       setTimeout(() => navigate('/login'), 2000);
     } catch (err) {
-      setError(err.response?.data?.message || 'Passwort-Reset fehlgeschlagen');
+      const msg = err.response?.data?.message || 'Passwort-Reset fehlgeschlagen';
+      setError(msg);
+      showError(msg);
     } finally {
       setLoading(false);
     }

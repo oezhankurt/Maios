@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../api/api';
+import { useToast } from '../hooks/useToast';
 
 export default function ForgotPassword() {
+  const { success: showSuccess, error: showError } = useToast();
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
@@ -17,10 +19,13 @@ export default function ForgotPassword() {
     try {
       const response = await api.post('/auth/send-password-reset', { email });
       setMessage(response.data.message);
+      showSuccess(response.data.message);
       setSubmitted(true);
       setEmail('');
     } catch (err) {
-      setError(err.response?.data?.message || 'Anfrage fehlgeschlagen');
+      const msg = err.response?.data?.message || 'Anfrage fehlgeschlagen';
+      setError(msg);
+      showError(msg);
     } finally {
       setLoading(false);
     }

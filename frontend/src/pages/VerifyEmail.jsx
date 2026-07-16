@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { api } from '../api/api';
+import { useToast } from '../hooks/useToast';
 
 export default function VerifyEmail() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const { success: showSuccess, error: showError } = useToast();
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
@@ -15,6 +17,7 @@ export default function VerifyEmail() {
 
       if (!token) {
         setError('Kein Token vorhanden');
+        showError('Kein Token vorhanden');
         setLoading(false);
         return;
       }
@@ -22,16 +25,19 @@ export default function VerifyEmail() {
       try {
         const response = await api.post('/auth/verify-email', { token });
         setMessage(response.data.message);
+        showSuccess(response.data.message);
         setTimeout(() => navigate('/login'), 2000);
       } catch (err) {
-        setError(err.response?.data?.message || 'Verifizierung fehlgeschlagen');
+        const msg = err.response?.data?.message || 'Verifizierung fehlgeschlagen';
+        setError(msg);
+        showError(msg);
       } finally {
         setLoading(false);
       }
     };
 
     verifyToken();
-  }, [searchParams, navigate]);
+  }, [searchParams, navigate, showSuccess, showError]);
 
   return (
     <div className="auth-wrap">
