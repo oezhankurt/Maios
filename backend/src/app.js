@@ -12,7 +12,30 @@ const { csrfGenerate } = require('./middleware/csrf');
 
 const app = express();
 
-app.use(helmet());
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'", "'unsafe-inline'"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        imgSrc: ["'self'", 'data:', 'https:'],
+        fontSrc: ["'self'", 'data:'],
+        connectSrc: ["'self'", process.env.CLIENT_URL || 'http://localhost:5173'],
+        frameSrc: ["'none'"],
+        objectSrc: ["'none'"],
+      },
+    },
+    hsts: {
+      maxAge: 31536000,
+      includeSubDomains: true,
+      preload: true,
+    },
+    referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
+    noSniff: true,
+    xssFilter: true,
+  })
+);
 app.use(
   cors({
     origin: config.clientUrl === '*' ? true : config.clientUrl.split(','),
