@@ -15,6 +15,7 @@ router.use('/channels', require('./channelsRoutes'));
 router.use('/research', require('./researchRoutes'));
 router.use('/cerebro', require('./cerebroRoutes'));
 router.use('/listings/multi-platform', require('./listingsMultiPlatformRoutes'));
+router.use('/ai/optimize', require('./aiOptimizationRoutes'));
 router.use('/listings/builder', require('./listingBuilderRoutes'));
 router.use('/listings/analyzer', require('./listingAnalyzerRoutes'));
 router.use('/listings/index', require('./indexCheckerRoutes'));
