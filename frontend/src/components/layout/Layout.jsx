@@ -14,7 +14,10 @@ const TITLES = {
   '/ppc/automation': 'Advertising · Automation',
   '/listings': 'Produkte & Preis',
   '/listings/score': 'Listing-Analyse',
-  '/channels': 'Kanäle & Marktplätze',
+  '/channels': 'Kanäle · Übersicht',
+  '/channels/marketplaces': 'Marktplätze',
+  '/channels/search': 'Suchmaschinen',
+  '/channels/ads': 'Advertising-Plattformen (DACH)',
   '/analytics': 'Analytics',
   '/settings': 'Settings',
 };

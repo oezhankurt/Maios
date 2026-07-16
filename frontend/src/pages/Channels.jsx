@@ -35,7 +35,14 @@ function Group({ title, subtitle, items }) {
  * Channel overview — all marketplaces, search engines and advertising
  * platforms (DACH) as categories with connection status.
  */
-export default function Channels() {
+const TITLES = {
+  overview: 'Kanäle · Übersicht',
+  marketplaces: '🛒 Marktplätze',
+  search: '🔎 Suchmaschinen',
+  ads: '🎯 Advertising-Plattformen (DACH)',
+};
+
+export default function Channels({ view = 'overview' }) {
   const [data, setData] = useState(null);
 
   useEffect(() => {
@@ -44,38 +51,69 @@ export default function Channels() {
 
   if (!data) return <Loading label="Lade Kanäle…" />;
 
+  const total = data.marketplaces.length + data.searchEngines.length + data.adPlatforms.length;
+  const infoBox = (
+    <div className="card" style={{ background: 'rgba(56,189,248,0.06)' }}>
+      <div className="text-muted" style={{ fontSize: 13 }}>
+        ℹ️ Alle Kanäle laufen aktuell im <strong>Demo-Modus</strong>. Sobald die jeweiligen
+        Schnittstellen (Amazon SP-API/Ads, Google Ads, Microsoft Ads, Kaufland, Otto …)
+        verbunden sind, fließen echte Daten je Kanal — der Aufbau ist bereits „API-ready".
+      </div>
+    </div>
+  );
+
   return (
     <div>
       <div className="page-header">
-        <h1>Kanäle & Marktplätze</h1>
-        <span className="text-muted" style={{ fontSize: 13 }}>
-          {data.marketplaces.length + data.searchEngines.length + data.adPlatforms.length} Kanäle · DACH
-        </span>
+        <h1>{TITLES[view] || 'Kanäle & Marktplätze'}</h1>
+        <span className="text-muted" style={{ fontSize: 13 }}>{total} Kanäle · DACH</span>
       </div>
 
-      <Group
-        title="🛒 Marktplätze"
-        subtitle="Vertriebskanäle — hier laufen deine Verkäufe, Rankings und Preise zusammen."
-        items={data.marketplaces}
-      />
-      <Group
-        title="🔎 Suchmaschinen"
-        subtitle="Für Off-Amazon-SEO und externe Keyword-Nachfrage."
-        items={data.searchEngines}
-      />
-      <Group
-        title="🎯 Advertising-Plattformen (DACH)"
-        subtitle="Alle Werbeplattformen — Grundlage für plattformübergreifendes Bidding & Reporting."
-        items={data.adPlatforms}
-      />
+      {view === 'overview' && (
+        <>
+          <Group
+            title="🛒 Marktplätze"
+            subtitle="Vertriebskanäle — hier laufen deine Verkäufe, Rankings und Preise zusammen."
+            items={data.marketplaces}
+          />
+          <Group
+            title="🔎 Suchmaschinen"
+            subtitle="Für Off-Amazon-SEO und externe Keyword-Nachfrage."
+            items={data.searchEngines}
+          />
+          <Group
+            title="🎯 Advertising-Plattformen (DACH)"
+            subtitle="Alle Werbeplattformen — Grundlage für plattformübergreifendes Bidding & Reporting."
+            items={data.adPlatforms}
+          />
+        </>
+      )}
 
-      <div className="card" style={{ background: 'rgba(56,189,248,0.06)' }}>
-        <div className="text-muted" style={{ fontSize: 13 }}>
-          ℹ️ Alle Kanäle laufen aktuell im <strong>Demo-Modus</strong>. Sobald die jeweiligen
-          Schnittstellen (Amazon SP-API/Ads, Google Ads, Microsoft Ads, Kaufland, Otto …)
-          verbunden sind, fließen echte Daten je Kanal — der Aufbau ist bereits „API-ready".
-        </div>
-      </div>
+      {view === 'marketplaces' && (
+        <Group
+          title="🛒 Marktplätze"
+          subtitle="Vertriebskanäle — hier laufen deine Verkäufe, Rankings und Preise zusammen."
+          items={data.marketplaces}
+        />
+      )}
+
+      {view === 'search' && (
+        <Group
+          title="🔎 Suchmaschinen"
+          subtitle="Für Off-Amazon-SEO und externe Keyword-Nachfrage."
+          items={data.searchEngines}
+        />
+      )}
+
+      {view === 'ads' && (
+        <Group
+          title="🎯 Advertising-Plattformen (DACH)"
+          subtitle="Alle Werbeplattformen — Grundlage für plattformübergreifendes Bidding & Reporting."
+          items={data.adPlatforms}
+        />
+      )}
+
+      {infoBox}
     </div>
   );
 }

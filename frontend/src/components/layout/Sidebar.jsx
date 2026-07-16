@@ -28,6 +28,9 @@ const NAV = [
   {
     label: 'Marktplätze', icon: '🌐', children: [
       { label: 'Übersicht', to: '/channels' },
+      { label: 'Marktplätze', to: '/channels/marketplaces' },
+      { label: 'Suchmaschinen', to: '/channels/search' },
+      { label: 'Advertising-Plattformen', to: '/channels/ads' },
     ],
   },
   { label: 'Analytics', icon: '📈', to: '/analytics' },

@@ -39,7 +39,10 @@ export default function App() {
         <Route path="/ppc/automation" element={<PPC view="automation" />} />
         <Route path="/listings" element={<Listings view="products" />} />
         <Route path="/listings/score" element={<Listings view="score" />} />
-        <Route path="/channels" element={<Channels />} />
+        <Route path="/channels" element={<Channels view="overview" />} />
+        <Route path="/channels/marketplaces" element={<Channels view="marketplaces" />} />
+        <Route path="/channels/search" element={<Channels view="search" />} />
+        <Route path="/channels/ads" element={<Channels view="ads" />} />
         <Route path="/analytics" element={<Analytics />} />
         <Route path="/settings" element={<Settings />} />
       </Route>
