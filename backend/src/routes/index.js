@@ -17,6 +17,7 @@ router.use('/cerebro', require('./cerebroRoutes'));
 router.use('/listings', require('./listingsMgmtRoutes'));
 router.use('/listings/multi-platform', require('./listingsMultiPlatformRoutes'));
 router.use('/listings/bulk', require('./bulkListingsRoutes'));
+router.use('/listings/schedule', require('./listingScheduleRoutes'));
 router.use('/ai/optimize', require('./aiOptimizationRoutes'));
 router.use('/listings/builder', require('./listingBuilderRoutes'));
 router.use('/listings/analyzer', require('./listingAnalyzerRoutes'));

@@ -3,6 +3,7 @@ import { api } from '../api/api';
 import { useToast } from '../hooks/useToast';
 import BulkImportCSV from '../components/BulkImportCSV';
 import BulkOperationsPanel from '../components/BulkOperationsPanel';
+import SchedulePublishModal from '../components/SchedulePublishModal';
 
 export default function ListingsManager() {
   const { success: showSuccess, error: showError } = useToast();
@@ -12,6 +13,7 @@ export default function ListingsManager() {
   const [selectedListing, setSelectedListing] = useState(null);
   const [selectedListings, setSelectedListings] = useState([]);
   const [showImportModal, setShowImportModal] = useState(false);
+  const [showScheduleModal, setShowScheduleModal] = useState(false);
 
   useEffect(() => {
     loadListings();
@@ -343,7 +345,7 @@ export default function ListingsManager() {
             <h4 style={{ margin: '0 0 10px 0', fontSize: '13px', color: '#93c5fd' }}>
               Zu Plattformen veröffentlichen:
             </h4>
-            <div style={{ display: 'flex', gap: '10px' }}>
+            <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
               {['amazon', 'ebay', 'kaufland', 'otto'].map((platform) => (
                 <button
                   key={platform}
@@ -362,6 +364,21 @@ export default function ListingsManager() {
                   {platform.charAt(0).toUpperCase() + platform.slice(1)}
                 </button>
               ))}
+              <button
+                onClick={() => setShowScheduleModal(true)}
+                style={{
+                  padding: '8px 16px',
+                  background: '#60a5fa',
+                  border: 'none',
+                  borderRadius: '4px',
+                  color: '#fff',
+                  cursor: 'pointer',
+                  fontSize: '12px',
+                  fontWeight: '500',
+                }}
+              >
+                ⏰ Planen
+              </button>
             </div>
           </div>
         </div>
@@ -372,6 +389,18 @@ export default function ListingsManager() {
         <BulkImportCSV
           onImportSuccess={handleImportSuccess}
           onClose={() => setShowImportModal(false)}
+        />
+      )}
+
+      {/* Schedule Modal */}
+      {showScheduleModal && selectedListing && (
+        <SchedulePublishModal
+          listing={selectedListing}
+          onClose={() => setShowScheduleModal(false)}
+          onSuccess={() => {
+            setShowScheduleModal(false);
+            loadListings();
+          }}
         />
       )}
 
