@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import Sidebar from './Sidebar.jsx';
 import Header from './Header.jsx';
+import Footer from './Footer.jsx';
 import { useAuthStore } from '../../store/authStore';
 
 const TITLES = {
@@ -55,14 +56,17 @@ export default function Layout() {
   const title = TITLES[location.pathname] || 'Maios';
 
   return (
-    <div className="app-shell">
-      <Sidebar open={sidebarOpen} onNavigate={() => setSidebarOpen(false)} />
-      <div className="main">
-        <Header title={title} onToggleSidebar={() => setSidebarOpen((v) => !v)} />
-        <div className="content">
-          <Outlet />
+    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+      <div className="app-shell" style={{ flex: 1, display: 'flex' }}>
+        <Sidebar open={sidebarOpen} onNavigate={() => setSidebarOpen(false)} />
+        <div className="main">
+          <Header title={title} onToggleSidebar={() => setSidebarOpen((v) => !v)} />
+          <div className="content">
+            <Outlet />
+          </div>
         </div>
       </div>
+      <Footer />
     </div>
   );
 }

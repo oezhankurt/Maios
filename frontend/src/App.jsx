@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuthStore } from './store/authStore';
 import Layout from './components/layout/Layout.jsx';
+import PublicLayout from './components/layout/PublicLayout.jsx';
 import Login from './pages/Login.jsx';
 import Register from './pages/Register.jsx';
 import Dashboard from './pages/Dashboard.jsx';
@@ -34,12 +35,12 @@ function ProtectedRoute({ children }) {
 export default function App() {
   return (
     <Routes>
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
-      <Route path="/faq" element={<FAQ />} />
-      <Route path="/impressum" element={<Impressum />} />
-      <Route path="/privacy" element={<PrivacyPolicy />} />
-      <Route path="/terms" element={<Terms />} />
+      <Route path="/login" element={<PublicLayout><Login /></PublicLayout>} />
+      <Route path="/register" element={<PublicLayout><Register /></PublicLayout>} />
+      <Route path="/faq" element={<PublicLayout><FAQ /></PublicLayout>} />
+      <Route path="/impressum" element={<PublicLayout><Impressum /></PublicLayout>} />
+      <Route path="/privacy" element={<PublicLayout><PrivacyPolicy /></PublicLayout>} />
+      <Route path="/terms" element={<PublicLayout><Terms /></PublicLayout>} />
 
       <Route
         element={
