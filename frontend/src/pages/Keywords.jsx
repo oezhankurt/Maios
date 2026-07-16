@@ -7,7 +7,7 @@ import RankingTracker from '../components/keywords/RankingTracker.jsx';
 import RankingTrend from '../components/keywords/RankingTrend.jsx';
 import Loading from '../components/layout/Loading.jsx';
 
-export default function Keywords() {
+export default function Keywords({ view = 'master' }) {
   const { selectedProduct, setSelectedProduct, marketplace, setMarketplace } = useFilterStore();
   const [products, setProducts] = useState([]);
   const [keywords, setKeywords] = useState([]);
@@ -64,7 +64,7 @@ export default function Keywords() {
   return (
     <div>
       <div className="page-header">
-        <h1>Keywords</h1>
+        <h1>{view === 'rankings' ? 'Ranking Tracker' : 'Keyword Master'}</h1>
         <ProductPicker products={products} value={selectedProduct} onChange={setSelectedProduct} />
       </div>
 
@@ -72,17 +72,21 @@ export default function Keywords() {
         <div className="card empty">Create a product first to research and track keywords.</div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-          <KeywordMaster product={product} onSelectKeyword={setSelectedKeyword} />
+          {view === 'master' && (
+            <KeywordMaster product={product} onSelectKeyword={setSelectedKeyword} />
+          )}
 
-          <div className="grid" style={{ gridTemplateColumns: '3fr 2fr' }}>
-            <RankingTracker
-              rankings={rankings}
-              marketplace={marketplace}
-              onMarketplaceChange={setMarketplace}
-              onSelectKeyword={setSelectedKeyword}
-            />
-            <RankingTrend keywordId={selectedKeyword} marketplace={marketplace} />
-          </div>
+          {view === 'rankings' && (
+            <div className="grid" style={{ gridTemplateColumns: '3fr 2fr' }}>
+              <RankingTracker
+                rankings={rankings}
+                marketplace={marketplace}
+                onMarketplaceChange={setMarketplace}
+                onSelectKeyword={setSelectedKeyword}
+              />
+              <RankingTrend keywordId={selectedKeyword} marketplace={marketplace} />
+            </div>
+          )}
         </div>
       )}
     </div>

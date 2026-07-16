@@ -31,9 +31,14 @@ export default function App() {
         }
       >
         <Route path="/" element={<Dashboard />} />
-        <Route path="/keywords" element={<Keywords />} />
-        <Route path="/ppc" element={<PPC />} />
-        <Route path="/listings" element={<Listings />} />
+        <Route path="/keywords" element={<Keywords view="master" />} />
+        <Route path="/keywords/rankings" element={<Keywords view="rankings" />} />
+        <Route path="/ppc" element={<PPC view="overview" />} />
+        <Route path="/ppc/campaigns" element={<PPC view="campaigns" />} />
+        <Route path="/ppc/portfolios" element={<PPC view="portfolios" />} />
+        <Route path="/ppc/automation" element={<PPC view="automation" />} />
+        <Route path="/listings" element={<Listings view="products" />} />
+        <Route path="/listings/score" element={<Listings view="score" />} />
         <Route path="/channels" element={<Channels />} />
         <Route path="/analytics" element={<Analytics />} />
         <Route path="/settings" element={<Settings />} />

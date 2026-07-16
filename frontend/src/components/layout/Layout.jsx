@@ -6,9 +6,14 @@ import { useAuthStore } from '../../store/authStore';
 
 const TITLES = {
   '/': 'Dashboard',
-  '/keywords': 'Keyword Research & Tracking',
-  '/ppc': 'PPC Campaign Management',
-  '/listings': 'Multi-Channel Listings',
+  '/keywords': 'Keyword Master',
+  '/keywords/rankings': 'Ranking Tracker',
+  '/ppc': 'Advertising · Zeitvergleich',
+  '/ppc/campaigns': 'Advertising · Kampagnen',
+  '/ppc/portfolios': 'Advertising · Smart Portfolios',
+  '/ppc/automation': 'Advertising · Automation',
+  '/listings': 'Produkte & Preis',
+  '/listings/score': 'Listing-Analyse',
   '/channels': 'Kanäle & Marktplätze',
   '/analytics': 'Analytics',
   '/settings': 'Settings',

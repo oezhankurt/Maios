@@ -10,7 +10,7 @@ import Loading from '../components/layout/Loading.jsx';
 
 const EMPTY = { title: '', asin: '', ean: '', category: '', price: 0, costPerUnit: 0, status: 'active' };
 
-export default function Listings() {
+export default function Listings({ view = 'products' }) {
   const [products, setProducts] = useState([]);
   const [selected, setSelected] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -83,7 +83,7 @@ export default function Listings() {
   return (
     <div>
       <div className="page-header">
-        <h1>Listings</h1>
+        <h1>{view === 'score' ? 'Listing-Analyse' : 'Produkte & Preis'}</h1>
         <button className="btn btn-primary" onClick={openCreate}>
           + Add Product
         </button>
@@ -99,22 +99,21 @@ export default function Listings() {
         />
       </div>
 
-      {selected && (
-        <>
-          <div style={{ marginBottom: 20 }}>
-            <ListingAnalysis product={selected} />
+      {selected && view === 'score' && (
+        <ListingAnalysis product={selected} />
+      )}
+
+      {selected && view === 'products' && (
+        <div className="grid" style={{ gridTemplateColumns: '1fr 1fr' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+            <PriceOptimizer product={selected} onApply={load} />
+            <StockSync product={selected} />
           </div>
-          <div className="grid" style={{ gridTemplateColumns: '1fr 1fr' }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-              <PriceOptimizer product={selected} onApply={load} />
-              <StockSync product={selected} />
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-              <CompetitorComparison product={selected} />
-              <ChangeHistory product={selected} refreshKey={selected.updatedAt} />
-            </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+            <CompetitorComparison product={selected} />
+            <ChangeHistory product={selected} refreshKey={selected.updatedAt} />
           </div>
-        </>
+        </div>
       )}
 
       {showModal && (

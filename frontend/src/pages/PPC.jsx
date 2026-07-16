@@ -10,7 +10,14 @@ import Loading from '../components/layout/Loading.jsx';
 
 const EMPTY = { productId: '', campaignName: '', campaignType: 'sp', adPlatform: 'amazon_ads', dailyBudget: 20, targetAcos: 25 };
 
-export default function PPC() {
+const TITLES = {
+  overview: 'Advertising · Zeitvergleich',
+  campaigns: 'Kampagnen',
+  portfolios: 'Smart Portfolios',
+  automation: 'Automation Rules',
+};
+
+export default function PPC({ view = 'overview' }) {
   const [products, setProducts] = useState([]);
   const [campaigns, setCampaigns] = useState([]);
   const [portfolios, setPortfolios] = useState([]);
@@ -63,28 +70,37 @@ export default function PPC() {
   return (
     <div>
       <div className="page-header">
-        <h1>PPC Campaigns</h1>
-        <button className="btn btn-primary" onClick={() => setShowModal(true)}>
-          + New Campaign
-        </button>
+        <h1>{TITLES[view] || 'Advertising'}</h1>
+        {view === 'campaigns' && (
+          <button className="btn btn-primary" onClick={() => setShowModal(true)}>
+            + New Campaign
+          </button>
+        )}
       </div>
 
-      <PPCKpis />
+      {view === 'overview' && <PPCKpis />}
 
-      <div className="grid" style={{ gridTemplateColumns: '1fr 1fr', marginBottom: 20 }}>
+      {view === 'portfolios' && (
         <SmartPortfolios portfolios={portfolios} onChange={load} />
+      )}
+
+      {view === 'automation' && (
         <AutomationRules rules={rules} portfolios={portfolios} onChange={load} />
-      </div>
+      )}
 
-      <div style={{ marginBottom: 20 }}>
-        <CampaignList campaigns={campaigns} selectedId={selected?.id} onSelect={setSelected} />
-      </div>
+      {view === 'campaigns' && (
+        <>
+          <div style={{ marginBottom: 20 }}>
+            <CampaignList campaigns={campaigns} selectedId={selected?.id} onSelect={setSelected} />
+          </div>
 
-      {selected && (
-        <div className="grid" style={{ gridTemplateColumns: '1fr 2fr' }}>
-          <BidOptimizer campaign={selected} onOptimized={load} />
-          <PerformanceMetrics campaign={selected} />
-        </div>
+          {selected && (
+            <div className="grid" style={{ gridTemplateColumns: '1fr 2fr' }}>
+              <BidOptimizer campaign={selected} onOptimized={load} />
+              <PerformanceMetrics campaign={selected} />
+            </div>
+          )}
+        </>
       )}
 
       {showModal && (
