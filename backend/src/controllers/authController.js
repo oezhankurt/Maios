@@ -4,6 +4,7 @@ const asyncHandler = require('../utils/asyncHandler');
 const ApiError = require('../utils/ApiError');
 const amazonService = require('../services/amazonService');
 const authService = require('../services/authService');
+const { validatePassword } = require('../utils/passwordValidator');
 
 function publicUser(user) {
   const json = user.toJSON();
@@ -16,11 +17,18 @@ function publicUser(user) {
 const register = asyncHandler(async (req, res) => {
   const { email, password, username, timezone, language, currency } = req.body;
 
+  const pwValidation = validatePassword(password);
+  if (!pwValidation.isValid) {
+    throw ApiError.badRequest(pwValidation.errors.join('. '));
+  }
+
   const existing = await User.findOne({ where: { email } });
   if (existing) throw ApiError.conflict('Email already registered');
 
   const passwordHash = await User.hashPassword(password);
   const user = await User.create({ email, passwordHash, username, timezone, language, currency });
+
+  await authService.logLoginEvent(user.id, req);
 
   const token = signToken({ sub: user.id, email: user.email });
   res.status(201).json({ success: true, data: { user: publicUser(user), token } });

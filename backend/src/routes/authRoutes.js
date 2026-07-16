@@ -1,13 +1,24 @@
 const express = require('express');
 const { body } = require('express-validator');
+const rateLimit = require('express-rate-limit');
 const authController = require('../controllers/authController');
 const { authenticate } = require('../middleware/auth');
 const { validate } = require('../middleware/validator');
 
 const router = express.Router();
 
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: 'Zu viele Versuche. Bitte versuchen Sie es später erneut.',
+  skipSuccessfulRequests: true,
+});
+
 router.post(
   '/register',
+  authLimiter,
   [
     body('email').isEmail().withMessage('Valid email required'),
     body('password').isLength({ min: 8 }).withMessage('Password must be at least 8 characters'),
@@ -19,6 +30,7 @@ router.post(
 
 router.post(
   '/login',
+  authLimiter,
   [body('email').isEmail(), body('password').notEmpty()],
   validate,
   authController.login

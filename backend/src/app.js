@@ -49,6 +49,16 @@ app.use(cookieParser());
 app.use(requestLogger);
 app.use(csrfGenerate);
 
+// Strict rate limiting for auth endpoints (5 attempts per 15 minutes per IP)
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: 'Zu viele Login-Versuche. Bitte versuchen Sie es später erneut.',
+  skipSuccessfulRequests: true,
+});
+
 // Basic rate limiting on the API surface.
 app.use(
   '/api',
