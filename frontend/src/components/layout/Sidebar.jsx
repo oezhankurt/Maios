@@ -6,38 +6,24 @@ import { NavLink, useLocation } from 'react-router-dom';
 const NAV = [
   { label: 'Dashboard', icon: '📊', to: '/' },
   {
-    label: 'Marktplätze', icon: '🌐', children: [
-      { label: 'Übersicht', to: '/channels' },
-      { label: 'Marktplätze', to: '/channels/marketplaces' },
-      { label: 'Suchmaschinen', to: '/channels/search' },
-      { label: 'Advertising-Plattformen', to: '/channels/ads' },
-      { label: 'PPC Zeitvergleich', to: '/ppc' },
-      { label: 'Kampagnen', to: '/ppc/campaigns' },
-      { label: 'Smart Portfolios', to: '/ppc/portfolios' },
-      { label: 'Automation', to: '/ppc/automation' },
-      { label: 'Google Ads', to: '/google-ads' },
-      { label: 'Bing Ads', to: '/bing-ads' },
-    ],
-  },
-  {
-    label: 'Listings', icon: '📦', children: [
-      { label: 'Produkte & Preis', to: '/listings' },
-      { label: 'Listing-Analyse', to: '/listings/score' },
-      { label: 'Listing Builder', to: '/listings/builder' },
+    label: 'Amazon', icon: '🚀', children: [
+      { label: 'Listings Manager', to: '/listings' },
+      { label: 'Listing Builder Pro', to: '/listings/amazon-builder' },
       { label: 'Listing Analyzer', to: '/listings/analyzer' },
+      { label: 'Listing-Analyse', to: '/listings/score' },
       { label: 'Index Checker', to: '/listings/index' },
       { label: 'Scribbles', to: '/listings/scribbles' },
-    ],
-  },
-  { label: 'Pricing', icon: '💰', to: '/pricing' },
-  { label: 'Analytics', icon: '📈', to: '/analytics' },
-  {
-    label: 'Keywords', icon: '🔑', children: [
-      { label: 'Keyword Master', to: '/keywords' },
+      { label: 'Repricing', to: '/pricing' },
+      { label: 'Keywords', to: '/keywords' },
       { label: 'Cerebro · Reverse-ASIN', to: '/keywords/cerebro' },
       { label: 'Rankings', to: '/keywords/rankings' },
+      { label: 'PPC Kampagnen', to: '/ppc' },
+      { label: 'Smart Portfolios', to: '/ppc/portfolios' },
+      { label: 'Automation', to: '/ppc/automation' },
     ],
   },
+  { label: 'Google Ads', icon: '📱', to: '/google-ads' },
+  { label: 'Bing Ads', icon: '🔷', to: '/bing-ads' },
   {
     label: 'Produktrecherche', icon: '🔍', children: [
       { label: 'Black Box · Produkte', to: '/research' },
@@ -48,6 +34,7 @@ const NAV = [
       { label: 'Elite Analytics', to: '/research/analytics' },
     ],
   },
+  { label: 'Analytics', icon: '📈', to: '/analytics' },
   { label: 'Audience', icon: '👥', to: '/audience' },
   {
     label: 'Einstellungen', icon: '⚙️', children: [
