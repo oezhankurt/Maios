@@ -39,6 +39,7 @@ import UnifiedListingCreator from './pages/UnifiedListingCreator.jsx';
 import ListingsManager from './pages/ListingsManager.jsx';
 import ListingsSchedule from './pages/ListingsSchedule.jsx';
 import ListingsAnalyticsDashboard from './pages/ListingsAnalyticsDashboard.jsx';
+import Pricing from './pages/Pricing.jsx';
 
 function ProtectedRoute({ children }) {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
@@ -114,6 +115,7 @@ export default function App() {
         <Route path="/bing-ads/performance" element={<BingAds view="performance" />} />
         <Route path="/analytics" element={<Analytics />} />
         <Route path="/audience" element={<Audience />} />
+        <Route path="/pricing" element={<Pricing />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="/settings/2fa" element={<TwoFactorSettings />} />
         <Route path="/login-history" element={<LoginHistory />} />

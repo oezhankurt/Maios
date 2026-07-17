@@ -52,6 +52,7 @@ const NAV = [
   },
   { label: 'Analytics', icon: '📈', to: '/analytics' },
   { label: 'Audience', icon: '👥', to: '/audience' },
+  { label: 'Pricing', icon: '💰', to: '/pricing' },
   { label: 'Login Verlauf', icon: '📋', to: '/login-history' },
   { label: 'Einstellungen', icon: '⚙️', to: '/settings' },
 ];
