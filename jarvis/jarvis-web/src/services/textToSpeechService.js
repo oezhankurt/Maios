@@ -16,9 +16,21 @@ class TextToSpeechService {
     this.currentUtterance = null
     this.voices = []
     this.germanVoice = null
+    this.audioContext = null
+    this.analyser = null
 
     this.loadVoices()
     this.synth.onvoiceschanged = () => this.loadVoices()
+    this.initAudioContext()
+  }
+
+  initAudioContext() {
+    try {
+      const AudioContext = window.AudioContext || window.webkitAudioContext
+      this.audioContext = new AudioContext()
+    } catch (e) {
+      console.warn('AudioContext not available for effects')
+    }
   }
 
   loadVoices() {

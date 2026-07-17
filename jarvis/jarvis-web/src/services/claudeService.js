@@ -2,7 +2,7 @@ export class ClaudeService {
   constructor(apiKey = '') {
     this.apiKey = apiKey || import.meta.env.VITE_CLAUDE_API_KEY
     this.apiBase = 'https://api.anthropic.com'
-    this.model = 'claude-opus-4-1'
+    this.model = 'claude-opus-4-8'
     this.conversationHistory = []
     this.systemPrompt = this.getDefaultSystemPrompt()
   }
