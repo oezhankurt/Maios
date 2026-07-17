@@ -65,7 +65,22 @@ ipcMain.handle('get-config', async () => {
   return {
     appVersion: app.getVersion(),
     isPackaged: app.isPackaged,
+    platform: process.platform,
   }
+})
+
+ipcMain.on('minimize-window', () => {
+  if (mainWindow) mainWindow.minimize()
+})
+
+ipcMain.on('maximize-window', () => {
+  if (mainWindow) {
+    mainWindow.isMaximized() ? mainWindow.unmaximize() : mainWindow.maximize()
+  }
+})
+
+ipcMain.on('close-window', () => {
+  if (mainWindow) mainWindow.close()
 })
 
 function createApplicationMenu() {
