@@ -70,6 +70,26 @@ export default function AmazonListingBuilder() {
     }
   };
 
+  const calculateFieldScore = (field, value, maxLength, minLength = 0) => {
+    let score = 100;
+    if (!value || value.length === 0) {
+      return { score: 0, status: 'empty', message: 'Erforderlich' };
+    }
+    if (value.length < minLength) {
+      score -= 30;
+      return { score, status: 'warning', message: `Zu kurz (min. ${minLength})` };
+    }
+    if (value.length > maxLength) {
+      score -= 20;
+      return { score, status: 'error', message: `Zu lang (max. ${maxLength})` };
+    }
+    if (value.length < maxLength * 0.5) {
+      score -= 10;
+      return { score, status: 'info', message: `${maxLength - value.length} Zeichen frei` };
+    }
+    return { score, status: 'good', message: `${maxLength - value.length} Zeichen frei` };
+  };
+
   const generateAIAnalysis = (listingData) => {
     const issues = [];
     const suggestions = [];
@@ -157,6 +177,25 @@ export default function AmazonListingBuilder() {
     }));
   };
 
+  const FieldScore = ({ value, maxLength, minLength = 0 }) => {
+    const fieldScore = calculateFieldScore('field', value, maxLength, minLength);
+    const percentage = (value.length / maxLength) * 100;
+    return (
+      <div className="field-score-container">
+        <div className="field-score-info">
+          <span className="char-info">{value.length}/{maxLength}</span>
+          <span className={`seo-score status-${fieldScore.status}`}>{fieldScore.message}</span>
+        </div>
+        <div className="score-bar">
+          <div
+            className={`score-fill status-${fieldScore.status}`}
+            style={{ width: `${Math.min(percentage, 100)}%` }}
+          ></div>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="listing-builder-container">
       <div className="builder-header">
@@ -219,7 +258,7 @@ export default function AmazonListingBuilder() {
                     value={listing.title}
                     onChange={(e) => updateField('title', e.target.value)}
                   />
-                  <div className="char-info">{listing.title.length}/200</div>
+                  <FieldScore value={listing.title} maxLength={200} minLength={20} />
                 </div>
 
                 <div className="form-2col">
@@ -284,14 +323,16 @@ export default function AmazonListingBuilder() {
                     {listing.bulletPoints.map((bp, i) => (
                       <div key={i} className="bullet-input-group">
                         <span className="bullet-num">{i + 1}.</span>
-                        <textarea
-                          rows={2}
-                          maxLength={500}
-                          placeholder={`Wichtiges Merkmal oder Vorteil ${i + 1}`}
-                          value={bp}
-                          onChange={(e) => updateBulletPoint(i, e.target.value)}
-                        />
-                        <div className="char-info-small">{bp.length}/500</div>
+                        <div style={{ flex: 1 }}>
+                          <textarea
+                            rows={2}
+                            maxLength={500}
+                            placeholder={`Wichtiges Merkmal oder Vorteil ${i + 1}`}
+                            value={bp}
+                            onChange={(e) => updateBulletPoint(i, e.target.value)}
+                          />
+                          <FieldScore value={bp} maxLength={500} />
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -316,7 +357,7 @@ export default function AmazonListingBuilder() {
                     value={listing.description}
                     onChange={(e) => updateField('description', e.target.value)}
                   />
-                  <div className="char-info">{listing.description.length}/2000</div>
+                  <FieldScore value={listing.description} maxLength={2000} />
                 </div>
               </div>
             )}
