@@ -14,8 +14,9 @@ const api = axios.create({
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('maios_token');
   if (token) config.headers.Authorization = `Bearer ${token}`;
-  // Add CSRF token for state-changing requests
-  setCSRFHeader(config);
+  // Add CSRF token from localStorage for state-changing requests
+  const csrfToken = localStorage.getItem('maios_csrf_token');
+  if (csrfToken) config.headers['x-csrf-token'] = csrfToken;
   return config;
 });
 

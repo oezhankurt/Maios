@@ -5,6 +5,7 @@ const CSRF_COOKIE_NAME = 'x-csrf-token';
 
 const csrfGenerate = (req, res, next) => {
   const token = generateCSRFToken();
+  res.set('X-CSRF-Token', token);
   res.cookie(CSRF_COOKIE_NAME, token, {
     httpOnly: false,
     secure: true,
@@ -17,16 +18,18 @@ const csrfGenerate = (req, res, next) => {
 
 const csrfValidate = (req, res, next) => {
   const headerToken = req.get(CSRF_TOKEN_HEADER);
-  const cookieToken = req.cookies?.[CSRF_COOKIE_NAME];
 
-  if (!headerToken || !cookieToken) {
+  if (!headerToken) {
     return next(ApiError.badRequest('CSRF token missing'));
   }
 
   try {
-    const isValid = validateCSRFToken(headerToken, cookieToken);
-    if (!isValid) {
-      return next(ApiError.badRequest('CSRF token invalid'));
+    const cookieToken = req.cookies?.[CSRF_COOKIE_NAME];
+    if (cookieToken) {
+      const isValid = validateCSRFToken(headerToken, cookieToken);
+      if (!isValid) {
+        return next(ApiError.badRequest('CSRF token invalid'));
+      }
     }
     next();
   } catch (err) {

@@ -13,6 +13,9 @@ export default function Login() {
   useEffect(() => {
     fetch('https://maios-production.up.railway.app/api/health', {
       credentials: 'include',
+    }).then((res) => {
+      const token = res.headers.get('X-CSRF-Token');
+      if (token) localStorage.setItem('maios_csrf_token', token);
     }).catch(() => {});
   }, []);
 
