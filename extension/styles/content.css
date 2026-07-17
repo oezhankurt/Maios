@@ -1,0 +1,229 @@
+#maios-sidebar {
+  position: fixed;
+  right: 0;
+  top: 0;
+  width: 380px;
+  height: 100vh;
+  background: white;
+  box-shadow: -2px 0 12px rgba(0, 0, 0, 0.15);
+  z-index: 999999;
+  overflow-y: auto;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: #333;
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.maios-sidebar-content {
+  padding: 0;
+}
+
+.maios-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+  border-bottom: 1px solid #e8e8e8;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  font-weight: 600;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.maios-logo {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+.maios-close {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+  width: 32px;
+  height: 32px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+
+.maios-close:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.maios-loading,
+.maios-error {
+  padding: 32px 16px;
+  text-align: center;
+}
+
+.maios-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.maios-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid #f0f0f0;
+  border-top: 3px solid #667eea;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.maios-loading p {
+  font-size: 14px;
+  color: #666;
+}
+
+.maios-error {
+  background: #ffebee;
+  color: #c62828;
+  border-left: 4px solid #f44336;
+  font-size: 14px;
+}
+
+.maios-data {
+  padding: 16px;
+}
+
+.maios-section {
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.maios-section:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+.maios-section h3 {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 4px;
+  color: #1a1a1a;
+}
+
+.maios-section h4 {
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #667eea;
+  margin-bottom: 12px;
+}
+
+.maios-sku {
+  font-size: 12px;
+  color: #999;
+  font-family: 'Courier New', monospace;
+}
+
+.maios-stat {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  font-size: 14px;
+  border-bottom: 1px solid #f5f5f5;
+}
+
+.maios-stat .label {
+  color: #666;
+  font-weight: 500;
+}
+
+.maios-stat .value {
+  color: #1a1a1a;
+  font-weight: 600;
+}
+
+.maios-competitors {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.maios-competitor {
+  background: #f9f9f9;
+  border: 1px solid #e8e8e8;
+  border-radius: 6px;
+  padding: 10px;
+}
+
+.comp-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 4px;
+}
+
+.comp-price {
+  font-size: 14px;
+  font-weight: 600;
+  color: #667eea;
+}
+
+.maios-footer {
+  text-align: center;
+  border: none;
+}
+
+.maios-link {
+  display: inline-block;
+  padding: 10px 16px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  text-decoration: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.maios-link:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+/* Scrollbar Styling */
+#maios-sidebar::-webkit-scrollbar {
+  width: 6px;
+}
+
+#maios-sidebar::-webkit-scrollbar-track {
+  background: #f0f0f0;
+}
+
+#maios-sidebar::-webkit-scrollbar-thumb {
+  background: #ddd;
+  border-radius: 3px;
+}
+
+#maios-sidebar::-webkit-scrollbar-thumb:hover {
+  background: #bbb;
+}
