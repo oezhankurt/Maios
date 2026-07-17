@@ -1,49 +1,43 @@
-import { useState, useRef, useEffect } from 'react'
 import './JarvisVoiceChat.css'
+import { useSpeech } from '../hooks/useSpeech'
+import { useState } from 'react'
 
 export default function JarvisVoiceChat() {
-  const [isListening, setIsListening] = useState(false)
-  const [transcript, setTranscript] = useState('')
   const [messages, setMessages] = useState([])
-  const recognitionRef = useRef(null)
-
-  useEffect(() => {
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
-    if (!SpeechRecognition) {
-      console.error('Speech Recognition not supported in this browser')
-      return
-    }
-
-    recognitionRef.current = new SpeechRecognition()
-    recognitionRef.current.lang = 'de-DE'
-    recognitionRef.current.continuous = false
-    recognitionRef.current.interimResults = true
-
-    recognitionRef.current.onstart = () => setIsListening(true)
-    recognitionRef.current.onend = () => setIsListening(false)
-    recognitionRef.current.onerror = (e) => console.error('Speech error:', e)
-
-    recognitionRef.current.onresult = (event) => {
-      let interim = ''
-      for (let i = event.resultIndex; i < event.results.length; i++) {
-        const transcriptPart = event.results[i][0].transcript
-        if (event.results[i].isFinal) {
-          setTranscript(prev => prev + transcriptPart)
-        } else {
-          interim += transcriptPart
-        }
-      }
-      if (interim) setTranscript(prev => prev.split('\n')[0] + '\n' + interim)
-    }
-  }, [])
+  const { isListening, transcript, isSpeaking, error, isSupported, startListening, stopListening, speak } = useSpeech()
 
   const toggleListening = () => {
     if (isListening) {
-      recognitionRef.current?.stop()
+      stopListening()
     } else {
-      setTranscript('')
-      recognitionRef.current?.start()
+      startListening()
     }
+  }
+
+  const handleSendMessage = () => {
+    if (transcript.trim()) {
+      const userMessage = { role: 'user', content: transcript }
+      setMessages(prev => [...prev, userMessage])
+
+      speak(`Du hast gesagt: ${transcript}. Das wird bald zu Claude weitergeleitet.`)
+    }
+  }
+
+  if (!isSupported) {
+    return (
+      <div className="jarvis-container">
+        <div className="jarvis-header">
+          <div className="jarvis-logo">❌</div>
+          <h1>Jarvis</h1>
+          <p>Speech-APIs nicht unterstützt</p>
+        </div>
+        <div className="chat-area">
+          <div className="empty-state">
+            <p>Dein Browser unterstützt Speech Recognition oder Text-to-Speech nicht. Versuche einen anderen Browser wie Chrome, Edge oder Safari.</p>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -53,6 +47,8 @@ export default function JarvisVoiceChat() {
         <h1>Jarvis</h1>
         <p>Dein Voice Assistant für Claude</p>
       </div>
+
+      {error && <div className="error-banner">{error}</div>}
 
       <div className="chat-area">
         <div className="messages">
@@ -73,16 +69,30 @@ export default function JarvisVoiceChat() {
             <p>{transcript}</p>
           </div>
         )}
+
+        {isSpeaking && (
+          <div className="speaking-indicator">
+            <span className="dot"></span>
+            <span className="dot"></span>
+            <span className="dot"></span>
+          </div>
+        )}
       </div>
 
       <div className="controls">
         <button
-          className={`voice-button ${isListening ? 'listening' : ''}`}
+          className={`voice-button ${isListening ? 'listening' : ''} ${isSpeaking ? 'speaking' : ''}`}
           onClick={toggleListening}
+          disabled={isSpeaking}
           title={isListening ? 'Stopp' : 'Recording starten'}
         >
           {isListening ? '🔴 Listening...' : '🎤 Speak'}
         </button>
+        {transcript && (
+          <button className="send-button" onClick={handleSendMessage} disabled={isListening}>
+            Senden ↩️
+          </button>
+        )}
       </div>
     </div>
   )
