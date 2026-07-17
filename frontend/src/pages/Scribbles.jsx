@@ -1,106 +1,171 @@
-import { useState } from 'react';
-import { ScribbleAPI } from '../api/api';
-import Loading from '../components/layout/Loading.jsx';
-import ScribbleEditor from '../components/listings/ScribbleEditor.jsx';
+import { useState, useEffect } from 'react';
+import { useToast } from '../hooks/useToast';
+import '../pages/Scribbles.css';
 
 export default function Scribbles() {
-  const [asin, setAsin] = useState('');
-  const [keywords, setKeywords] = useState('');
-  const [selectedField, setSelectedField] = useState('title');
-  const [suggestions, setSuggestions] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [notes, setNotes] = useState(() => {
+    const saved = localStorage.getItem('scribbles-notes');
+    return saved ? JSON.parse(saved) : [];
+  });
+  const [asinInput, setAsinInput] = useState('');
+  const [noteInput, setNoteInput] = useState('');
+  const [editingId, setEditingId] = useState(null);
+  const [editText, setEditText] = useState('');
+  const { success: showSuccess } = useToast();
 
-  const generateSuggestions = async () => {
-    if (!asin.trim() || !keywords.trim()) return;
+  useEffect(() => {
+    localStorage.setItem('scribbles-notes', JSON.stringify(notes));
+  }, [notes]);
 
-    setLoading(true);
-    try {
-      const keywordList = keywords
-        .split(/[,;\n]+/)
-        .map((k) => k.trim())
-        .filter(Boolean);
+  const addNote = () => {
+    if (!asinInput.trim() || !noteInput.trim()) return;
 
-      let result;
-      if (selectedField === 'title') {
-        result = await ScribbleAPI.optimizeTitle({ asin: asin.trim(), keywords: keywordList });
-      } else if (selectedField === 'bullets') {
-        result = await ScribbleAPI.optimizeBullets({ asin: asin.trim(), keywords: keywordList });
-      } else if (selectedField === 'description') {
-        result = await ScribbleAPI.optimizeDescription({ asin: asin.trim(), keywords: keywordList });
-      }
+    const newNote = {
+      id: Date.now(),
+      asin: asinInput.toUpperCase().trim(),
+      note: noteInput.trim(),
+      favorite: false,
+      createdAt: new Date().toLocaleDateString('de-DE'),
+    };
 
-      setSuggestions(result);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
+    setNotes([newNote, ...notes]);
+    setAsinInput('');
+    setNoteInput('');
+    showSuccess('Notiz hinzugefügt!');
   };
 
+  const deleteNote = (id) => {
+    setNotes(notes.filter(n => n.id !== id));
+  };
+
+  const toggleFavorite = (id) => {
+    setNotes(notes.map(n =>
+      n.id === id ? { ...n, favorite: !n.favorite } : n
+    ));
+  };
+
+  const startEdit = (note) => {
+    setEditingId(note.id);
+    setEditText(note.note);
+  };
+
+  const saveEdit = (id) => {
+    setNotes(notes.map(n =>
+      n.id === id ? { ...n, note: editText.trim() } : n
+    ));
+    setEditingId(null);
+    showSuccess('Notiz aktualisiert!');
+  };
+
+  const cancelEdit = () => {
+    setEditingId(null);
+    setEditText('');
+  };
+
+  const sortedNotes = [...notes].sort((a, b) => {
+    if (a.favorite !== b.favorite) return b.favorite ? 1 : -1;
+    return new Date(b.createdAt) - new Date(a.createdAt);
+  });
+
   return (
-    <div>
-      <div className="page-header">
-        <h1>Scribbles</h1>
-        <span className="text-muted" style={{ fontSize: 13 }}>Optimiere deine Listing-Texte mit AI-Vorschlägen</span>
+    <div className="scribbles-page">
+      <div className="scribbles-header">
+        <div>
+          <h1>📝 Notizen & Merkzettel</h1>
+          <p>Speichere ASINs und wichtige Notizen</p>
+        </div>
       </div>
 
-      <div className="grid" style={{ gridTemplateColumns: '300px 1fr', gap: 20 }}>
-        <div className="card">
-          <div style={{ marginBottom: 16 }}>
-            <div style={{ fontWeight: 700, marginBottom: 12 }}>Einstellungen</div>
-
-            <div className="field">
+      <div className="scribbles-container">
+        <div className="scribbles-form">
+          <div className="form-card">
+            <h2>Neue Notiz</h2>
+            <div className="form-group">
               <label>ASIN</label>
               <input
-                className="input"
+                type="text"
                 placeholder="z.B. B0F9X766FD"
-                value={asin}
-                onChange={(e) => setAsin(e.target.value)}
+                value={asinInput}
+                onChange={(e) => setAsinInput(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && noteInput.trim() && addNote()}
               />
             </div>
-
-            <div className="field">
-              <label>Keywords</label>
+            <div className="form-group">
+              <label>Notiz</label>
               <textarea
-                className="input"
-                style={{ minHeight: 80, resize: 'vertical' }}
-                placeholder="Ein Keyword pro Zeile"
-                value={keywords}
-                onChange={(e) => setKeywords(e.target.value)}
+                placeholder="Was möchtest du über dieses Produkt notieren?"
+                value={noteInput}
+                onChange={(e) => setNoteInput(e.target.value)}
+                rows={4}
+                onKeyPress={(e) => e.ctrlKey && e.key === 'Enter' && addNote()}
               />
             </div>
-
-            <div className="field">
-              <label>Feld optimieren</label>
-              <select
-                className="select"
-                value={selectedField}
-                onChange={(e) => setSelectedField(e.target.value)}
-              >
-                <option value="title">Titel</option>
-                <option value="bullets">Bullet Points</option>
-                <option value="description">Beschreibung</option>
-              </select>
-            </div>
-
             <button
-              className="btn btn-primary"
-              disabled={loading || !asin.trim() || !keywords.trim()}
-              onClick={generateSuggestions}
-              style={{ width: '100%' }}
+              className="btn-add"
+              disabled={!asinInput.trim() || !noteInput.trim()}
+              onClick={addNote}
             >
-              {loading ? 'Generiere...' : 'Vorschläge generieren'}
+              + Hinzufügen
             </button>
           </div>
         </div>
 
-        <div>
-          {loading ? (
-            <Loading label="Generiere Vorschläge..." />
-          ) : suggestions ? (
-            <ScribbleEditor data={suggestions} />
+        <div className="scribbles-list">
+          {sortedNotes.length === 0 ? (
+            <div className="empty-state">
+              <p>Keine Notizen vorhanden</p>
+              <span>Erstelle deine erste ASIN-Notiz!</span>
+            </div>
           ) : (
-            <div className="empty">Gib ASIN und Keywords ein, um Vorschläge zu generieren</div>
+            sortedNotes.map(note => (
+              <div key={note.id} className={`note-card ${note.favorite ? 'favorite' : ''}`}>
+                <div className="note-header">
+                  <div className="note-asin">
+                    <span className="asin-badge">{note.asin}</span>
+                    <span className="note-date">{note.createdAt}</span>
+                  </div>
+                  <div className="note-actions">
+                    <button
+                      className={`action-btn favorite ${note.favorite ? 'active' : ''}`}
+                      onClick={() => toggleFavorite(note.id)}
+                      title={note.favorite ? 'Aus Favoriten entfernen' : 'Zu Favoriten hinzufügen'}
+                    >
+                      ⭐
+                    </button>
+                    <button
+                      className="action-btn delete"
+                      onClick={() => deleteNote(note.id)}
+                      title="Löschen"
+                    >
+                      🗑️
+                    </button>
+                  </div>
+                </div>
+
+                {editingId === note.id ? (
+                  <div className="note-edit">
+                    <textarea
+                      value={editText}
+                      onChange={(e) => setEditText(e.target.value)}
+                      rows={3}
+                    />
+                    <div className="edit-actions">
+                      <button className="btn-save" onClick={() => saveEdit(note.id)}>
+                        ✓ Speichern
+                      </button>
+                      <button className="btn-cancel" onClick={cancelEdit}>
+                        ✕ Abbrechen
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="note-content" onDoubleClick={() => startEdit(note)}>
+                    <p>{note.note}</p>
+                    <span className="edit-hint">Doppelklick zum Bearbeiten</span>
+                  </div>
+                )}
+              </div>
+            ))
           )}
         </div>
       </div>
