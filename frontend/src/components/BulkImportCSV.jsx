@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { useAuthStore } from '../store/authStore';
-import { showToast } from './Toast/Toast';
+import { useToast } from '../hooks/useToast';
 
 export default function BulkImportCSV({ onImportSuccess, onClose }) {
   const [loading, setLoading] = useState(false);
@@ -8,6 +8,7 @@ export default function BulkImportCSV({ onImportSuccess, onClose }) {
   const [previewData, setPreviewData] = useState(null);
   const fileInputRef = useRef(null);
   const authToken = useAuthStore((s) => s.token);
+  const { success: showSuccess, error: showError } = useToast();
 
   const handleDownloadTemplate = async () => {
     try {
@@ -24,7 +25,7 @@ export default function BulkImportCSV({ onImportSuccess, onClose }) {
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
     } catch (error) {
-      showToast('Failed to download template', 'error');
+      showError('Failed to download template');
     }
   };
 
@@ -58,7 +59,7 @@ export default function BulkImportCSV({ onImportSuccess, onClose }) {
 
   const processFile = async (file) => {
     if (!file.name.endsWith('.csv')) {
-      showToast('Please upload a CSV file', 'error');
+      showError('Please upload a CSV file');
       return;
     }
 
@@ -77,12 +78,12 @@ export default function BulkImportCSV({ onImportSuccess, onClose }) {
 
       if (data.success) {
         setPreviewData(data);
-        showToast(`Validated ${data.validRecords} records`, 'success');
+        showSuccess(`Validated ${data.validRecords} records`);
       } else {
-        showToast(data.error || 'Validation failed', 'error');
+        showError(data.error || 'Validation failed');
       }
     } catch (error) {
-      showToast('Error processing file', 'error');
+      showError('Error processing file');
     } finally {
       setLoading(false);
     }
@@ -90,7 +91,7 @@ export default function BulkImportCSV({ onImportSuccess, onClose }) {
 
   const handleImport = async () => {
     if (!fileInputRef.current?.files?.[0]) {
-      showToast('Please select a file', 'error');
+      showError('Please select a file');
       return;
     }
 
@@ -108,14 +109,14 @@ export default function BulkImportCSV({ onImportSuccess, onClose }) {
       const data = await response.json();
 
       if (data.success) {
-        showToast(`Imported ${data.imported} listings successfully`, 'success');
+        showSuccess(`Imported ${data.imported} listings successfully`);
         onImportSuccess?.();
         onClose?.();
       } else {
-        showToast(data.error || 'Import failed', 'error');
+        showError(data.error || 'Import failed');
       }
     } catch (error) {
-      showToast('Error importing file', 'error');
+      showError('Error importing file');
     } finally {
       setLoading(false);
     }

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { api } from '../api/api';
+import api from '../api/api';
 import { useToast } from '../hooks/useToast';
 
 export default function ListingOptimizer({ listingData, platform, onUpdate }) {

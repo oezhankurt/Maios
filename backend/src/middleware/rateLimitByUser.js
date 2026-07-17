@@ -1,8 +1,6 @@
 const rateLimit = require('express-rate-limit');
-const RedisStore = require('rate-limit-redis');
-const redis = require('redis');
 
-// Memory-based rate limiting for authenticated users (when Redis is not available)
+// Memory-based rate limiting for authenticated users
 const userLimiters = new Map();
 
 function getOrCreateLimiter(userId) {

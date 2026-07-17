@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { useAuthStore } from '../store/authStore';
-import { showToast } from './Toast/Toast';
+import { useToast } from '../hooks/useToast';
 
 export default function ListingExportPanel({ onClose }) {
   const [exporting, setExporting] = useState(false);
   const authToken = useAuthStore((s) => s.token);
+  const { success: showSuccess, error: showError } = useToast();
 
   const handleExport = async (format, type = null) => {
     setExporting(true);
@@ -26,15 +27,15 @@ export default function ListingExportPanel({ onClose }) {
         a.click();
         window.URL.revokeObjectURL(downloadUrl);
         document.body.removeChild(a);
-        showToast(`✓ ${format.toUpperCase()} exported successfully`, 'success');
+        showSuccess(`✓ ${format.toUpperCase()} exported successfully`);
       } else {
         const data = await response.json();
         if (data.success) {
-          showToast('✓ Report generated successfully', 'success');
+          showSuccess('✓ Report generated successfully');
         }
       }
     } catch (error) {
-      showToast('Export failed', 'error');
+      showError('Export failed');
     } finally {
       setExporting(false);
     }

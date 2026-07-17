@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { api } from '../api/api';
+import api from '../api/api';
 import { useToast } from '../hooks/useToast';
 import BulkImportCSV from '../components/BulkImportCSV';
 import BulkOperationsPanel from '../components/BulkOperationsPanel';

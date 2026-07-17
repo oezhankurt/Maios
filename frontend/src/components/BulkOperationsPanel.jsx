@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { useAuthStore } from '../store/authStore';
-import { showToast } from './Toast/Toast';
+import { useToast } from '../hooks/useToast';
 
 export default function BulkOperationsPanel({ selectedListings, onOperationComplete }) {
   const [loading, setLoading] = useState(false);
   const [selectedPlatforms, setSelectedPlatforms] = useState([]);
   const authToken = useAuthStore((s) => s.token);
+  const { success: showSuccess, error: showError } = useToast();
 
   const platforms = [
     { id: 'amazon', label: '🟠 Amazon', color: 'orange' },
@@ -24,12 +25,12 @@ export default function BulkOperationsPanel({ selectedListings, onOperationCompl
 
   const handleBulkOptimize = async () => {
     if (selectedListings.length === 0) {
-      showToast('Select listings to optimize', 'error');
+      showError('Select listings to optimize');
       return;
     }
 
     if (selectedPlatforms.length === 0) {
-      showToast('Select platforms for optimization', 'error');
+      showError('Select platforms for optimization');
       return;
     }
 
@@ -51,16 +52,13 @@ export default function BulkOperationsPanel({ selectedListings, onOperationCompl
       const data = await response.json();
 
       if (data.success) {
-        showToast(
-          `✓ Optimized ${data.successful.length} listings (avg score: ${data.averageScore}%)`,
-          'success'
-        );
+        showSuccess(`✓ Optimized ${data.successful.length} listings (avg score: ${data.averageScore}%)`);
         onOperationComplete?.();
       } else {
-        showToast(data.error || 'Optimization failed', 'error');
+        showError(data.error || 'Optimization failed');
       }
     } catch (error) {
-      showToast('Error optimizing listings', 'error');
+      showError('Error optimizing listings');
     } finally {
       setLoading(false);
     }
@@ -68,12 +66,12 @@ export default function BulkOperationsPanel({ selectedListings, onOperationCompl
 
   const handleBulkPublish = async () => {
     if (selectedListings.length === 0) {
-      showToast('Select listings to publish', 'error');
+      showError('Select listings to publish');
       return;
     }
 
     if (selectedPlatforms.length === 0) {
-      showToast('Select platforms for publishing', 'error');
+      showError('Select platforms for publishing');
       return;
     }
 
@@ -95,16 +93,13 @@ export default function BulkOperationsPanel({ selectedListings, onOperationCompl
       const data = await response.json();
 
       if (data.success) {
-        showToast(
-          `✓ Published ${data.publishedCount} listings to ${data.platformsPublished.length} platforms`,
-          'success'
-        );
+        showSuccess(`✓ Published ${data.publishedCount} listings to ${data.platformsPublished.length} platforms`);
         onOperationComplete?.();
       } else {
-        showToast(data.error || 'Publishing failed', 'error');
+        showError(data.error || 'Publishing failed');
       }
     } catch (error) {
-      showToast('Error publishing listings', 'error');
+      showError('Error publishing listings');
     } finally {
       setLoading(false);
     }
@@ -112,7 +107,7 @@ export default function BulkOperationsPanel({ selectedListings, onOperationCompl
 
   const handleBulkArchive = async () => {
     if (selectedListings.length === 0) {
-      showToast('Select listings to archive', 'error');
+      showError('Select listings to archive');
       return;
     }
 
@@ -134,13 +129,13 @@ export default function BulkOperationsPanel({ selectedListings, onOperationCompl
       const data = await response.json();
 
       if (data.success) {
-        showToast(`✓ Archived ${data.updatedCount} listings`, 'success');
+        showSuccess(`✓ Archived ${data.updatedCount} listings`);
         onOperationComplete?.();
       } else {
-        showToast(data.error || 'Archiving failed', 'error');
+        showError(data.error || 'Archiving failed');
       }
     } catch (error) {
-      showToast('Error archiving listings', 'error');
+      showError('Error archiving listings');
     } finally {
       setLoading(false);
     }
@@ -166,13 +161,13 @@ export default function BulkOperationsPanel({ selectedListings, onOperationCompl
       const data = await response.json();
 
       if (data.success) {
-        showToast(`✓ Deleted ${data.deletedCount} listings`, 'success');
+        showSuccess(`✓ Deleted ${data.deletedCount} listings`);
         onOperationComplete?.();
       } else {
-        showToast(data.error || 'Deletion failed', 'error');
+        showError(data.error || 'Deletion failed');
       }
     } catch (error) {
-      showToast('Error deleting listings', 'error');
+      showError('Error deleting listings');
     } finally {
       setLoading(false);
     }

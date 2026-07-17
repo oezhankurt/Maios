@@ -1,0 +1,15 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+echo "🔍 Running pre-commit checks..."
+cd backend
+npm run check
+EXIT_CODE=$?
+
+if [ $EXIT_CODE -ne 0 ]; then
+  echo "❌ Pre-commit checks failed. Fix errors and try again."
+  exit 1
+fi
+
+echo "✅ All checks passed!"
+exit 0

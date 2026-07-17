@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAuthStore } from '../store/authStore';
-import { showToast } from './Toast/Toast';
+import { useToast } from '../hooks/useToast';
 
 export default function SchedulePublishModal({ listing, onClose, onSuccess }) {
   const [selectedDate, setSelectedDate] = useState('');
@@ -8,6 +8,7 @@ export default function SchedulePublishModal({ listing, onClose, onSuccess }) {
   const [selectedPlatforms, setSelectedPlatforms] = useState([]);
   const [loading, setLoading] = useState(false);
   const authToken = useAuthStore((s) => s.token);
+  const { success: showSuccess, error: showError } = useToast();
 
   const platforms = [
     { id: 'amazon', label: '🟠 Amazon', color: 'orange' },
@@ -32,12 +33,12 @@ export default function SchedulePublishModal({ listing, onClose, onSuccess }) {
 
   const handleSchedule = async () => {
     if (!selectedDate) {
-      showToast('Datum auswählen', 'error');
+      showError('Datum auswählen');
       return;
     }
 
     if (selectedPlatforms.length === 0) {
-      showToast('Mindestens eine Plattform auswählen', 'error');
+      showError('Mindestens eine Plattform auswählen');
       return;
     }
 
@@ -60,14 +61,14 @@ export default function SchedulePublishModal({ listing, onClose, onSuccess }) {
       const data = await response.json();
 
       if (data.success) {
-        showToast('✓ Veröffentlichung geplant', 'success');
+        showSuccess('✓ Veröffentlichung geplant');
         onSuccess?.();
         onClose?.();
       } else {
-        showToast(data.error || 'Planung fehlgeschlagen', 'error');
+        showError(data.error || 'Planung fehlgeschlagen');
       }
     } catch (error) {
-      showToast('Fehler beim Planen der Veröffentlichung', 'error');
+      showError('Fehler beim Planen der Veröffentlichung');
     } finally {
       setLoading(false);
     }

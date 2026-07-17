@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuthStore } from '../store/authStore';
-import { showToast } from './Toast/Toast';
+import { useToast } from '../hooks/useToast';
 
 export default function ListingTemplateLibrary({ onSelectTemplate, onClose }) {
   const [templates, setTemplates] = useState([]);
@@ -9,6 +9,7 @@ export default function ListingTemplateLibrary({ onSelectTemplate, onClose }) {
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const authToken = useAuthStore((s) => s.token);
+  const { success: showSuccess, error: showError } = useToast();
 
   useEffect(() => {
     loadTemplates();
@@ -31,7 +32,7 @@ export default function ListingTemplateLibrary({ onSelectTemplate, onClose }) {
         setTemplates(data.data.templates || []);
       }
     } catch (error) {
-      showToast('Fehler beim Laden von Templates', 'error');
+      showError('Fehler beim Laden von Templates');
     } finally {
       setLoading(false);
     }
@@ -69,13 +70,13 @@ export default function ListingTemplateLibrary({ onSelectTemplate, onClose }) {
 
       const data = await response.json();
       if (data.success) {
-        showToast('✓ Template gelöscht', 'success');
+        showSuccess('✓ Template gelöscht');
         loadTemplates();
       } else {
-        showToast(data.error || 'Fehler beim Löschen', 'error');
+        showError(data.error || 'Fehler beim Löschen');
       }
     } catch (error) {
-      showToast('Fehler beim Löschen des Templates', 'error');
+      showError('Fehler beim Löschen des Templates');
     }
   };
 
