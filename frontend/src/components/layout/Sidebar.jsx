@@ -8,7 +8,7 @@ const NAV = [
   {
     label: 'Marktplätze', icon: '🌐', children: [
       {
-        label: 'Amazon', children: [
+        label: 'Amazon', collapsible: true, children: [
           { label: 'Listings Manager', to: '/listings' },
           { label: 'Listing Builder Pro', to: '/listings/amazon-builder' },
           { label: 'Listing Analyzer', to: '/listings/analyzer' },
@@ -24,9 +24,9 @@ const NAV = [
           { label: 'Automation', to: '/ppc/automation' },
         ],
       },
-      { label: 'Otto', children: [{ label: 'Coming soon...', to: '#' }] },
-      { label: 'Kaufland', children: [{ label: 'Coming soon...', to: '#' }] },
-      { label: 'eBay', children: [{ label: 'Coming soon...', to: '#' }] },
+      { label: 'Otto', collapsible: true, children: [{ label: 'Coming soon...', to: '#' }] },
+      { label: 'Kaufland', collapsible: true, children: [{ label: 'Coming soon...', to: '#' }] },
+      { label: 'eBay', collapsible: true, children: [{ label: 'Coming soon...', to: '#' }] },
     ],
   },
   {
@@ -73,8 +73,12 @@ export default function Sidebar({ open, onNavigate }) {
   const { pathname } = useLocation();
   const active = findActiveGroup(pathname);
   const [openGroups, setOpenGroups] = useState({});
+  const [openMarketplaces, setOpenMarketplaces] = useState({});
+
   const isOpen = (label) => (label in openGroups ? openGroups[label] : label === active?.parent);
   const toggle = (label) => setOpenGroups((g) => ({ ...g, [label]: !isOpen(label) }));
+  const isMarketplaceOpen = (label) => openMarketplaces[label] || label === active?.child;
+  const toggleMarketplace = (label) => setOpenMarketplaces((m) => ({ ...m, [label]: !isMarketplaceOpen(label) }));
 
   return (
     <aside className={`sidebar ${open ? 'open' : ''}`}>
@@ -113,6 +117,36 @@ export default function Sidebar({ open, onNavigate }) {
               {expanded && (
                 <div className="nav-children">
                   {item.children.map((c) => {
+                    if (c.children && c.collapsible) {
+                      const marketplaceExpanded = isMarketplaceOpen(c.label);
+                      return (
+                        <div key={c.label}>
+                          <button
+                            type="button"
+                            className="nav-marketplace"
+                            onClick={() => toggleMarketplace(c.label)}
+                          >
+                            <span>{c.label}</span>
+                            <span className={`caret ${marketplaceExpanded ? 'open' : ''}`}>›</span>
+                          </button>
+                          {marketplaceExpanded && (
+                            <div className="marketplace-items">
+                              {c.children.map((sub) => (
+                                <NavLink
+                                  key={sub.to}
+                                  to={sub.to}
+                                  end
+                                  className={({ isActive }) => `nav-child ${isActive ? 'active' : ''}`}
+                                  onClick={onNavigate}
+                                >
+                                  {sub.label}
+                                </NavLink>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    }
                     if (c.children) {
                       return (
                         <div key={c.label} style={{ paddingLeft: '8px' }}>
