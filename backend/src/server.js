@@ -8,11 +8,16 @@ async function start() {
   try {
     await connectDatabase();
 
-    // In development, keep the schema in sync automatically. In production,
-    // rely on migrations (npm run db:migrate).
+    // Sync database schema - creates missing tables
+    // In development: full sync with alter
+    // In production: sync only if tables don't exist
     if (config.env === 'development') {
-      await sequelize.sync();
+      await sequelize.sync({ alter: true });
       logger.info('Database schema synced (development).');
+    } else {
+      // In production, only create missing tables, don't alter existing ones
+      await sequelize.sync({ alter: false });
+      logger.info('Database schema synced (production).');
     }
 
     const server = app.listen(config.port, () => {
