@@ -1,7 +1,7 @@
 const express = require('express');
 const RepricingService = require('../services/repricingService');
 const { requireAuth } = require('../middleware/auth');
-const { asyncHandler } = require('../utils/asyncHandler');
+const asyncHandler = require('../utils/asyncHandler');
 
 const router = express.Router();
 
