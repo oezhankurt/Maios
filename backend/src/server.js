@@ -11,13 +11,18 @@ async function start() {
     // Sync database schema - creates missing tables
     // In development: full sync with alter
     // In production: sync only if tables don't exist
-    if (config.env === 'development') {
-      await sequelize.sync({ alter: true });
-      logger.info('Database schema synced (development).');
-    } else {
-      // In production, only create missing tables, don't alter existing ones
-      await sequelize.sync({ alter: false });
-      logger.info('Database schema synced (production).');
+    try {
+      if (config.env === 'development') {
+        await sequelize.sync({ alter: true });
+        logger.info('Database schema synced (development).');
+      } else {
+        // In production, only create missing tables, don't alter existing ones
+        await sequelize.sync({ alter: false });
+        logger.info('Database schema synced (production).');
+      }
+    } catch (syncErr) {
+      logger.warn(`Database sync warning: ${syncErr.message}`);
+      // Continue anyway - migrations may have already run or tables may exist
     }
 
     const server = app.listen(config.port, () => {
