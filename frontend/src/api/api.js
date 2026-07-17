@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { setCSRFHeader } from '../utils/csrf';
 
-const baseURL = 'https://maios-production.up.railway.app';
+const baseURL = 'https://maios-production.up.railway.app/api';
 
 const api = axios.create({
   baseURL,
