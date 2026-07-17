@@ -11,6 +11,12 @@ export default function Login() {
   const [password, setPassword] = useState('demo1234');
 
   useEffect(() => {
+    fetch('https://maios-production.up.railway.app/api/health', {
+      credentials: 'include',
+    }).catch(() => {});
+  }, []);
+
+  useEffect(() => {
     if (error) showError(error);
   }, [error, showError]);
 
