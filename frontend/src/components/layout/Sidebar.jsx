@@ -11,6 +11,12 @@ const NAV = [
       { label: 'Marktplätze', to: '/channels/marketplaces' },
       { label: 'Suchmaschinen', to: '/channels/search' },
       { label: 'Advertising-Plattformen', to: '/channels/ads' },
+      { label: 'PPC Zeitvergleich', to: '/ppc' },
+      { label: 'Kampagnen', to: '/ppc/campaigns' },
+      { label: 'Smart Portfolios', to: '/ppc/portfolios' },
+      { label: 'Automation', to: '/ppc/automation' },
+      { label: 'Google Ads', to: '/google-ads' },
+      { label: 'Bing Ads', to: '/bing-ads' },
     ],
   },
   {
