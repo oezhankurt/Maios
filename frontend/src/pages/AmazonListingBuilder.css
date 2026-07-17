@@ -126,44 +126,56 @@
 .steps-nav {
   display: flex;
   flex-direction: column;
-  gap: 0;
+  gap: 10px;
   flex: 1;
+  padding: 0 12px;
 }
 
 .step-item {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px 20px;
-  background: transparent;
-  border: none;
-  border-left: 3px solid transparent;
+  padding: 14px 16px;
+  background: var(--bg-white);
+  border: 1.5px solid var(--border-light);
+  border-radius: 10px;
   cursor: pointer;
-  transition: all 0.25s ease;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   text-align: left;
   color: var(--text-gray);
   font-size: 14px;
   font-weight: 500;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
 }
 
 .step-item:hover:not(:disabled) {
   background: var(--bg-lighter);
+  border-color: var(--primary);
   color: var(--text-dark);
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 102, 255, 0.1);
 }
 
 .step-item.active {
   background: var(--primary-light);
-  border-left-color: var(--primary);
+  border-color: var(--primary);
   color: var(--primary);
   font-weight: 600;
+  box-shadow: 0 4px 12px rgba(0, 102, 255, 0.15);
+  transform: scale(1.03);
 }
 
 .step-item.completed {
   color: var(--success);
 }
 
+.step-item.completed:hover:not(:disabled) {
+  border-color: var(--success);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.1);
+}
+
 .step-item:disabled {
-  opacity: 0.4;
+  opacity: 0.5;
   cursor: not-allowed;
 }
 
