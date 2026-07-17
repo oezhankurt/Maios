@@ -239,16 +239,27 @@
   animation: shimmer 1.5s infinite;
 }
 
-.clear-btn {
+.bottom-buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.clear-btn,
+.orders-btn {
   padding: 8px 16px;
   font-size: 12px;
   font-weight: 600;
   border: none;
   border-radius: 50px;
-  background: #ff6b6b;
   color: white;
   cursor: pointer;
   transition: all 0.3s ease;
+}
+
+.clear-btn {
+  background: #ff6b6b;
   box-shadow: 0 2px 8px rgba(255, 107, 107, 0.3);
 }
 
@@ -257,7 +268,18 @@
   box-shadow: 0 4px 12px rgba(255, 107, 107, 0.4);
 }
 
-.clear-btn:active {
+.orders-btn {
+  background: #4CAF50;
+  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+}
+
+.orders-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
+}
+
+.clear-btn:active,
+.orders-btn:active {
   transform: translateY(0);
 }
 

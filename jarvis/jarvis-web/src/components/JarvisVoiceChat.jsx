@@ -1,16 +1,22 @@
 import './JarvisVoiceChat.css'
 import { useSpeech } from '../hooks/useSpeech'
 import { useClaude } from '../hooks/useClaude'
+import { useMemory } from '../hooks/useMemory'
 import Settings from './Settings'
+import StandingOrders from './StandingOrders'
 import { useState, useEffect, useRef } from 'react'
 
 export default function JarvisVoiceChat() {
   const [messages, setMessages] = useState([])
   const [transcript, setTranscript] = useState('')
   const [showSettings, setShowSettings] = useState(false)
+  const [showStandingOrders, setShowStandingOrders] = useState(false)
   const messagesEndRef = useRef(null)
+  const conversationId = useRef(`conv-${Date.now()}`)
+
   const { isListening, transcript: speechTranscript, isSpeaking, error: speechError, isSupported, startListening, stopListening, speak } = useSpeech()
   const { sendMessage, isLoading, error: claudeError, testConnection, setSystemPrompt, clearHistory } = useClaude()
+  const { saveConversation, standingOrders } = useMemory()
 
   useEffect(() => {
     setTranscript(speechTranscript)
@@ -25,6 +31,12 @@ export default function JarvisVoiceChat() {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
+
+  useEffect(() => {
+    if (messages.length > 0) {
+      saveConversation(conversationId.current, messages)
+    }
+  }, [messages, saveConversation])
 
   const handleSettingsSave = ({ apiKey, systemPrompt }) => {
     setSystemPrompt(systemPrompt)
@@ -49,6 +61,18 @@ export default function JarvisVoiceChat() {
 
   const handleSendMessage = async () => {
     if (!transcript.trim() || isLoading) return
+
+    if (standingOrders.length > 0) {
+      const ordersText = standingOrders.map(o => `- ${o.text}`).join('\n')
+      const systemPromptWithOrders = `Du bist Jarvis, ein intelligenter Voice-Assistant für Claude.
+
+Standing Orders (befolge diese immer):
+${ordersText}
+
+Antworte prägnant, hilfsbereit und auf Deutsch.
+Halte deine Antworten kurz genug, um sie laut vorzulesen (2-3 Sätze ideal).`
+      setSystemPrompt(systemPromptWithOrders)
+    }
 
     const userMessage = { role: 'user', content: transcript }
     setMessages(prev => [...prev, userMessage])
@@ -161,17 +185,32 @@ export default function JarvisVoiceChat() {
             {isLoading ? 'Claude antwortet...' : 'Senden ↩️'}
           </button>
         )}
-        {messages.length > 0 && (
-          <button className="clear-btn" onClick={handleClearHistory} title="Chatverlauf löschen">
-            🗑️ Clear
+        <div className="bottom-buttons">
+          {messages.length > 0 && (
+            <button className="clear-btn" onClick={handleClearHistory} title="Chatverlauf löschen">
+              🗑️ Clear
+            </button>
+          )}
+          <button
+            className="orders-btn"
+            onClick={() => setShowStandingOrders(true)}
+            title="Standing Orders verwalten"
+          >
+            📋 {standingOrders.length}
           </button>
-        )}
+        </div>
       </div>
 
       {showSettings && (
         <Settings
           onClose={() => setShowSettings(false)}
           onSave={handleSettingsSave}
+        />
+      )}
+
+      {showStandingOrders && (
+        <StandingOrders
+          onClose={() => setShowStandingOrders(false)}
         />
       )}
     </div>
