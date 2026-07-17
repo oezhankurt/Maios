@@ -98,6 +98,68 @@ textarea {
   color: #fff;
   box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
 }
+
+/* ── TABS / REITER - GLOBALES DESIGN ─────────────────────────────────────────── */
+
+/* Alle Tab-Container */
+.tabs-header,
+.preview-tabs,
+.tab-bar,
+.tabs-container {
+  display: flex;
+  gap: 8px;
+  padding: 0;
+  background: transparent;
+  border: none;
+}
+
+/* Alle Tab-Buttons */
+.tab-btn,
+.preview-tab,
+.tabs-button,
+.reiter-btn,
+button[class*='tab'] {
+  position: relative;
+  padding: 10px 16px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Tab Hover - MAGNIFYING GLASS ZOOM */
+.tab-btn:hover,
+.preview-tab:hover,
+.tabs-button:hover,
+.reiter-btn:hover,
+button[class*='tab']:hover {
+  transform: scale(1.08);
+  border-color: var(--primary);
+  color: var(--primary);
+  background: var(--primary-light);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Tab Active */
+.tab-btn.active,
+.preview-tab.active,
+.tabs-button.active,
+.reiter-btn.active,
+button[class*='tab'].active {
+  background: var(--primary-light);
+  border-color: var(--primary);
+  color: var(--primary);
+  font-weight: 600;
+  transform: scale(1.05);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
 .btn-primary:hover {
   background: linear-gradient(135deg, var(--primary-hover) 0%, #4f46e5 100%);
   box-shadow: 0 6px 16px rgba(99, 102, 241, 0.4);
