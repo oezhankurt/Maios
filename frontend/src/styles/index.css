@@ -118,6 +118,7 @@ textarea {
 .preview-tab,
 .tabs-button,
 .reiter-btn,
+.tab,
 button[class*='tab'] {
   position: relative;
   padding: 10px 16px;
@@ -139,6 +140,7 @@ button[class*='tab'] {
 .preview-tab:hover,
 .tabs-button:hover,
 .reiter-btn:hover,
+.tab:hover,
 button[class*='tab']:hover {
   transform: scale(1.08);
   border-color: var(--primary);
@@ -152,6 +154,7 @@ button[class*='tab']:hover {
 .preview-tab.active,
 .tabs-button.active,
 .reiter-btn.active,
+.tab.active,
 button[class*='tab'].active {
   background: var(--primary-light);
   border-color: var(--primary);
