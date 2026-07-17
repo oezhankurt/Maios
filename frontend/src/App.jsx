@@ -48,7 +48,9 @@ function ProtectedRoute({ children }) {
 
 export default function App() {
   useEffect(() => {
-    api.get('/health').catch(() => {
+    fetch('https://maios-production.up.railway.app/api/health', {
+      credentials: 'include',
+    }).catch(() => {
       // Silently fail - health check is just for CSRF initialization
     });
   }, []);
