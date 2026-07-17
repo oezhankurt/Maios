@@ -1,12 +1,12 @@
 const express = require('express');
 const multer = require('multer');
-const { verifyToken } = require('../middleware/authMiddleware');
+const { authenticate } = require('../middleware/auth');
 const bulkListingsController = require('../controllers/bulkListingsController');
 
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage() });
 
-router.use(verifyToken);
+router.use(authenticate);
 
 router.get('/csv-template', bulkListingsController.getCSVTemplate);
 router.post('/csv-import', upload.single('file'), bulkListingsController.importCSV);

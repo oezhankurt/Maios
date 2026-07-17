@@ -1,10 +1,10 @@
 const express = require('express');
-const { verifyToken } = require('../middleware/authMiddleware');
+const { authenticate } = require('../middleware/auth');
 const listingScheduleController = require('../controllers/listingScheduleController');
 
 const router = express.Router();
 
-router.use(verifyToken);
+router.use(authenticate);
 
 router.post('/:listingId/schedule', listingScheduleController.schedulePublish);
 router.post('/:listingId/unschedule', listingScheduleController.unschedule);

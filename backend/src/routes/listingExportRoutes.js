@@ -1,10 +1,10 @@
 const express = require('express');
-const { verifyToken } = require('../middleware/authMiddleware');
+const { authenticate } = require('../middleware/auth');
 const listingExportController = require('../controllers/listingExportController');
 
 const router = express.Router();
 
-router.use(verifyToken);
+router.use(authenticate);
 
 router.get('/csv', listingExportController.exportCSV);
 router.get('/json', listingExportController.exportJSON);

@@ -1,10 +1,10 @@
 const express = require('express');
-const { verifyToken } = require('../middleware/authMiddleware');
+const { authenticate } = require('../middleware/auth');
 const listingTemplateController = require('../controllers/listingTemplateController');
 
 const router = express.Router();
 
-router.use(verifyToken);
+router.use(authenticate);
 
 router.post('/', listingTemplateController.createTemplate);
 router.get('/', listingTemplateController.listTemplates);

@@ -1,10 +1,10 @@
 const express = require('express');
-const { verifyToken } = require('../middleware/authMiddleware');
+const { authenticate } = require('../middleware/auth');
 const listingAnalyticsController = require('../controllers/listingAnalyticsController');
 
 const router = express.Router();
 
-router.use(verifyToken);
+router.use(authenticate);
 
 router.get('/', listingAnalyticsController.getComprehensiveAnalytics);
 router.get('/performance', listingAnalyticsController.getPerformance);
