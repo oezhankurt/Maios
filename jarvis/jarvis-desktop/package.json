@@ -1,0 +1,28 @@
+{
+  "name": "jarvis-desktop",
+  "version": "1.0.0",
+  "description": "Jarvis - Voice Assistant for Claude (Desktop)",
+  "main": "main.js",
+  "type": "module",
+  "scripts": {
+    "dev": "electron .",
+    "build": "electron-builder",
+    "dist": "npm run build -- --publish never"
+  },
+  "devDependencies": {
+    "electron": "^27.0.0",
+    "electron-builder": "^24.6.0"
+  },
+  "build": {
+    "appId": "de.jarvis.app",
+    "productName": "Jarvis",
+    "files": [
+      "main.js",
+      "preload.js",
+      "../jarvis-web/dist/**/*"
+    ],
+    "directories": {
+      "buildResources": "assets"
+    }
+  }
+}
