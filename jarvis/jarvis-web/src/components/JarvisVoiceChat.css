@@ -204,9 +204,50 @@
   cursor: not-allowed;
 }
 
+.send-button.loading {
+  background: #2196F3;
+  animation: shimmer 1.5s infinite;
+}
+
 .voice-button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+@keyframes shimmer {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+.loading-message {
+  padding: 10px 16px;
+  background: rgba(33, 150, 243, 0.1);
+  border-radius: 8px;
+  border-left: 3px solid #2196F3;
+  font-size: 14px;
+  color: #2196F3;
+  text-align: center;
+  animation: pulse-text 1.5s infinite;
+}
+
+@media (prefers-color-scheme: dark) {
+  .loading-message {
+    background: rgba(33, 150, 243, 0.2);
+    color: #64B5F6;
+  }
+}
+
+@keyframes pulse-text {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
 }
 
 .speaking-indicator {

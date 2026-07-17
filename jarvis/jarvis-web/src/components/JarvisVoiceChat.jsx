@@ -1,25 +1,53 @@
 import './JarvisVoiceChat.css'
 import { useSpeech } from '../hooks/useSpeech'
-import { useState } from 'react'
+import { useClaude } from '../hooks/useClaude'
+import { useState, useEffect } from 'react'
 
 export default function JarvisVoiceChat() {
   const [messages, setMessages] = useState([])
-  const { isListening, transcript, isSpeaking, error, isSupported, startListening, stopListening, speak } = useSpeech()
+  const [transcript, setTranscript] = useState('')
+  const { isListening, transcript: speechTranscript, isSpeaking, error: speechError, isSupported, startListening, stopListening, speak } = useSpeech()
+  const { sendMessage, isLoading, error: claudeError, testConnection } = useClaude()
+
+  useEffect(() => {
+    setTranscript(speechTranscript)
+  }, [speechTranscript])
+
+  const error = speechError || claudeError
+
+  useEffect(() => {
+    testConnection()
+  }, [testConnection])
 
   const toggleListening = () => {
     if (isListening) {
       stopListening()
     } else {
+      setTranscript('')
       startListening()
     }
   }
 
-  const handleSendMessage = () => {
-    if (transcript.trim()) {
-      const userMessage = { role: 'user', content: transcript }
-      setMessages(prev => [...prev, userMessage])
+  const handleSendMessage = async () => {
+    if (!transcript.trim() || isLoading) return
 
-      speak(`Du hast gesagt: ${transcript}. Das wird bald zu Claude weitergeleitet.`)
+    const userMessage = { role: 'user', content: transcript }
+    setMessages(prev => [...prev, userMessage])
+    setTranscript('')
+
+    try {
+      const response = await sendMessage(transcript)
+      const assistantMessage = { role: 'assistant', content: response }
+      setMessages(prev => [...prev, assistantMessage])
+
+      await new Promise(resolve => {
+        speak(response, {
+          onEnd: resolve,
+        })
+      })
+    } catch (err) {
+      console.error('Error:', err)
+      speak('Entschuldigung, es gab ein Problem bei der Kommunikation mit Claude.')
     }
   }
 
@@ -70,11 +98,17 @@ export default function JarvisVoiceChat() {
           </div>
         )}
 
-        {isSpeaking && (
+        {(isSpeaking || isLoading) && (
           <div className="speaking-indicator">
             <span className="dot"></span>
             <span className="dot"></span>
             <span className="dot"></span>
+          </div>
+        )}
+
+        {isLoading && (
+          <div className="loading-message">
+            Claude antwortet...
           </div>
         )}
       </div>
@@ -83,14 +117,18 @@ export default function JarvisVoiceChat() {
         <button
           className={`voice-button ${isListening ? 'listening' : ''} ${isSpeaking ? 'speaking' : ''}`}
           onClick={toggleListening}
-          disabled={isSpeaking}
+          disabled={isSpeaking || isLoading}
           title={isListening ? 'Stopp' : 'Recording starten'}
         >
           {isListening ? '🔴 Listening...' : '🎤 Speak'}
         </button>
         {transcript && (
-          <button className="send-button" onClick={handleSendMessage} disabled={isListening}>
-            Senden ↩️
+          <button
+            className={`send-button ${isLoading ? 'loading' : ''}`}
+            onClick={handleSendMessage}
+            disabled={isListening || isLoading}
+          >
+            {isLoading ? 'Claude antwortet...' : 'Senden ↩️'}
           </button>
         )}
       </div>
