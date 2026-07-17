@@ -3,15 +3,16 @@ import api from '../api/api';
 import { useToast } from '../hooks/useToast';
 import '../pages/AmazonListingBuilder.css';
 
-const SECTIONS = [
-  { id: 'basic', label: 'Basis-Info', icon: '📦' },
-  { id: 'descriptions', label: 'Beschreibungen', icon: '📝' },
-  { id: 'pricing', label: 'Preisgestaltung', icon: '💰' },
-  { id: 'images', label: 'Bilder', icon: '🖼️' },
+const STEPS = [
+  { id: 1, label: 'Produktinformationen', icon: '📦' },
+  { id: 2, label: 'Bilder & Videos', icon: '🖼️' },
+  { id: 3, label: 'Beschreibung', icon: '📝' },
+  { id: 4, label: 'Attribute', icon: '⚙️' },
+  { id: 5, label: 'Review & Speichern', icon: '✅' },
 ];
 
 export default function AmazonListingBuilder() {
-  const [activeTab, setActiveTab] = useState('basic');
+  const [currentStep, setCurrentStep] = useState(1);
   const [listing, setListing] = useState({
     sku: '',
     asin: '',
@@ -68,26 +69,6 @@ export default function AmazonListingBuilder() {
     }
   };
 
-  const calculateFieldScore = (field, value, maxLength, minLength = 0) => {
-    let score = 100;
-    if (!value || value.length === 0) {
-      return { score: 0, status: 'empty', message: 'Erforderlich' };
-    }
-    if (value.length < minLength) {
-      score -= 30;
-      return { score, status: 'warning', message: `Zu kurz (min. ${minLength})` };
-    }
-    if (value.length > maxLength) {
-      score -= 20;
-      return { score, status: 'error', message: `Zu lang (max. ${maxLength})` };
-    }
-    if (value.length < maxLength * 0.5) {
-      score -= 10;
-      return { score, status: 'info', message: `${maxLength - value.length} Zeichen frei` };
-    }
-    return { score, status: 'good', message: `${maxLength - value.length} Zeichen frei` };
-  };
-
   const generateAIAnalysis = (listingData) => {
     const issues = [];
     const suggestions = [];
@@ -111,7 +92,7 @@ export default function AmazonListingBuilder() {
     }
 
     if (listingData.keywords.length === 0) {
-      suggestions.push('Fügen Sie mindestens 5-10 Keywords hinzu für bessere Sichtbarkeit');
+      suggestions.push('Fügen Sie mindestens 5-10 Keywords hinzu');
       score -= 10;
     } else if (listingData.keywords.length < 5) {
       suggestions.push(`Nur ${listingData.keywords.length} Keywords - 5-10 werden empfohlen`);
@@ -121,12 +102,6 @@ export default function AmazonListingBuilder() {
     if (!listingData.price) {
       issues.push('Preis ist erforderlich');
       score -= 10;
-    }
-
-    const titleLower = (listingData.title || '').toLowerCase();
-    const keywordMatches = listingData.keywords.filter(k => titleLower.includes(k.toLowerCase())).length;
-    if (keywordMatches === 0 && listingData.keywords.length > 0) {
-      suggestions.push('Versuchen Sie, ein Haupt-Keyword in den Titel einzubauen');
     }
 
     return {
@@ -170,18 +145,65 @@ export default function AmazonListingBuilder() {
     }));
   };
 
+  const isStepComplete = (step) => {
+    switch (step) {
+      case 1:
+        return listing.sku && listing.title && listing.category;
+      case 2:
+        return listing.images.length > 0;
+      case 3:
+        return listing.bulletPoints.filter(bp => bp.trim()).length >= 3;
+      case 4:
+        return listing.price && listing.stock >= 0;
+      case 5:
+        return true;
+      default:
+        return false;
+    }
+  };
+
+  const handleNext = () => {
+    if (currentStep < 5) {
+      setCurrentStep(currentStep + 1);
+    }
+  };
+
+  const handleBack = () => {
+    if (currentStep > 1) {
+      setCurrentStep(currentStep - 1);
+    }
+  };
+
   const FieldScore = ({ value, maxLength, minLength = 0 }) => {
-    const fieldScore = calculateFieldScore('field', value, maxLength, minLength);
+    let status = 'empty';
+    let message = 'Erforderlich';
+
+    if (value && value.length > 0) {
+      if (value.length < minLength) {
+        status = 'warning';
+        message = `Zu kurz (min. ${minLength})`;
+      } else if (value.length > maxLength) {
+        status = 'error';
+        message = `Zu lang (max. ${maxLength})`;
+      } else if (value.length < maxLength * 0.5) {
+        status = 'info';
+        message = `${maxLength - value.length} Zeichen frei`;
+      } else {
+        status = 'good';
+        message = `${maxLength - value.length} Zeichen frei`;
+      }
+    }
+
     const percentage = (value.length / maxLength) * 100;
     return (
       <div className="field-score-container">
         <div className="field-score-info">
           <span className="char-count">{value.length}/{maxLength}</span>
-          <span className={`seo-score status-${fieldScore.status}`}>{fieldScore.message}</span>
+          <span className={`seo-score status-${status}`}>{message}</span>
         </div>
         <div className="score-bar">
           <div
-            className={`score-fill status-${fieldScore.status}`}
+            className={`score-fill status-${status}`}
             style={{ width: `${Math.min(percentage, 100)}%` }}
           ></div>
         </div>
@@ -189,73 +211,50 @@ export default function AmazonListingBuilder() {
     );
   };
 
-  const getTabCompletion = (tabId) => {
-    switch(tabId) {
-      case 'basic':
-        return listing.sku && listing.title && listing.category ? 100 : 50;
-      case 'descriptions':
-        const filledBullets = listing.bulletPoints.filter(bp => bp.trim()).length;
-        return (filledBullets / 5) * 100;
-      case 'pricing':
-        return listing.price ? 100 : 0;
-      case 'images':
-        return listing.images.length > 0 ? 100 : 0;
-      default:
-        return 0;
-    }
-  };
-
   return (
-    <div className="listing-builder-container">
+    <div className="listing-wizard-container">
       {/* HEADER */}
-      <div className="builder-header">
-        <div className="header-left">
-          <h1>🚀 Amazon Listing Builder Pro</h1>
-          <p>Erstelle professionelle Amazon-Listings mit Live-Vorschau und KI-Analyse</p>
-        </div>
-        <div className="header-right">
-          <div className="overall-score">
-            <span className="score-label">SCORE</span>
-            <span className="score-value">{aiAnalysis?.score || 0}</span>
-          </div>
-          <button onClick={handleSave} disabled={loading} className="btn-save-main">
-            💾 Speichern
-          </button>
-        </div>
-      </div>
-
-      {/* TABS */}
-      <div className="tabs-bar">
-        <div className="tabs-container">
-          {SECTIONS.map(section => {
-            const completion = getTabCompletion(section.id);
-            const isActive = activeTab === section.id;
-            return (
-              <button
-                key={section.id}
-                className={`tab-btn ${isActive ? 'active' : ''}`}
-                onClick={() => setActiveTab(section.id)}
-              >
-                <span className="tab-icon">{section.icon}</span>
-                <span className="tab-label">{section.label}</span>
-                {completion > 0 && (
-                  <span className="tab-progress">{Math.round(completion)}%</span>
-                )}
-              </button>
-            );
-          })}
+      <div className="wizard-header">
+        <h1>🚀 Amazon Listing Builder Pro</h1>
+        <div className="step-indicator">
+          <span className="step-number">{currentStep} von {STEPS.length}</span>
+          <a href="/" className="close-btn">✕</a>
         </div>
       </div>
 
       {/* MAIN LAYOUT */}
-      <div className="builder-layout">
-        {/* LEFT: FORM */}
-        <div className="form-panel">
-          {/* BASIC TAB */}
-          {activeTab === 'basic' && (
-            <div className="tab-content">
-              <h2>Basis-Informationen</h2>
-              <p className="section-desc">Grundlegende Produktangaben für Amazon</p>
+      <div className="wizard-layout">
+        {/* LEFT: SIDEBAR */}
+        <aside className="wizard-sidebar">
+          <h3>Schritte</h3>
+          <nav className="steps-nav">
+            {STEPS.map((step) => {
+              const completed = isStepComplete(step.id);
+              const active = currentStep === step.id;
+              return (
+                <button
+                  key={step.id}
+                  className={`step-item ${active ? 'active' : ''} ${completed ? 'completed' : ''}`}
+                  onClick={() => setCurrentStep(step.id)}
+                  disabled={!completed && step.id > currentStep}
+                >
+                  <div className="step-checkbox">
+                    {completed ? '✓' : step.id}
+                  </div>
+                  <div className="step-label">{step.label}</div>
+                </button>
+              );
+            })}
+          </nav>
+        </aside>
+
+        {/* RIGHT: CONTENT */}
+        <main className="wizard-content">
+          {/* STEP 1: PRODUKTINFORMATIONEN */}
+          {currentStep === 1 && (
+            <div className="step-panel">
+              <h2>Produktinformationen</h2>
+              <p className="step-desc">Grundlegende Daten zu Ihrem Produkt</p>
 
               <div className="form-2col">
                 <div className="form-group">
@@ -303,63 +302,61 @@ export default function AmazonListingBuilder() {
                   </select>
                 </div>
                 <div className="form-group">
-                  <label>Preis * (EUR)</label>
+                  <label>Marke</label>
                   <input
-                    type="number"
-                    step="0.01"
-                    placeholder="0.00"
-                    value={listing.price}
-                    onChange={(e) => updateField('price', e.target.value)}
-                  />
-                </div>
-              </div>
-
-              <div className="form-2col">
-                <div className="form-group">
-                  <label>Lagerbestand *</label>
-                  <input
-                    type="number"
-                    placeholder="0"
-                    value={listing.stock}
-                    onChange={(e) => updateField('stock', parseInt(e.target.value))}
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Gewicht</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    placeholder="0.00"
-                    value={listing.weight}
-                    onChange={(e) => updateField('weight', e.target.value)}
+                    type="text"
+                    placeholder="Ihre Marke"
+                    value={listing.brand || ''}
+                    onChange={(e) => updateField('brand', e.target.value)}
                   />
                 </div>
               </div>
             </div>
           )}
 
-          {/* DESCRIPTIONS TAB */}
-          {activeTab === 'descriptions' && (
-            <div className="tab-content">
-              <h2>Beschreibungen & Keywords</h2>
-              <p className="section-desc">Merkmale, Suchbegriffe und detaillierte Beschreibung</p>
+          {/* STEP 2: BILDER & VIDEOS */}
+          {currentStep === 2 && (
+            <div className="step-panel">
+              <h2>Bilder & Videos</h2>
+              <p className="step-desc">Hochqualitative Produktbilder für bessere Konversion</p>
+
+              <div className="upload-area">
+                <input type="file" multiple accept="image/*" hidden id="image-input" />
+                <label htmlFor="image-input" className="upload-label">
+                  <p>📤 Bilder hier ablegen</p>
+                  <span>oder klicken zum Upload</span>
+                </label>
+              </div>
+
+              <div className="info-box">
+                <p><strong>💡 Tipp:</strong> Mindestens 3 hochwertige Bilder werden empfohlen. Erste Position ist das Hauptbild.</p>
+              </div>
+            </div>
+          )}
+
+          {/* STEP 3: BESCHREIBUNG */}
+          {currentStep === 3 && (
+            <div className="step-panel">
+              <h2>Produktbeschreibung</h2>
+              <p className="step-desc">Merkmale, Keywords und Details</p>
 
               <div className="form-group full">
                 <label>Bullet Points * (5 Stück, max 500 Zeichen)</label>
                 <div className="bullets-container">
                   {listing.bulletPoints.map((bp, i) => (
-                    <div key={i} className="bullet-input-group">
-                      <span className="bullet-num">{i + 1}.</span>
-                      <div style={{ flex: 1 }}>
-                        <textarea
-                          rows={2}
-                          maxLength={500}
-                          placeholder={`Wichtiges Merkmal oder Vorteil ${i + 1}`}
-                          value={bp}
-                          onChange={(e) => updateBulletPoint(i, e.target.value)}
-                        />
-                        <FieldScore value={bp} maxLength={500} />
+                    <div key={i} className="bullet-item">
+                      <div className="bullet-header">
+                        <span className="bullet-num">Merkmal {i + 1}</span>
+                        {bp && <span className="bullet-status">✓</span>}
                       </div>
+                      <textarea
+                        rows={2}
+                        maxLength={500}
+                        placeholder={`Wichtiges Merkmal oder Vorteil`}
+                        value={bp}
+                        onChange={(e) => updateBulletPoint(i, e.target.value)}
+                      />
+                      <FieldScore value={bp} maxLength={500} />
                     </div>
                   ))}
                 </div>
@@ -369,11 +366,11 @@ export default function AmazonListingBuilder() {
                 <label>Suchbegriffe / Keywords</label>
                 <textarea
                   rows={3}
-                  placeholder="Geben Sie Keywords durch Komma getrennt ein"
+                  placeholder="Komma-getrennt: Keyword1, Keyword2, Keyword3..."
                   value={listing.keywords.join(', ')}
                   onChange={(e) => updateField('keywords', e.target.value.split(',').map(k => k.trim()).filter(k => k))}
                 />
-                <div className="keywords-count">Eingegeben: {listing.keywords.length}</div>
+                <div className="keywords-info">Eingegeben: {listing.keywords.length}</div>
               </div>
 
               <div className="form-group full">
@@ -390,116 +387,144 @@ export default function AmazonListingBuilder() {
             </div>
           )}
 
-          {/* PRICING TAB */}
-          {activeTab === 'pricing' && (
-            <div className="tab-content">
-              <h2>Preisgestaltung & Versand</h2>
-              <p className="section-desc">Detaillierte Repricing in separatem Tool</p>
+          {/* STEP 4: ATTRIBUTE */}
+          {currentStep === 4 && (
+            <div className="step-panel">
+              <h2>Preis & Bestand</h2>
+              <p className="step-desc">Preisgestaltung und Lagerbestände</p>
+
+              <div className="form-2col">
+                <div className="form-group">
+                  <label>Verkaufspreis * (EUR)</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    placeholder="0.00"
+                    value={listing.price}
+                    onChange={(e) => updateField('price', e.target.value)}
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Lagerbestand *</label>
+                  <input
+                    type="number"
+                    placeholder="0"
+                    value={listing.stock}
+                    onChange={(e) => updateField('stock', parseInt(e.target.value))}
+                  />
+                </div>
+              </div>
+
+              <div className="form-2col">
+                <div className="form-group">
+                  <label>Gewicht (kg)</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    placeholder="0.00"
+                    value={listing.weight}
+                    onChange={(e) => updateField('weight', e.target.value)}
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Höhe (cm)</label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    placeholder="0.0"
+                    value={listing.dimensions.height}
+                    onChange={(e) => updateField('dimensions', {...listing.dimensions, height: parseFloat(e.target.value)})}
+                  />
+                </div>
+              </div>
+
               <div className="info-box">
-                <p><strong>💡 Info:</strong> Preisgestaltung wird separat im <strong>Repricing-Tool</strong> verwaltet</p>
+                <p><strong>💡 Tipp:</strong> Detaillierte Repricing-Regeln können Sie später im Repricing-Tool konfigurieren.</p>
               </div>
             </div>
           )}
 
-          {/* IMAGES TAB */}
-          {activeTab === 'images' && (
-            <div className="tab-content">
-              <h2>Bilder & Media</h2>
-              <p className="section-desc">Hochqualitative Produktbilder</p>
-              <div className="upload-area">
-                <input type="file" multiple accept="image/*" hidden id="image-input" />
-                <label htmlFor="image-input" className="upload-label">
-                  <p>📤 Bilder hier ablegen</p>
-                  <span>oder klicken zum Upload</span>
-                </label>
-              </div>
-            </div>
-          )}
-        </div>
+          {/* STEP 5: REVIEW & SPEICHERN */}
+          {currentStep === 5 && (
+            <div className="step-panel">
+              <h2>Review & Speichern</h2>
+              <p className="step-desc">Überprüfen Sie Ihr Listing vor dem Speichern</p>
 
-        {/* RIGHT: PREVIEW & ANALYSIS */}
-        <div className="preview-panel">
-          <div className="preview-tabs">
-            <button className="preview-tab active">👁️ Vorschau</button>
-            <button className="preview-tab">🤖 AI-Analyse</button>
-          </div>
-
-          {/* AMAZON PREVIEW */}
-          <div className="preview-content">
-            <div className="amazon-preview">
-              <div className="preview-title">{listing.title || 'Produkttitel...'}</div>
-
-              <div className="preview-price">
-                <span className="price-label">Preis:</span>
-                <span className="price-value">{listing.price ? `€${parseFloat(listing.price).toFixed(2)}` : '–'}</span>
-              </div>
-
-              <div className="preview-rating">
-                ⭐⭐⭐⭐⭐ 4.5 | 128 Bewertungen
-              </div>
-
-              <div className="preview-bullets">
-                <h4>Merkmale:</h4>
-                {listing.bulletPoints.filter(bp => bp).map((bp, i) => (
-                  <div key={i} className="bullet-preview">• {bp.substring(0, 80)}{bp.length > 80 ? '...' : ''}</div>
-                ))}
-              </div>
-
-              <div className="preview-description">
-                <h4>Beschreibung:</h4>
-                <p>{listing.description.substring(0, 150)}{listing.description.length > 150 ? '...' : ''}</p>
-              </div>
-
-              <button className="btn-add-to-cart">In den Warenkorb</button>
-            </div>
-          </div>
-
-          {/* AI ANALYSIS */}
-          {aiAnalysis && (
-            <div className="analysis-content">
-              <div className="score-card">
-                <div className="score-circle">
-                  <span className="score-number">{aiAnalysis.score}</span>
-                  <span className="score-label">Score</span>
+              <div className="review-section">
+                <h3>Zusammenfassung</h3>
+                <div className="review-grid">
+                  <div className="review-item">
+                    <span className="review-label">Titel:</span>
+                    <span className="review-value">{listing.title || '–'}</span>
+                  </div>
+                  <div className="review-item">
+                    <span className="review-label">SKU:</span>
+                    <span className="review-value">{listing.sku || '–'}</span>
+                  </div>
+                  <div className="review-item">
+                    <span className="review-label">Kategorie:</span>
+                    <span className="review-value">{listing.category || '–'}</span>
+                  </div>
+                  <div className="review-item">
+                    <span className="review-label">Preis:</span>
+                    <span className="review-value">€{parseFloat(listing.price || 0).toFixed(2)}</span>
+                  </div>
+                  <div className="review-item">
+                    <span className="review-label">Lagerbestand:</span>
+                    <span className="review-value">{listing.stock}</span>
+                  </div>
+                  <div className="review-item">
+                    <span className="review-label">Merkmale:</span>
+                    <span className="review-value">{listing.bulletPoints.filter(bp => bp).length}/5</span>
+                  </div>
                 </div>
               </div>
 
-              {aiAnalysis.issues.length > 0 && (
-                <div className="issues-box">
-                  <h4>⚠️ Probleme</h4>
-                  {aiAnalysis.issues.map((issue, i) => (
-                    <div key={i} className="issue-item">{issue}</div>
-                  ))}
+              {aiAnalysis && (
+                <div className="ai-summary">
+                  <h3>KI-Analyse Score: {aiAnalysis.score}</h3>
+                  {aiAnalysis.issues.length > 0 && (
+                    <div className="issues">
+                      <h4>⚠️ Kritische Punkte:</h4>
+                      {aiAnalysis.issues.map((issue, i) => (
+                        <p key={i}>• {issue}</p>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
-
-              {aiAnalysis.suggestions.length > 0 && (
-                <div className="suggestions-box">
-                  <h4>💡 Vorschläge</h4>
-                  {aiAnalysis.suggestions.map((sug, i) => (
-                    <div key={i} className="suggestion-item">{sug}</div>
-                  ))}
-                </div>
-              )}
-
-              <div className="stats-box">
-                <h4>📊 Statistiken</h4>
-                <div className="stat-row">
-                  <span>Titel-Länge:</span>
-                  <span>{aiAnalysis.stats.titleLength}/200</span>
-                </div>
-                <div className="stat-row">
-                  <span>Bullet Points:</span>
-                  <span>{aiAnalysis.stats.bulletPoints}/5</span>
-                </div>
-                <div className="stat-row">
-                  <span>Keywords:</span>
-                  <span>{aiAnalysis.stats.keywords}</span>
-                </div>
-              </div>
             </div>
           )}
-        </div>
+
+          {/* NAVIGATION BUTTONS */}
+          <div className="wizard-actions">
+            <button
+              className="btn-back"
+              onClick={handleBack}
+              disabled={currentStep === 1}
+            >
+              ← Zurück
+            </button>
+
+            {currentStep < 5 ? (
+              <button
+                className="btn-next"
+                onClick={handleNext}
+                disabled={!isStepComplete(currentStep)}
+              >
+                Weiter →
+              </button>
+            ) : (
+              <button
+                className="btn-save"
+                onClick={handleSave}
+                disabled={loading}
+              >
+                💾 Speichern
+              </button>
+            )}
+          </div>
+        </main>
       </div>
     </div>
   );
