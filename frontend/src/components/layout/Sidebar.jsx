@@ -6,30 +6,11 @@ import { NavLink, useLocation } from 'react-router-dom';
 const NAV = [
   { label: 'Dashboard', icon: '📊', to: '/' },
   {
-    label: 'Produktrecherche', icon: '🔍', children: [
-      { label: 'Black Box · Produkte', to: '/research' },
-      { label: 'Keyword-Recherche', to: '/research/keywords' },
-      { label: 'Wettbewerber', to: '/research/competitors' },
-      { label: 'Nische', to: '/research/niche' },
-      { label: 'Produkt-Targeting', to: '/research/targeting' },
-      { label: 'Elite Analytics', to: '/research/analytics' },
-    ],
-  },
-  {
-    label: 'Keywords', icon: '🔑', children: [
-      { label: 'Keyword Master', to: '/keywords' },
-      { label: 'Cerebro · Reverse-ASIN', to: '/keywords/cerebro' },
-      { label: 'Rankings', to: '/keywords/rankings' },
-    ],
-  },
-  {
-    label: 'Advertising', icon: '🎯', children: [
-      { label: 'Zeitvergleich', to: '/ppc' },
-      { label: 'Kampagnen', to: '/ppc/campaigns' },
-      { label: 'Smart Portfolios', to: '/ppc/portfolios' },
-      { label: 'Automation', to: '/ppc/automation' },
-      { label: 'Google Ads', to: '/google-ads' },
-      { label: 'Bing Ads', to: '/bing-ads' },
+    label: 'Marktplätze', icon: '🌐', children: [
+      { label: 'Übersicht', to: '/channels' },
+      { label: 'Marktplätze', to: '/channels/marketplaces' },
+      { label: 'Suchmaschinen', to: '/channels/search' },
+      { label: 'Advertising-Plattformen', to: '/channels/ads' },
     ],
   },
   {
@@ -42,19 +23,32 @@ const NAV = [
       { label: 'Scribbles', to: '/listings/scribbles' },
     ],
   },
+  { label: 'Pricing', icon: '💰', to: '/pricing' },
+  { label: 'Analytics', icon: '📈', to: '/analytics' },
   {
-    label: 'Marktplätze', icon: '🌐', children: [
-      { label: 'Übersicht', to: '/channels' },
-      { label: 'Marktplätze', to: '/channels/marketplaces' },
-      { label: 'Suchmaschinen', to: '/channels/search' },
-      { label: 'Advertising-Plattformen', to: '/channels/ads' },
+    label: 'Keywords', icon: '🔑', children: [
+      { label: 'Keyword Master', to: '/keywords' },
+      { label: 'Cerebro · Reverse-ASIN', to: '/keywords/cerebro' },
+      { label: 'Rankings', to: '/keywords/rankings' },
     ],
   },
-  { label: 'Analytics', icon: '📈', to: '/analytics' },
+  {
+    label: 'Produktrecherche', icon: '🔍', children: [
+      { label: 'Black Box · Produkte', to: '/research' },
+      { label: 'Keyword-Recherche', to: '/research/keywords' },
+      { label: 'Wettbewerber', to: '/research/competitors' },
+      { label: 'Nische', to: '/research/niche' },
+      { label: 'Produkt-Targeting', to: '/research/targeting' },
+      { label: 'Elite Analytics', to: '/research/analytics' },
+    ],
+  },
   { label: 'Audience', icon: '👥', to: '/audience' },
-  { label: 'Pricing', icon: '💰', to: '/pricing' },
-  { label: 'Login Verlauf', icon: '📋', to: '/login-history' },
-  { label: 'Einstellungen', icon: '⚙️', to: '/settings' },
+  {
+    label: 'Einstellungen', icon: '⚙️', children: [
+      { label: 'Konto-Einstellungen', to: '/settings' },
+      { label: 'Login Verlauf', to: '/login-history' },
+    ],
+  },
 ];
 
 function matchesChild(pathname, to) {
