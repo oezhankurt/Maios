@@ -7,8 +7,8 @@ const csrfGenerate = (req, res, next) => {
   const token = generateCSRFToken();
   res.cookie(CSRF_COOKIE_NAME, token, {
     httpOnly: false,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict',
+    secure: true,
+    sameSite: 'none',
     maxAge: 3600000,
   });
   res.csrfToken = token;
