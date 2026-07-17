@@ -40,6 +40,7 @@ import ListingsManager from './pages/ListingsManager.jsx';
 import ListingsSchedule from './pages/ListingsSchedule.jsx';
 import ListingsAnalyticsDashboard from './pages/ListingsAnalyticsDashboard.jsx';
 import Pricing from './pages/Pricing.jsx';
+import AmazonListingBuilder from './pages/AmazonListingBuilder.jsx';
 
 function ProtectedRoute({ children }) {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
@@ -99,6 +100,7 @@ export default function App() {
         <Route path="/listings/products" element={<Listings view="products" />} />
         <Route path="/listings/score" element={<Listings view="score" />} />
         <Route path="/listings/builder" element={<ListingBuilder />} />
+        <Route path="/listings/amazon-builder" element={<AmazonListingBuilder />} />
         <Route path="/listings/analyzer" element={<ListingAnalyzer />} />
         <Route path="/listings/index" element={<IndexChecker />} />
         <Route path="/listings/scribbles" element={<Scribbles />} />
