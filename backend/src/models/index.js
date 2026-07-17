@@ -25,6 +25,7 @@ const ListingPublishLog = require('./ListingPublishLog')(sequelize);
 const ListingTemplate = require('./ListingTemplate')(sequelize);
 const RepricingRule = require('./RepricingRule')(sequelize);
 const PriceHistory = require('./PriceHistory')(sequelize);
+const AmazonListing = require('./AmazonListing')(sequelize);
 
 // ── Associations ─────────────────────────────────────────────────────
 User.hasMany(LoginHistory, { foreignKey: 'userId', as: 'loginHistory', onDelete: 'CASCADE' });
@@ -122,6 +123,12 @@ PriceHistory.belongsTo(Product, { foreignKey: 'productId', as: 'product' });
 RepricingRule.hasMany(PriceHistory, { foreignKey: 'repricingRuleId', as: 'priceHistory' });
 PriceHistory.belongsTo(RepricingRule, { foreignKey: 'repricingRuleId', as: 'repricingRule' });
 
+// Amazon Listings
+User.hasMany(AmazonListing, { foreignKey: 'userId', as: 'amazonListings', onDelete: 'CASCADE' });
+AmazonListing.belongsTo(User, { foreignKey: 'userId', as: 'user' });
+Product.hasMany(AmazonListing, { foreignKey: 'productId', as: 'amazonListings', onDelete: 'SET NULL' });
+AmazonListing.belongsTo(Product, { foreignKey: 'productId', as: 'product' });
+
 const db = {
   sequelize,
   User,
@@ -149,6 +156,7 @@ const db = {
   ListingTemplate,
   RepricingRule,
   PriceHistory,
+  AmazonListing,
 };
 
 module.exports = db;

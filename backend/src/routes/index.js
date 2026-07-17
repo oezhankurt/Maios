@@ -30,6 +30,7 @@ router.use('/audience', require('./audienceRoutes'));
 router.use('/google-ads', require('./googleAdsRoutes'));
 router.use('/bing-ads', require('./bingAdsRoutes'));
 router.use('/repricing', require('./repricing'));
+router.use('/amazon-listings', require('./amazonListingRoutes'));
 
 router.get('/health', (req, res) => {
   res.json({ success: true, status: 'ok', timestamp: new Date().toISOString() });
