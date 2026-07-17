@@ -35,7 +35,7 @@ Sei freundlich, humorvoll und unterstützend.`
 
   async sendMessage(userMessage) {
     if (!this.apiKey) {
-      throw new Error('Claude API Key nicht konfiguriert. Bitte in .env setzen.')
+      throw new Error('Claude API Key nicht konfiguriert. Bitte in Einstellungen hinzufügen.')
     }
 
     this.addToHistory('user', userMessage)
@@ -82,6 +82,9 @@ Sei freundlich, humorvoll und unterstützend.`
       }
     } catch (error) {
       console.error('Claude API Error:', error)
+      if (!navigator.onLine) {
+        throw new Error('Du bist offline. Claude API ist nicht erreichbar. Nur lokale Funktionen verfügbar.')
+      }
       throw error
     }
   }
