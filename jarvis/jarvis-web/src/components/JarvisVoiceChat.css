@@ -18,27 +18,57 @@
 }
 
 .jarvis-header {
-  padding: 30px 20px;
-  text-align: center;
+  padding: 20px;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
 }
 
 .jarvis-logo {
-  font-size: 48px;
-  margin-bottom: 10px;
+  font-size: 40px;
+  flex-shrink: 0;
 }
 
-.jarvis-header h1 {
-  font-size: 28px;
+.jarvis-title {
+  flex: 1;
+  text-align: center;
+}
+
+.jarvis-title h1 {
+  font-size: 24px;
   font-weight: 600;
-  margin-bottom: 5px;
+  margin: 0 0 3px 0;
 }
 
-.jarvis-header p {
-  font-size: 14px;
+.jarvis-title p {
+  font-size: 12px;
   opacity: 0.9;
+  margin: 0;
+}
+
+.settings-btn {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 20px;
+  color: white;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.settings-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.1);
 }
 
 .chat-area {
@@ -207,6 +237,28 @@
 .send-button.loading {
   background: #2196F3;
   animation: shimmer 1.5s infinite;
+}
+
+.clear-btn {
+  padding: 8px 16px;
+  font-size: 12px;
+  font-weight: 600;
+  border: none;
+  border-radius: 50px;
+  background: #ff6b6b;
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(255, 107, 107, 0.3);
+}
+
+.clear-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(255, 107, 107, 0.4);
+}
+
+.clear-btn:active {
+  transform: translateY(0);
 }
 
 .voice-button:disabled {

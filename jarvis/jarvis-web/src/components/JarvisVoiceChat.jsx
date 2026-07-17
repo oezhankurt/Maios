@@ -1,13 +1,16 @@
 import './JarvisVoiceChat.css'
 import { useSpeech } from '../hooks/useSpeech'
 import { useClaude } from '../hooks/useClaude'
-import { useState, useEffect } from 'react'
+import Settings from './Settings'
+import { useState, useEffect, useRef } from 'react'
 
 export default function JarvisVoiceChat() {
   const [messages, setMessages] = useState([])
   const [transcript, setTranscript] = useState('')
+  const [showSettings, setShowSettings] = useState(false)
+  const messagesEndRef = useRef(null)
   const { isListening, transcript: speechTranscript, isSpeaking, error: speechError, isSupported, startListening, stopListening, speak } = useSpeech()
-  const { sendMessage, isLoading, error: claudeError, testConnection } = useClaude()
+  const { sendMessage, isLoading, error: claudeError, testConnection, setSystemPrompt, clearHistory } = useClaude()
 
   useEffect(() => {
     setTranscript(speechTranscript)
@@ -18,6 +21,22 @@ export default function JarvisVoiceChat() {
   useEffect(() => {
     testConnection()
   }, [testConnection])
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [messages])
+
+  const handleSettingsSave = ({ apiKey, systemPrompt }) => {
+    setSystemPrompt(systemPrompt)
+    window.location.reload()
+  }
+
+  const handleClearHistory = () => {
+    if (window.confirm('Chatverlauf wirklich löschen?')) {
+      clearHistory()
+      setMessages([])
+    }
+  }
 
   const toggleListening = () => {
     if (isListening) {
@@ -72,8 +91,17 @@ export default function JarvisVoiceChat() {
     <div className="jarvis-container">
       <div className="jarvis-header">
         <div className="jarvis-logo">🎤</div>
-        <h1>Jarvis</h1>
-        <p>Dein Voice Assistant für Claude</p>
+        <div className="jarvis-title">
+          <h1>Jarvis</h1>
+          <p>Dein Voice Assistant für Claude</p>
+        </div>
+        <button
+          className="settings-btn"
+          onClick={() => setShowSettings(true)}
+          title="Einstellungen"
+        >
+          ⚙️
+        </button>
       </div>
 
       {error && <div className="error-banner">{error}</div>}
@@ -111,6 +139,8 @@ export default function JarvisVoiceChat() {
             Claude antwortet...
           </div>
         )}
+
+        <div ref={messagesEndRef} />
       </div>
 
       <div className="controls">
@@ -131,7 +161,19 @@ export default function JarvisVoiceChat() {
             {isLoading ? 'Claude antwortet...' : 'Senden ↩️'}
           </button>
         )}
+        {messages.length > 0 && (
+          <button className="clear-btn" onClick={handleClearHistory} title="Chatverlauf löschen">
+            🗑️ Clear
+          </button>
+        )}
       </div>
+
+      {showSettings && (
+        <Settings
+          onClose={() => setShowSettings(false)}
+          onSave={handleSettingsSave}
+        />
+      )}
     </div>
   )
 }
