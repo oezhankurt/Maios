@@ -8,7 +8,7 @@ const NAV = [
   {
     label: 'Marktplätze', icon: '🌐', children: [
       {
-        label: 'Amazon', collapsible: true, children: [
+        label: 'Amazon', icon: '🔶', collapsible: true, children: [
           { label: 'Listings Manager', to: '/listings' },
           { label: 'Listing Builder Pro', to: '/listings/amazon-builder' },
           { label: 'Listing Analyzer', to: '/listings/analyzer' },
@@ -24,9 +24,9 @@ const NAV = [
           { label: 'Automation', to: '/ppc/automation' },
         ],
       },
-      { label: 'Otto', collapsible: true, children: [{ label: 'Coming soon...', to: '#' }] },
-      { label: 'Kaufland', collapsible: true, children: [{ label: 'Coming soon...', to: '#' }] },
-      { label: 'eBay', collapsible: true, children: [{ label: 'Coming soon...', to: '#' }] },
+      { label: 'Otto', icon: '🟥', collapsible: true, children: [{ label: 'Coming soon...', to: '#' }] },
+      { label: 'Kaufland', icon: '🟩', collapsible: true, children: [{ label: 'Coming soon...', to: '#' }] },
+      { label: 'eBay', icon: '🟨', collapsible: true, children: [{ label: 'Coming soon...', to: '#' }] },
     ],
   },
   {
@@ -126,6 +126,7 @@ export default function Sidebar({ open, onNavigate }) {
                             className="nav-marketplace"
                             onClick={() => toggleMarketplace(c.label)}
                           >
+                            {c.icon && <span className="marketplace-icon">{c.icon}</span>}
                             <span>{c.label}</span>
                             <span className={`caret ${marketplaceExpanded ? 'open' : ''}`}>›</span>
                           </button>
