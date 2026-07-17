@@ -1,9 +1,11 @@
+import { useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuthStore } from './store/authStore';
 import Layout from './components/layout/Layout.jsx';
 import PublicLayout from './components/layout/PublicLayout.jsx';
 import ToastContainer from './components/Toast/Toast.jsx';
 import ThemeToggle from './components/ThemeToggle.jsx';
+import api from './api/api.js';
 import Login from './pages/Login.jsx';
 import Register from './pages/Register.jsx';
 import Dashboard from './pages/Dashboard.jsx';
@@ -45,6 +47,12 @@ function ProtectedRoute({ children }) {
 }
 
 export default function App() {
+  useEffect(() => {
+    api.get('/health').catch(() => {
+      // Silently fail - health check is just for CSRF initialization
+    });
+  }, []);
+
   return (
     <>
       <ToastContainer />
