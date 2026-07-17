@@ -9,19 +9,49 @@ const NAV = [
     label: 'Marktplätze', icon: '🌐', children: [
       {
         label: 'Amazon', icon: '🔶', collapsible: true, children: [
-          { label: 'Listings Manager', to: '/listings' },
-          { label: 'Listing Builder Pro', to: '/listings/amazon-builder' },
-          { label: 'Listing Analyzer', to: '/listings/analyzer' },
-          { label: 'Listing-Analyse', to: '/listings/score' },
-          { label: 'Index Checker', to: '/listings/index' },
-          { label: 'Scribbles', to: '/listings/scribbles' },
-          { label: 'Repricing', to: '/pricing' },
-          { label: 'Keywords', to: '/keywords' },
-          { label: 'Cerebro · Reverse-ASIN', to: '/keywords/cerebro' },
-          { label: 'Rankings', to: '/keywords/rankings' },
-          { label: 'PPC Kampagnen', to: '/ppc' },
-          { label: 'Smart Portfolios', to: '/ppc/portfolios' },
-          { label: 'Automation', to: '/ppc/automation' },
+          {
+            label: 'Listings & Beschreibungen',
+            group: true,
+            children: [
+              { label: 'Listings Manager', to: '/listings' },
+              { label: 'Listing Builder Pro', to: '/listings/amazon-builder' },
+              { label: 'Listing Analyzer', to: '/listings/analyzer' },
+              { label: 'Listing-Analyse', to: '/listings/score' },
+            ],
+          },
+          {
+            label: 'Index & Notizen',
+            group: true,
+            children: [
+              { label: 'Index Checker', to: '/listings/index' },
+              { label: 'Scribbles', to: '/listings/scribbles' },
+            ],
+          },
+          {
+            label: 'Repricing',
+            group: true,
+            children: [
+              { label: 'Repricing', to: '/pricing' },
+            ],
+          },
+          {
+            label: 'Keywords',
+            group: true,
+            children: [
+              { label: 'Keywords', to: '/keywords' },
+              { label: 'Cerebro · Reverse-ASIN', to: '/keywords/cerebro' },
+              { label: 'Rankings', to: '/keywords/rankings' },
+            ],
+          },
+          {
+            label: 'PPC & Werbung',
+            group: true,
+            children: [
+              { label: 'PPC Kampagnen', to: '/ppc' },
+              { label: 'Smart Portfolios', to: '/ppc/portfolios' },
+              { label: 'Automation', to: '/ppc/automation' },
+            ],
+          },
         ],
       },
       { label: 'Otto', icon: '🟥', collapsible: true, children: [{ label: 'Coming soon...', to: '#' }] },
@@ -132,17 +162,37 @@ export default function Sidebar({ open, onNavigate }) {
                           </button>
                           {marketplaceExpanded && (
                             <div className="marketplace-items">
-                              {c.children.map((sub) => (
-                                <NavLink
-                                  key={sub.to}
-                                  to={sub.to}
-                                  end
-                                  className={({ isActive }) => `nav-child ${isActive ? 'active' : ''}`}
-                                  onClick={onNavigate}
-                                >
-                                  {sub.label}
-                                </NavLink>
-                              ))}
+                              {c.children.map((sub, idx) => {
+                                if (sub.group) {
+                                  return (
+                                    <div key={`group-${idx}`} className="nav-group-section">
+                                      <div className="group-title">{sub.label}</div>
+                                      {sub.children.map((item) => (
+                                        <NavLink
+                                          key={item.to}
+                                          to={item.to}
+                                          end
+                                          className={({ isActive }) => `nav-child ${isActive ? 'active' : ''}`}
+                                          onClick={onNavigate}
+                                        >
+                                          {item.label}
+                                        </NavLink>
+                                      ))}
+                                    </div>
+                                  );
+                                }
+                                return (
+                                  <NavLink
+                                    key={sub.to}
+                                    to={sub.to}
+                                    end
+                                    className={({ isActive }) => `nav-child ${isActive ? 'active' : ''}`}
+                                    onClick={onNavigate}
+                                  >
+                                    {sub.label}
+                                  </NavLink>
+                                );
+                              })}
                             </div>
                           )}
                         </div>
