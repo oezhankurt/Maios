@@ -73,7 +73,7 @@ export default function Sidebar({ open, onNavigate }) {
   return (
     <aside className={`sidebar ${open ? 'open' : ''}`}>
       <div className="brand">
-        Ma<span>ios</span>
+        M<span className="brand-accent">ai</span>os
       </div>
       <nav>
         {NAV.map((item) => {
