@@ -1,5 +1,5 @@
 const csv = require('csv-parse/sync');
-const { v4: uuidv4 } = require('uuid');
+const { randomUUID } = require('crypto');
 
 class CSVImportService {
   static REQUIRED_FIELDS = ['productName', 'basePrice'];
@@ -74,7 +74,7 @@ class CSVImportService {
   static transformRecords(records) {
     return records.map((record) => {
       const listing = {
-        id: uuidv4(),
+        id: randomUUID(),
         productName: record.productName.trim(),
         description: record.description ? record.description.trim() : null,
         basePrice: parseFloat(record.basePrice),

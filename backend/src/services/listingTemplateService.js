@@ -1,5 +1,5 @@
 const { ListingTemplate, Listing } = require('../models');
-const { v4: uuidv4 } = require('uuid');
+const { randomUUID } = require('crypto');
 
 class ListingTemplateService {
   static async createTemplate(userId, templateData) {
@@ -12,7 +12,7 @@ class ListingTemplateService {
     }
 
     const template = await ListingTemplate.create({
-      id: uuidv4(),
+      id: randomUUID(),
       userId,
       name,
       category,
@@ -124,7 +124,7 @@ class ListingTemplateService {
     };
 
     const template = await ListingTemplate.create({
-      id: uuidv4(),
+      id: randomUUID(),
       userId,
       name: templateName,
       category: listing.metadata?.category || 'General',
@@ -159,7 +159,7 @@ class ListingTemplateService {
     }
 
     const newTemplate = await ListingTemplate.create({
-      id: uuidv4(),
+      id: randomUUID(),
       userId,
       name: newName || `${template.name} (Copy)`,
       category: template.category,
