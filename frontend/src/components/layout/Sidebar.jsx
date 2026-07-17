@@ -6,24 +6,29 @@ import { NavLink, useLocation } from 'react-router-dom';
 const NAV = [
   { label: 'Dashboard', icon: '📊', to: '/' },
   {
-    label: 'Amazon', icon: '🚀', children: [
-      { label: 'Listings Manager', to: '/listings' },
-      { label: 'Listing Builder Pro', to: '/listings/amazon-builder' },
-      { label: 'Listing Analyzer', to: '/listings/analyzer' },
-      { label: 'Listing-Analyse', to: '/listings/score' },
-      { label: 'Index Checker', to: '/listings/index' },
-      { label: 'Scribbles', to: '/listings/scribbles' },
-      { label: 'Repricing', to: '/pricing' },
-      { label: 'Keywords', to: '/keywords' },
-      { label: 'Cerebro · Reverse-ASIN', to: '/keywords/cerebro' },
-      { label: 'Rankings', to: '/keywords/rankings' },
-      { label: 'PPC Kampagnen', to: '/ppc' },
-      { label: 'Smart Portfolios', to: '/ppc/portfolios' },
-      { label: 'Automation', to: '/ppc/automation' },
+    label: 'Marktplätze', icon: '🌐', children: [
+      {
+        label: 'Amazon', children: [
+          { label: 'Listings Manager', to: '/listings' },
+          { label: 'Listing Builder Pro', to: '/listings/amazon-builder' },
+          { label: 'Listing Analyzer', to: '/listings/analyzer' },
+          { label: 'Listing-Analyse', to: '/listings/score' },
+          { label: 'Index Checker', to: '/listings/index' },
+          { label: 'Scribbles', to: '/listings/scribbles' },
+          { label: 'Repricing', to: '/pricing' },
+          { label: 'Keywords', to: '/keywords' },
+          { label: 'Cerebro · Reverse-ASIN', to: '/keywords/cerebro' },
+          { label: 'Rankings', to: '/keywords/rankings' },
+          { label: 'PPC Kampagnen', to: '/ppc' },
+          { label: 'Smart Portfolios', to: '/ppc/portfolios' },
+          { label: 'Automation', to: '/ppc/automation' },
+        ],
+      },
+      { label: 'Otto', children: [{ label: 'Coming soon...', to: '#' }] },
+      { label: 'Kaufland', children: [{ label: 'Coming soon...', to: '#' }] },
+      { label: 'eBay', children: [{ label: 'Coming soon...', to: '#' }] },
     ],
   },
-  { label: 'Google Ads', icon: '📱', to: '/google-ads' },
-  { label: 'Bing Ads', icon: '🔷', to: '/bing-ads' },
   {
     label: 'Produktrecherche', icon: '🔍', children: [
       { label: 'Black Box · Produkte', to: '/research' },
@@ -45,16 +50,30 @@ const NAV = [
 ];
 
 function matchesChild(pathname, to) {
-  return pathname === to || pathname.startsWith(`${to}/`);
+  return to && (pathname === to || pathname.startsWith(`${to}/`));
+}
+
+function findActiveGroup(pathname) {
+  for (const item of NAV) {
+    if (!item.children) continue;
+    for (const child of item.children) {
+      if (child.children) {
+        if (child.children.some((c) => matchesChild(pathname, c.to))) {
+          return { parent: item.label, child: child.label };
+        }
+      } else if (matchesChild(pathname, child.to)) {
+        return { parent: item.label };
+      }
+    }
+  }
+  return null;
 }
 
 export default function Sidebar({ open, onNavigate }) {
   const { pathname } = useLocation();
-  const activeGroup = NAV.find(
-    (n) => n.children && n.children.some((c) => matchesChild(pathname, c.to))
-  )?.label;
+  const active = findActiveGroup(pathname);
   const [openGroups, setOpenGroups] = useState({});
-  const isOpen = (label) => (label in openGroups ? openGroups[label] : label === activeGroup);
+  const isOpen = (label) => (label in openGroups ? openGroups[label] : label === active?.parent);
   const toggle = (label) => setOpenGroups((g) => ({ ...g, [label]: !isOpen(label) }));
 
   return (
@@ -79,7 +98,7 @@ export default function Sidebar({ open, onNavigate }) {
             );
           }
           const expanded = isOpen(item.label);
-          const groupActive = item.label === activeGroup;
+          const groupActive = item.label === active?.parent;
           return (
             <div key={item.label}>
               <button
@@ -93,17 +112,49 @@ export default function Sidebar({ open, onNavigate }) {
               </button>
               {expanded && (
                 <div className="nav-children">
-                  {item.children.map((c) => (
-                    <NavLink
-                      key={c.to}
-                      to={c.to}
-                      end
-                      className={({ isActive }) => `nav-child ${isActive ? 'active' : ''}`}
-                      onClick={onNavigate}
-                    >
-                      {c.label}
-                    </NavLink>
-                  ))}
+                  {item.children.map((c) => {
+                    if (c.children) {
+                      return (
+                        <div key={c.label} style={{ paddingLeft: '8px' }}>
+                          <div
+                            style={{
+                              padding: '8px 0',
+                              fontWeight: 500,
+                              color: '#666',
+                              fontSize: '13px',
+                            }}
+                          >
+                            {c.label}
+                          </div>
+                          <div style={{ paddingLeft: '8px' }}>
+                            {c.children.map((sub) => (
+                              <NavLink
+                                key={sub.to}
+                                to={sub.to}
+                                end
+                                className={({ isActive }) => `nav-child ${isActive ? 'active' : ''}`}
+                                onClick={onNavigate}
+                                style={{ fontSize: '13px', paddingLeft: '12px' }}
+                              >
+                                {sub.label}
+                              </NavLink>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    }
+                    return (
+                      <NavLink
+                        key={c.to}
+                        to={c.to}
+                        end
+                        className={({ isActive }) => `nav-child ${isActive ? 'active' : ''}`}
+                        onClick={onNavigate}
+                      >
+                        {c.label}
+                      </NavLink>
+                    );
+                  })}
                 </div>
               )}
             </div>
