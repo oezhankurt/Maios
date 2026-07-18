@@ -46,12 +46,11 @@ Sei freundlich, humorvoll und unterstützend.`
     }))
 
     try {
-      const response = await fetch(`${this.apiBase}/v1/messages`, {
+      const response = await fetch('http://localhost:5175/api/claude', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'x-api-key': this.apiKey,
-          'anthropic-version': '2023-06-01',
         },
         body: JSON.stringify({
           model: this.model,
