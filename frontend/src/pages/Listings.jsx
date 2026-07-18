@@ -7,6 +7,7 @@ import ListingAnalysis from '../components/listings/ListingAnalysis.jsx';
 import ChangeHistory from '../components/listings/ChangeHistory.jsx';
 import StockSync from '../components/listings/StockSync.jsx';
 import Loading from '../components/layout/Loading.jsx';
+import './Listings.css';
 
 const EMPTY = { title: '', asin: '', ean: '', category: '', price: 0, costPerUnit: 0, status: 'active' };
 
