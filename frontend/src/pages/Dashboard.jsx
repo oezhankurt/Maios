@@ -7,6 +7,7 @@ import ProfitChart from '../components/dashboard/ProfitChart.jsx';
 import AlertsList from '../components/dashboard/AlertsList.jsx';
 import TopProducts from '../components/dashboard/TopProducts.jsx';
 import Loading from '../components/layout/Loading.jsx';
+import './Dashboard.css';
 
 export default function Dashboard() {
   const { overview, chart, topProducts, alerts, loading, error, loadAll, dismissAlert } =
