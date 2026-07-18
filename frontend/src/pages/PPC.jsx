@@ -7,6 +7,7 @@ import SmartPortfolios from '../components/ppc/SmartPortfolios.jsx';
 import AutomationRules from '../components/ppc/AutomationRules.jsx';
 import PPCKpis from '../components/ppc/PPCKpis.jsx';
 import Loading from '../components/layout/Loading.jsx';
+import './PPC.css';
 
 const EMPTY = { productId: '', campaignName: '', campaignType: 'sp', adPlatform: 'amazon_ads', dailyBudget: 20, targetAcos: 25 };
 

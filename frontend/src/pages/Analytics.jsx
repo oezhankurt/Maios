@@ -6,6 +6,7 @@ import Chart from '../components/layout/Chart.jsx';
 import Loading from '../components/layout/Loading.jsx';
 import ProductDiagnostics from '../components/listings/ProductDiagnostics.jsx';
 import { currency, number, percent, shortDate } from '../utils/format';
+import './Analytics.css';
 
 export default function Analytics() {
   const ccy = useAuthStore((s) => s.user?.currency || 'EUR');

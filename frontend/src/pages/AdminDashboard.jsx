@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import api from '../api/api';
 import { useToast } from '../hooks/useToast';
+import './AdminDashboard.css';
 
 export default function AdminDashboard() {
   const { success: showSuccess, error: showError } = useToast();

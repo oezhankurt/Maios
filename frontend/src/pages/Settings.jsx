@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useAuthStore } from '../store/authStore';
 import { AuthAPI } from '../api/api';
+import './Settings.css';
 
 export default function Settings() {
   const { user, refresh } = useAuthStore();

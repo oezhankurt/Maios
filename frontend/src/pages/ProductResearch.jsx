@@ -6,6 +6,7 @@ import CompetitorsTab from '../components/research/CompetitorsTab.jsx';
 import NicheTab from '../components/research/NicheTab.jsx';
 import TargetingTab from '../components/research/TargetingTab.jsx';
 import EliteAnalyticsTab from '../components/research/EliteAnalyticsTab.jsx';
+import './ProductResearch.css';
 
 const TITLES = {
   products: 'Black Box · Produkte',

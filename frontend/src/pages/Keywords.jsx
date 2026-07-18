@@ -6,6 +6,7 @@ import KeywordMaster from '../components/keywords/KeywordMaster.jsx';
 import RankingTracker from '../components/keywords/RankingTracker.jsx';
 import RankingTrend from '../components/keywords/RankingTrend.jsx';
 import Loading from '../components/layout/Loading.jsx';
+import './Keywords.css';
 
 export default function Keywords({ view = 'master' }) {
   const { selectedProduct, setSelectedProduct, marketplace, setMarketplace } = useFilterStore();
