@@ -6,5 +6,17 @@ export default defineConfig({
   server: {
     port: 5173,
     open: true,
+    headers: {
+      'Cache-Control': 'public, max-age=3600',
+      'Service-Worker-Allowed': '/',
+    },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: undefined,
+      },
+    },
+  },
+  publicDir: 'public',
 })

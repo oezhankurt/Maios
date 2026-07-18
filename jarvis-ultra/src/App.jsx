@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react'
 import JarvisInterface from './components/JarvisInterface'
+import InstallPrompt from './components/InstallPrompt'
 import './App.css'
 
 export default function App() {
   return (
     <div className="app-container">
+      <InstallPrompt />
       <div className="holographic-background">
         <div className="water-effect"></div>
         <svg className="scan-lines" viewBox="0 0 1920 1080">
