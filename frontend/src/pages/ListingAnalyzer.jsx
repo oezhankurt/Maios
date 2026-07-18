@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { ListingAnalyzerAPI } from '../api/api';
 import Loading from '../components/layout/Loading.jsx';
 import ListingAnalysisResults from '../components/listings/ListingAnalysisResults.jsx';
+import './ListingAnalyzer.css';
 
 export default function ListingAnalyzer() {
   const [mainAsin, setMainAsin] = useState('');

@@ -1,0 +1,14 @@
+/* ── Listings Schedule Premium Minimalist Design ──────────────────── */
+.schedule-container { display: flex; flex-direction: column; gap: 24px; }
+.schedule-header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 20px; border-bottom: 1px solid var(--border); flex-wrap: wrap; gap: 16px; }
+.schedule-header h1 { font-size: 24px; font-weight: 700; color: var(--text); }
+.schedule-table { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; box-shadow: var(--shadow); }
+.schedule-table table { width: 100%; border-collapse: collapse; }
+.schedule-table th { padding: 14px 16px; text-align: left; font-weight: 700; color: var(--text-muted); background: var(--bg-elevated); border-bottom: 1px solid var(--border); font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+.schedule-table td { padding: 14px 16px; border-bottom: 1px solid var(--border); font-size: 13px; }
+.schedule-table tbody tr:hover { background: rgba(0, 102, 255, 0.02); }
+.schedule-badge { display: inline-block; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; background: rgba(16, 185, 129, 0.1); color: var(--success); }
+.schedule-actions { display: flex; gap: 8px; }
+.action-btn { width: 28px; height: 28px; border: none; background: transparent; border-radius: 6px; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s ease; }
+.action-btn:hover { background: rgba(0, 102, 255, 0.1); color: var(--primary); }
+@media (max-width: 768px) { .schedule-table { overflow-x: auto; } .schedule-table th, .schedule-table td { padding: 10px 12px; font-size: 12px; } }

@@ -1,0 +1,15 @@
+/* ── Terms Premium Minimalist Design ──────────────────── */
+.terms-container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+.terms-header { text-align: center; margin-bottom: 40px; padding-bottom: 24px; border-bottom: 1px solid var(--border); }
+.terms-header h1 { font-size: 28px; font-weight: 800; color: var(--text); margin-bottom: 8px; }
+.terms-content { display: flex; flex-direction: column; gap: 32px; }
+.terms-section { display: flex; flex-direction: column; gap: 12px; }
+.terms-section h2 { font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+.terms-section h3 { font-size: 14px; font-weight: 600; color: var(--text); margin-top: 12px; margin-bottom: 8px; }
+.terms-section p, .terms-section li { font-size: 14px; color: var(--text-muted); line-height: 1.6; }
+.terms-list { margin-left: 20px; margin-top: 8px; }
+.terms-list li { margin-bottom: 8px; }
+.terms-definition { background: var(--bg-card); padding: 12px; border-radius: 8px; margin-top: 8px; border-left: 3px solid var(--primary); }
+.terms-definition-title { font-weight: 600; color: var(--text); font-size: 13px; }
+.terms-definition-text { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+@media (max-width: 768px) { .terms-container { padding: 30px 15px; } .terms-header h1 { font-size: 24px; } }

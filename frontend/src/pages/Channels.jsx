@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { ChannelAPI } from '../api/api';
 import Loading from '../components/layout/Loading.jsx';
+import './Channels.css';
 
 const STATUS_BADGE = { connected: 'badge-success', ready: 'badge-info', demo: 'badge-muted' };
 const STATUS_LABEL = { connected: 'verbunden', ready: 'bereit', demo: 'Demo' };

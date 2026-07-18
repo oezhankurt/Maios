@@ -1,0 +1,10 @@
+/* ── Google Ads Premium Minimalist Design ──────────────────── */
+.google-ads-container { display: flex; flex-direction: column; gap: 24px; }
+.google-header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 20px; border-bottom: 1px solid var(--border); flex-wrap: wrap; gap: 16px; }
+.google-header h1 { font-size: 24px; font-weight: 700; color: var(--text); }
+.google-content { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 24px; box-shadow: var(--shadow); }
+.google-message { text-align: center; padding: 40px; color: var(--text-muted); }
+.google-message p { font-size: 14px; margin-bottom: 16px; }
+.google-btn { padding: 12px 24px; background: linear-gradient(135deg, var(--primary) 0%, #0052cc 100%); color: white; border: none; border-radius: 8px; cursor: pointer; transition: all 0.2s ease; font-weight: 600; box-shadow: 0 4px 12px rgba(0, 102, 255, 0.3); }
+.google-btn:hover { box-shadow: 0 6px 16px rgba(0, 102, 255, 0.4); transform: translateY(-2px); }
+@media (max-width: 768px) { .google-message { padding: 30px 20px; } }

@@ -1,0 +1,16 @@
+/* ── Listing Analyzer Premium Minimalist Design ──────────────────── */
+.analyzer-container { display: flex; flex-direction: column; gap: 24px; }
+.analyzer-header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 20px; border-bottom: 1px solid var(--border); flex-wrap: wrap; gap: 16px; }
+.analyzer-header h1 { font-size: 24px; font-weight: 700; color: var(--text); }
+.analyzer-content { display: grid; grid-template-columns: 2fr 1fr; gap: 24px; }
+.analysis-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 24px; box-shadow: var(--shadow); }
+.analysis-title { font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
+.score-section { display: flex; flex-direction: column; gap: 12px; }
+.score-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; background: var(--bg); border-radius: 8px; }
+.score-label { font-size: 13px; font-weight: 500; color: var(--text); }
+.score-value { font-size: 16px; font-weight: 800; color: var(--primary); }
+.recommendations { display: flex; flex-direction: column; gap: 12px; }
+.recommendation { padding: 12px; background: rgba(0, 102, 255, 0.05); border-left: 3px solid var(--primary); border-radius: 4px; font-size: 12px; color: var(--text); }
+.metric-item { padding: 12px 0; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; }
+.metric-item:last-child { border-bottom: none; }
+@media (max-width: 1024px) { .analyzer-content { grid-template-columns: 1fr; } }

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api from '../api/api';
 import { useToast } from '../hooks/useToast';
+import './ListingsAnalyticsDashboard.css';
 
 export default function ListingsAnalyticsDashboard() {
   const { error: showError } = useToast();

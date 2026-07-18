@@ -1,0 +1,16 @@
+/* ── Listings Manager Premium Minimalist Design ──────────────────── */
+.listings-manager-container { display: flex; flex-direction: column; gap: 24px; }
+.manager-header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 20px; border-bottom: 1px solid var(--border); flex-wrap: wrap; gap: 16px; }
+.manager-header h1 { font-size: 24px; font-weight: 700; color: var(--text); }
+.manager-toolbar { display: flex; gap: 8px; flex-wrap: wrap; }
+.toolbar-btn { padding: 10px 16px; border: 1px solid var(--border); background: var(--bg-card); border-radius: 8px; color: var(--text-muted); font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.15s ease; }
+.toolbar-btn:hover { border-color: var(--primary); background: var(--primary-light); color: var(--primary); }
+.toolbar-btn.primary { background: linear-gradient(135deg, var(--primary) 0%, #0052cc 100%); color: white; border-color: var(--primary); }
+.listings-view { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; box-shadow: var(--shadow); }
+.listings-view-table { width: 100%; border-collapse: collapse; }
+.listings-view-table th { padding: 14px 16px; text-align: left; font-weight: 700; color: var(--text-muted); background: var(--bg-elevated); border-bottom: 1px solid var(--border); font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+.listings-view-table td { padding: 14px 16px; border-bottom: 1px solid var(--border); font-size: 13px; }
+.listings-view-table tbody tr:hover { background: rgba(0, 102, 255, 0.02); }
+.select-all { width: 20px; height: 20px; cursor: pointer; }
+.status-badge { display: inline-block; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; background: rgba(16, 185, 129, 0.1); color: var(--success); }
+@media (max-width: 768px) { .manager-toolbar { flex-direction: column; width: 100%; } .toolbar-btn { width: 100%; } .listings-view-table { font-size: 12px; } .listings-view-table th, .listings-view-table td { padding: 10px 12px; } }

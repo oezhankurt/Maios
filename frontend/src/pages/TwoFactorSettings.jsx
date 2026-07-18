@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import api from '../api/api';
 import { useToast } from '../hooks/useToast';
+import './TwoFactorSettings.css';
 
 export default function TwoFactorSettings() {
   const { success: showSuccess, error: showError } = useToast();

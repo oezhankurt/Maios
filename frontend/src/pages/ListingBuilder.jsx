@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { ListingBuilderAPI } from '../api/api';
 import Loading from '../components/layout/Loading.jsx';
 import ListingTable from '../components/listings/ListingTable.jsx';
+import './ListingBuilder.css';
 
 export default function ListingBuilder() {
   const [listings, setListings] = useState([]);

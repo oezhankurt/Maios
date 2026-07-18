@@ -4,6 +4,7 @@ import Loading from '../components/layout/Loading.jsx';
 import BingAdsDashboard from '../components/ads/BingAdsDashboard.jsx';
 import BingAdsCampaigns from '../components/ads/BingAdsCampaigns.jsx';
 import BingAdsPerformance from '../components/ads/BingAdsPerformance.jsx';
+import './BingAds.css';
 
 export default function BingAds({ view = 'overview' }) {
   const [campaigns, setCampaigns] = useState([]);

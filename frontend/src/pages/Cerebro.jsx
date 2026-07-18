@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { CerebroAPI } from '../api/api';
 import CerebroResults from '../components/cerebro/CerebroResults.jsx';
 import Loading from '../components/layout/Loading.jsx';
+import './Cerebro.css';
 
 const ASIN_RE = /^B0[A-Z0-9]{8}$/i;
 

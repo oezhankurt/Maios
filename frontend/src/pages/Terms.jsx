@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import './Terms.css';
 
 export default function Terms() {
   const navigate = useNavigate();

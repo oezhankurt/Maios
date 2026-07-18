@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import api from '../api/api';
 import { useToast } from '../hooks/useToast';
 import SchedulePublishModal from '../components/SchedulePublishModal';
+import './ListingsSchedule.css';
 
 export default function ListingsSchedule() {
   const { success: showSuccess, error: showError } = useToast();

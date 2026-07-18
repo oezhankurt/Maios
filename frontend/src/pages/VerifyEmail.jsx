@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import api from '../api/api';
 import { useToast } from '../hooks/useToast';
+import './VerifyEmail.css';
 
 export default function VerifyEmail() {
   const navigate = useNavigate();

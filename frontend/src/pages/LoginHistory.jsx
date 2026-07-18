@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { AuthAPI } from '../api/api';
 import Loading from '../components/layout/Loading.jsx';
+import './LoginHistory.css';
 
 export default function LoginHistory() {
   const [history, setHistory] = useState([]);

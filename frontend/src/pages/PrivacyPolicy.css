@@ -1,0 +1,13 @@
+/* ── Privacy Policy Premium Minimalist Design ──────────────────── */
+.privacy-container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+.privacy-header { text-align: center; margin-bottom: 40px; padding-bottom: 24px; border-bottom: 1px solid var(--border); }
+.privacy-header h1 { font-size: 28px; font-weight: 800; color: var(--text); margin-bottom: 8px; }
+.privacy-content { display: flex; flex-direction: column; gap: 32px; }
+.privacy-section { display: flex; flex-direction: column; gap: 12px; }
+.privacy-section h2 { font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+.privacy-section h3 { font-size: 14px; font-weight: 600; color: var(--text); margin-top: 12px; margin-bottom: 8px; }
+.privacy-section p, .privacy-section li { font-size: 14px; color: var(--text-muted); line-height: 1.6; }
+.privacy-list { margin-left: 20px; margin-top: 8px; }
+.privacy-list li { margin-bottom: 8px; }
+.privacy-update { background: rgba(0, 102, 255, 0.05); border-left: 3px solid var(--primary); padding: 16px; border-radius: 4px; font-size: 12px; color: var(--text-muted); margin-top: 24px; }
+@media (max-width: 768px) { .privacy-container { padding: 30px 15px; } .privacy-header h1 { font-size: 24px; } }

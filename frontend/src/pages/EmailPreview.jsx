@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import './EmailPreview.css';
 
 export default function EmailPreview() {
   const [selectedEmail, setSelectedEmail] = useState('verification');

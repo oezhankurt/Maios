@@ -1,0 +1,17 @@
+/* ── Two Factor Settings Premium Minimalist Design ──────────────────── */
+.2fa-container { display: flex; flex-direction: column; gap: 24px; }
+.2fa-header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 20px; border-bottom: 1px solid var(--border); flex-wrap: wrap; gap: 16px; }
+.2fa-header h1 { font-size: 24px; font-weight: 700; color: var(--text); }
+.2fa-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 24px; box-shadow: var(--shadow); }
+.2fa-title { font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 16px; }
+.2fa-description { font-size: 13px; color: var(--text-muted); margin-bottom: 20px; line-height: 1.5; }
+.2fa-toggle { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+.toggle-switch { width: 44px; height: 24px; background: var(--border); border-radius: 12px; cursor: pointer; transition: background 0.2s ease; position: relative; }
+.toggle-switch.active { background: var(--primary); }
+.toggle-circle { width: 20px; height: 20px; background: white; border-radius: 50%; position: absolute; left: 2px; top: 2px; transition: left 0.2s ease; }
+.toggle-switch.active .toggle-circle { left: 22px; }
+.2fa-qr { text-align: center; padding: 20px; background: var(--bg); border-radius: 8px; margin-bottom: 20px; }
+.2fa-qr img { max-width: 200px; }
+.2fa-actions { display: flex; gap: 8px; }
+.2fa-btn { flex: 1; padding: 12px 16px; border: 1px solid var(--border); background: transparent; border-radius: 8px; color: var(--text-muted); cursor: pointer; transition: all 0.15s ease; font-weight: 500; }
+.2fa-btn:hover { border-color: var(--primary); background: var(--primary-light); color: var(--primary); }

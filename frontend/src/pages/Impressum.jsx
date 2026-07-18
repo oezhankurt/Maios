@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import './Impressum.css';
 
 export default function Impressum() {
   const navigate = useNavigate();

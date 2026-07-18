@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../api/api';
 import { useToast } from '../hooks/useToast';
+import './ForgotPassword.css';
 
 export default function ForgotPassword() {
   const { success: showSuccess, error: showError } = useToast();

@@ -5,6 +5,7 @@ import GoogleAdsDashboard from '../components/ads/GoogleAdsDashboard.jsx';
 import GoogleAdsCampaigns from '../components/ads/GoogleAdsCampaigns.jsx';
 import GoogleAdsKeywords from '../components/ads/GoogleAdsKeywords.jsx';
 import GoogleAdsBudget from '../components/ads/GoogleAdsBudget.jsx';
+import './GoogleAds.css';
 
 export default function GoogleAds({ view = 'overview' }) {
   const [campaigns, setCampaigns] = useState([]);

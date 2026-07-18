@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { IndexCheckerAPI } from '../api/api';
 import Loading from '../components/layout/Loading.jsx';
 import IndexResults from '../components/listings/IndexResults.jsx';
+import './IndexChecker.css';
 
 export default function IndexChecker() {
   const [asin, setAsin] = useState('');

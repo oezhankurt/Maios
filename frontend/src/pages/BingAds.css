@@ -1,0 +1,10 @@
+/* ── Bing Ads Premium Minimalist Design ──────────────────── */
+.bing-ads-container { display: flex; flex-direction: column; gap: 24px; }
+.bing-header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 20px; border-bottom: 1px solid var(--border); flex-wrap: wrap; gap: 16px; }
+.bing-header h1 { font-size: 24px; font-weight: 700; color: var(--text); }
+.bing-content { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 24px; box-shadow: var(--shadow); }
+.bing-message { text-align: center; padding: 40px; color: var(--text-muted); }
+.bing-message p { font-size: 14px; margin-bottom: 16px; }
+.bing-btn { padding: 12px 24px; background: linear-gradient(135deg, var(--primary) 0%, #0052cc 100%); color: white; border: none; border-radius: 8px; cursor: pointer; transition: all 0.2s ease; font-weight: 600; box-shadow: 0 4px 12px rgba(0, 102, 255, 0.3); }
+.bing-btn:hover { box-shadow: 0 6px 16px rgba(0, 102, 255, 0.4); transform: translateY(-2px); }
+@media (max-width: 768px) { .bing-message { padding: 30px 20px; } }

@@ -1,0 +1,18 @@
+/* ── Channels Premium Minimalist Design ──────────────────── */
+.channels-container { display: flex; flex-direction: column; gap: 24px; }
+.channels-header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 20px; border-bottom: 1px solid var(--border); flex-wrap: wrap; gap: 16px; }
+.channels-header h1 { font-size: 24px; font-weight: 700; color: var(--text); }
+.channels-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+.channel-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; box-shadow: var(--shadow); transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); }
+.channel-card:hover { border-color: rgba(0, 102, 255, 0.3); box-shadow: 0 12px 24px rgba(0, 102, 255, 0.15); transform: translateY(-2px); }
+.channel-icon { font-size: 32px; margin-bottom: 12px; }
+.channel-name { font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+.channel-status { display: inline-block; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; background: rgba(16, 185, 129, 0.1); color: var(--success); margin-bottom: 16px; }
+.channel-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding-top: 12px; border-top: 1px solid var(--border); }
+.stat { font-size: 12px; text-align: center; }
+.stat-value { font-size: 18px; font-weight: 700; color: var(--text); }
+.stat-label { color: var(--text-muted); font-size: 11px; }
+.channel-actions { display: flex; gap: 8px; margin-top: 12px; }
+.channel-btn { flex: 1; padding: 8px 12px; border: 1px solid var(--border); background: transparent; border-radius: 6px; color: var(--text-muted); font-size: 12px; cursor: pointer; transition: all 0.15s ease; }
+.channel-btn:hover { border-color: var(--primary); background: var(--primary-light); color: var(--primary); }
+@media (max-width: 768px) { .channels-grid { grid-template-columns: 1fr; } }

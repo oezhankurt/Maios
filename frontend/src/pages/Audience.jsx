@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { AudienceAPI } from '../api/api';
 import Loading from '../components/layout/Loading.jsx';
 import SurveyList from '../components/audience/SurveyList.jsx';
+import './Audience.css';
 
 export default function Audience() {
   const [surveys, setSurveys] = useState([]);

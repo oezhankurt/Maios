@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import api from '../api/api';
 import { useToast } from '../hooks/useToast';
+import './ResetPassword.css';
 
 export default function ResetPassword() {
   const navigate = useNavigate();

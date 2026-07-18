@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import api from '../api/api';
 import { useToast } from '../hooks/useToast';
 import ListingOptimizer from '../components/ListingOptimizer';
+import './UnifiedListingCreator.css';
 
 export default function UnifiedListingCreator() {
   const { success: showSuccess, error: showError } = useToast();

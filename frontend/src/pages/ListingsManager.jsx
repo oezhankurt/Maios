@@ -4,6 +4,7 @@ import { useToast } from '../hooks/useToast';
 import BulkImportCSV from '../components/BulkImportCSV';
 import BulkOperationsPanel from '../components/BulkOperationsPanel';
 import SchedulePublishModal from '../components/SchedulePublishModal';
+import './ListingsManager.css';
 
 export default function ListingsManager() {
   const { success: showSuccess, error: showError } = useToast();

@@ -1,0 +1,19 @@
+/* ── Audience Premium Minimalist Design ──────────────────── */
+.audience-container { display: flex; flex-direction: column; gap: 24px; }
+.audience-header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 20px; border-bottom: 1px solid var(--border); flex-wrap: wrap; gap: 16px; }
+.audience-header h1 { font-size: 24px; font-weight: 700; color: var(--text); }
+.audience-filters { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+.filter-btn { padding: 10px 16px; border: 1px solid var(--border); background: transparent; border-radius: 8px; color: var(--text-muted); font-size: 13px; cursor: pointer; transition: all 0.15s ease; }
+.filter-btn:hover { border-color: var(--primary); background: var(--primary-light); color: var(--primary); }
+.filter-btn.active { background: var(--primary); border-color: var(--primary); color: white; font-weight: 600; }
+.audience-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+.segment-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; box-shadow: var(--shadow); transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); }
+.segment-card:hover { border-color: rgba(0, 102, 255, 0.3); box-shadow: 0 12px 24px rgba(0, 102, 255, 0.15); transform: translateY(-2px); }
+.segment-name { font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+.segment-size { font-size: 28px; font-weight: 800; color: var(--primary); margin-bottom: 12px; }
+.segment-details { display: flex; flex-direction: column; gap: 8px; padding-top: 12px; border-top: 1px solid var(--border); font-size: 12px; }
+.detail-item { display: flex; justify-content: space-between; color: var(--text-muted); }
+.segment-actions { display: flex; gap: 8px; margin-top: 12px; }
+.action-btn { flex: 1; padding: 8px 12px; border: 1px solid var(--border); background: transparent; border-radius: 6px; color: var(--text-muted); font-size: 12px; cursor: pointer; transition: all 0.15s ease; }
+.action-btn:hover { border-color: var(--primary); background: var(--primary-light); color: var(--primary); }
+@media (max-width: 768px) { .audience-grid { grid-template-columns: 1fr; } }
