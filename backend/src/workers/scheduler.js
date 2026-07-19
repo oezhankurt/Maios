@@ -8,6 +8,7 @@ const rankingService = require('../services/rankingService');
 const priceOptimizer = require('../services/priceOptimizer');
 const smartPortfolioService = require('../services/smartPortfolioService');
 const autoBot = require('../services/autoBot');
+const asinSyncWorker = require('./asinSyncWorker');
 const config = require('../config');
 
 const jobs = [];
@@ -120,12 +121,26 @@ async function checkAlerts() {
   }
 }
 
+/** Montag-Freitag 5:00 AM: Sync ASIN-Daten von Supermetrics */
+async function syncAsinTraffic() {
+  logger.info('Scheduler: syncing ASIN traffic data from Supermetrics');
+  try {
+    const result = await asinSyncWorker.run();
+    if (result) {
+      logger.info(`Scheduler: ASIN sync complete - ${result.productsCount} products, ${result.metricsCount} metrics`);
+    }
+  } catch (err) {
+    logger.error(`ASIN sync failed: ${err.message}`);
+  }
+}
+
 function start() {
   jobs.push(schedule.scheduleJob('full-sync', '0 2 * * *', fullDataSync));
   jobs.push(schedule.scheduleJob('track-rankings', '0 * * * *', trackRankings));
   jobs.push(schedule.scheduleJob('optimize-prices', '0 */4 * * *', optimizePrices));
   jobs.push(schedule.scheduleJob('optimize-ppc', '30 */4 * * *', optimizePPC));
   jobs.push(schedule.scheduleJob('check-alerts', '0 */6 * * *', checkAlerts));
+  jobs.push(schedule.scheduleJob('sync-asin-traffic', '0 5 * * 1-5', syncAsinTraffic)); // Mo-Fr 5:00 AM
   logger.info(`Scheduler started with ${jobs.filter(Boolean).length} jobs.`);
 }
 
@@ -143,4 +158,5 @@ module.exports = {
   optimizePrices,
   optimizePPC,
   checkAlerts,
+  syncAsinTraffic,
 };
