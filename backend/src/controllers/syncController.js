@@ -5,10 +5,10 @@
 const asyncHandler = require('../utils/asyncHandler');
 const asinSyncWorker = require('../workers/asinSyncWorker');
 const logger = require('../utils/logger');
+const supermetricsService = require('../services/supermetricsService');
 
-// POST /api/sync/asin-traffic
 // Trigger manuellen ASIN-Sync
-exports.triggerAsinSync = asyncHandler(async (req, res) => {
+const triggerAsinSync = asyncHandler(async (req, res) => {
   const result = await asinSyncWorker.run();
 
   res.json({
@@ -18,11 +18,8 @@ exports.triggerAsinSync = asyncHandler(async (req, res) => {
   });
 });
 
-// GET /api/sync/status
 // Check ob Supermetrics konfiguriert ist
-exports.getSyncStatus = asyncHandler(async (req, res) => {
-  const supermetricsService = require('../services/supermetricsService');
-
+const getSyncStatus = asyncHandler(async (req, res) => {
   res.json({
     configured: supermetricsService.isConfigured(),
     dsUser: supermetricsService.dsUser || 'nicht konfiguriert',
@@ -32,3 +29,8 @@ exports.getSyncStatus = asyncHandler(async (req, res) => {
       : '❌ Bitte SUPERMETRICS_API_KEY in .env eintragen',
   });
 });
+
+module.exports = {
+  triggerAsinSync,
+  getSyncStatus,
+};
