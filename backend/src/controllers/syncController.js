@@ -3,7 +3,6 @@
  * Endpoints für manuellen Daten-Import
  */
 const asyncHandler = require('../utils/asyncHandler');
-const { ApiError } = require('../utils/errors');
 const asinSyncWorker = require('../workers/asinSyncWorker');
 const logger = require('../utils/logger');
 
