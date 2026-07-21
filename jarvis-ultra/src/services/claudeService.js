@@ -1,17 +1,16 @@
 export class ClaudeService {
-  constructor(apiKey = '') {
-    this.apiKey = apiKey || import.meta.env.VITE_CLAUDE_API_KEY
-    this.apiBase = 'https://api.anthropic.com'
+  constructor() {
+    this.apiBase = 'http://localhost:5175'
     this.model = 'claude-opus-4-8'
     this.conversationHistory = []
     this.systemPrompt = this.getDefaultSystemPrompt()
   }
 
   getDefaultSystemPrompt() {
-    return `Du bist Jarvis, ein intelligenter Voice-Assistant für Claude.
-Du antwortest prägnant, hilfsbereit und auf Deutsch.
+    return `Du bist J.A.R.V.I.S., ein intelligenter KI-Assistent im Stil von Iron Man's JARVIS.
+Du bist höflich, hilfsbereit, prägnant und sprichst Deutsch.
 Halte deine Antworten kurz genug, um sie laut vorzulesen (2-3 Sätze ideal).
-Sei freundlich, humorvoll und unterstützend.`
+Sei intelligent, humorvoll und unterstützend wie ein klassischer englischer Butler mit Zugang zu modernem Wissen.`
   }
 
   setSystemPrompt(prompt) {
@@ -34,23 +33,27 @@ Sei freundlich, humorvoll und unterstützend.`
   }
 
   async sendMessage(userMessage) {
-    if (!this.apiKey) {
-      throw new Error('Claude API Key nicht konfiguriert. Bitte in Einstellungen hinzufügen.')
+    const apiKey = import.meta.env.VITE_CLAUDE_API_KEY
+
+    if (!apiKey) {
+      throw new Error(
+        'Claude API Key nicht konfiguriert. Bitte VITE_CLAUDE_API_KEY in .env hinzufügen.'
+      )
     }
 
     this.addToHistory('user', userMessage)
 
-    const messages = this.conversationHistory.map((msg) => ({
+    const messages = this.conversationHistory.map(msg => ({
       role: msg.role,
       content: msg.content,
     }))
 
     try {
-      const response = await fetch('http://localhost:5175/api/claude', {
+      const response = await fetch(`${this.apiBase}/api/claude`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-api-key': this.apiKey,
+          'x-api-key': apiKey,
         },
         body: JSON.stringify({
           model: this.model,
@@ -62,9 +65,7 @@ Sei freundlich, humorvoll und unterstützend.`
 
       if (!response.ok) {
         const error = await response.json()
-        throw new Error(
-          error.error?.message || `API Error: ${response.status}`
-        )
+        throw new Error(error.error?.message || `API Error: ${response.status}`)
       }
 
       const data = await response.json()
@@ -82,29 +83,9 @@ Sei freundlich, humorvoll und unterstützend.`
     } catch (error) {
       console.error('Claude API Error:', error)
       if (!navigator.onLine) {
-        throw new Error('Du bist offline. Claude API ist nicht erreichbar. Nur lokale Funktionen verfügbar.')
+        throw new Error('Du bist offline. Claude API ist nicht erreichbar.')
       }
       throw error
-    }
-  }
-
-  async testConnection() {
-    try {
-      const response = await fetch(`${this.apiBase}/v1/models`, {
-        method: 'GET',
-        headers: {
-          'x-api-key': this.apiKey,
-          'anthropic-version': '2023-06-01',
-        },
-      })
-
-      if (!response.ok) {
-        throw new Error(`Connection test failed: ${response.status}`)
-      }
-
-      return { success: true, message: 'Claude API verbunden!' }
-    } catch (error) {
-      return { success: false, message: error.message }
     }
   }
 }

@@ -59,6 +59,12 @@ export default function JarvisVoiceChat() {
     }
   }
 
+  useEffect(() => {
+    if (!isListening && transcript.trim() && !isLoading && !isSpeaking) {
+      handleSendMessage()
+    }
+  }, [isListening])
+
   const handleSendMessage = async () => {
     if (!transcript.trim() || isLoading) return
 
