@@ -1,0 +1,1174 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Amazon ASIN Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.js" integrity="sha384-iU8HYtnGQ8Cy4zl7gbNMOhsDTTKX02BTXptVP/vqAWIaTfM7isw76iyZCsjL2eVi" crossorigin="anonymous"></script>
+<style>
+:root{color-scheme:dark;
+  --bg:#0d0f14;--bg2:#12151c;--card:#181c25;--card2:#1e232e;--border:#262c38;
+  --text:#e8eaf0;--muted:#8b93a5;--dim:#5c6373;
+  --accent:#ff9900;--accent2:#4ecdc4;--green:#3ddc84;--red:#ff6b6b;--yellow:#ffd166;--orange:#ff9f43;--blue:#54a0ff;--purple:#9b8cff}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Inter,Roboto,sans-serif;background:var(--bg);color:var(--text);padding:24px 28px}
+h1{font-size:22px;font-weight:800}
+h1 span{color:var(--accent)}
+.sub{color:var(--muted);font-size:13px;margin:4px 0 18px}
+.bar-controls{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:18px}
+select,input,button{font-family:inherit;font-size:13px;color:var(--text)}
+select,input{background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;outline:none}
+select:focus,input:focus{border-color:var(--accent)}
+.btn{background:linear-gradient(90deg,#ff9900,#ffb84d);border:none;border-radius:8px;padding:8px 16px;font-weight:700;cursor:pointer;color:#1a1200}
+.btn:disabled{opacity:.5;cursor:default}
+.btn.ghost{background:var(--card2);border:1px solid var(--border);color:var(--muted);font-weight:500}
+.btn.ghost.on{color:var(--text);border-color:var(--accent);background:rgba(255,153,0,.1)}
+#status{font-size:12px;color:var(--muted)}
+#status.err{color:var(--red)}
+.grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));margin-bottom:16px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px}
+.stat .lbl{font-size:11px;color:var(--muted);margin-bottom:5px}
+.stat .val{font-size:22px;font-weight:800}
+.pos{color:var(--green)}.neg{color:var(--red)}
+.two{display:grid;gap:12px;grid-template-columns:1fr 1fr;margin-bottom:16px}
+@media(max-width:900px){.two{grid-template-columns:1fr}}
+.chartbox{position:relative;height:280px}
+h2{font-size:14px;font-weight:700;margin-bottom:10px}
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+th{color:var(--muted);font-size:11px;text-align:left;padding:8px 8px;border-bottom:1px solid var(--border);cursor:pointer;user-select:none;white-space:nowrap}
+th.num,td.num{text-align:right}
+td{padding:8px;border-bottom:1px solid var(--border);vertical-align:top}
+tr:hover td{background:var(--card2)}
+td a{color:var(--blue);text-decoration:none;font-family:ui-monospace,monospace;font-size:12px}
+.title-cell{max-width:340px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text)}
+.badge{display:inline-block;font-size:10px;padding:2px 7px;border-radius:20px;font-weight:700;margin:1px 2px 1px 0;white-space:nowrap}
+.b-dead{background:rgba(255,107,107,.15);color:var(--red)}
+.b-cvr{background:rgba(255,159,67,.15);color:var(--orange)}
+.b-traffic{background:rgba(255,209,102,.15);color:var(--yellow)}
+.b-bb{background:rgba(84,160,255,.15);color:var(--blue)}
+.b-ok{background:rgba(61,220,132,.12);color:var(--green)}
+.rec{font-size:11px;color:var(--muted);max-width:220px;white-space:normal}
+.empty{color:var(--dim);text-align:center;padding:20px;font-size:13px}
+.note{font-size:11px;color:var(--dim);margin-top:10px}
+#spin{display:none;width:14px;height:14px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:sp 1s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+/* ---------- SEO-Modal ---------- */
+#seomodal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:50;padding:30px;overflow-y:auto}
+#seomodal .inner{max-width:760px;margin:0 auto;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px}
+#seomodal h2{margin:16px 0 8px;font-size:14px;color:var(--accent)}
+#seomodal .kw{display:inline-block;font-size:12px;padding:3px 10px;border-radius:20px;margin:2px;border:1px solid var(--border)}
+#seomodal .kw.ok{background:rgba(61,220,132,.12);color:var(--green)}
+#seomodal .kw.miss{background:rgba(255,107,107,.12);color:var(--red)}
+#seomodal .copybox{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px;font-size:12px;font-family:ui-monospace,monospace;word-break:break-word;margin-top:6px}
+#seomodal .hint{font-size:11px;color:var(--dim);margin-top:4px}
+#seomodal ol{margin:6px 0 0 18px;font-size:12.5px}
+#seomodal ol li{margin-bottom:6px}
+</style>
+</head>
+<body>
+<h1><span>Amazon</span> ASIN-Dashboard <span style="font-size:12px;color:var(--dim);font-weight:400">ascopharm</span></h1>
+<div class="sub" id="meta">–</div>
+
+<div class="bar-controls">
+  <select id="mp"></select>
+  <select id="range">
+    <option value="last_30_days" selected>Letzte 30 Tage</option>
+    <option value="last_7_days">Letzte 7 Tage</option>
+    <option value="last_month">Letzter Monat</option>
+    <option value="last_90_days">Letzte 90 Tage</option>
+  </select>
+  <button class="btn" id="refresh" onclick="loadData()">🔄 Aktualisieren</button>
+  <div id="spin"></div><span id="status"></span>
+</div>
+
+<div class="grid" id="kpis"></div>
+
+<div class="two">
+  <div class="card"><h2>💰 Top 10 nach Umsatz</h2><div class="chartbox"><canvas id="topChart"></canvas></div></div>
+  <div class="card"><h2>🚨 Größte Problemfälle (Traffic ohne Verkäufe)</h2><div id="worst"></div></div>
+</div>
+
+<div class="card">
+  <div class="bar-controls" style="margin-bottom:8px">
+    <button class="btn ghost on" data-v="group" onclick="setView('group',this)">🗂 Marken-Übersicht</button>
+    <button class="btn ghost" data-v="table" onclick="setView('table',this)">📋 Flache Tabelle</button>
+  </div>
+  <div class="bar-controls" style="margin-bottom:12px">
+    <button class="btn ghost on" data-f="all" onclick="setFilter('all',this)">Alle</button>
+    <button class="btn ghost" data-f="dead" onclick="setFilter('dead',this)">🔴 Tote ASINs</button>
+    <button class="btn ghost" data-f="cvr" onclick="setFilter('cvr',this)">🟠 Conversion-Problem</button>
+    <button class="btn ghost" data-f="traffic" onclick="setFilter('traffic',this)">🟡 Wenig Traffic</button>
+    <button class="btn ghost" data-f="bb" onclick="setFilter('bb',this)">🔵 Buybox-Problem</button>
+    <input type="text" id="search" placeholder="🔍 ASIN oder Titel…" oninput="renderTable()" style="margin-left:auto;min-width:200px">
+  </div>
+  <div style="overflow-x:auto;display:none" id="tablewrap"><table id="tbl"></table></div>
+  <div id="groupwrap"></div>
+  <div class="note">Kriterien: 🔴 Tot = ≤2 verkaufte Einheiten · 🟠 Conversion = ≥100 Sessions &amp; CVR &lt;10% · 🟡 Traffic = &lt;50 Sessions · 🔵 Buybox &lt;70%. Einheiten/Umsatz = FBA + FBM zusammen; Spalte "FBA / FBM" zeigt den Split (SKUs ohne FBA/FBM-Kennung werden als FBA gezählt). Klick auf Spaltenkopf sortiert, Klick auf ASIN öffnet das Listing.</div>
+</div>
+
+<div id="seomodal" onclick="if(event.target===this)closeSeo()"><div class="inner" id="seomodal-content"></div></div>
+
+<script>
+"use strict";
+const SERVER="c5bac003-68f0-42ee-98f7-88275d319461";
+const FIELDS=["asin","sku","title","sessions","page_views","units_ordered","ordered_product_sales","unit_session_percentage","buy_box_percentage"];
+// Versandkanal aus SKU ableiten: ...FBM → FBM, ...FBA → FBA, ohne Kennung → vermutlich FBA
+function chOf(sku){
+  if(/fbm/i.test(sku||""))return"FBM";
+  if(/fba/i.test(sku||""))return"FBA";
+  return"FBA*";
+}
+const MARKETPLACES=[["A1PA6795UKMFR9","Amazon.de"],["A13V1IB3VIYZZH","Amazon.fr"],["A1F83G8C2ARO7P","Amazon.co.uk"],["APJ6JRA9NG5V4","Amazon.it"],["A1RKKUPIHCS9HS","Amazon.es"],["A1805IZSGTT6HS","Amazon.nl"],["A1C3SOZRARQ6R3","Amazon.pl"],["A2NODRKZP88ZB9","Amazon.se"],["AMEN7PMS3EDWL","Amazon.com.be"],["A28R8C7NBKEWEA","Amazon.ie"],["A17E79C6D8DWNP","Amazon.sa"],["A2VIGQ35RCS4UG","Amazon.ae"]];
+const DOMAINS={"A1PA6795UKMFR9":"amazon.de","A13V1IB3VIYZZH":"amazon.fr","A1F83G8C2ARO7P":"amazon.co.uk","APJ6JRA9NG5V4":"amazon.it","A1RKKUPIHCS9HS":"amazon.es","A1805IZSGTT6HS":"amazon.nl","A1C3SOZRARQ6R3":"amazon.pl","A2NODRKZP88ZB9":"amazon.se","AMEN7PMS3EDWL":"amazon.com.be","A28R8C7NBKEWEA":"amazon.ie","A17E79C6D8DWNP":"amazon.sa","A2VIGQ35RCS4UG":"amazon.ae"};
+const eur=n=>new Intl.NumberFormat("de-DE",{style:"currency",currency:"EUR",maximumFractionDigits:0}).format(n);
+const fmt=n=>new Intl.NumberFormat("de-DE").format(n);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+/* ---- CSV / compressed parsing ---- */
+function csvLine(l){
+  const out=[];let cur="",q=false;
+  for(let i=0;i<l.length;i++){const c=l[i];
+    if(q){
+      if(c==='"'&&l[i+1]==='"'){cur+='"';i++;}
+      else if(c==='\\'&&l[i+1]==='"'){cur+='"';i++;}
+      else if(c==='"')q=false;
+      else cur+=c;
+    }else{
+      if(c==='"')q=true;
+      else if(c===","){out.push(cur);cur="";}
+      else cur+=c;
+    }
+  }
+  out.push(cur);return out;
+}
+function toRawRows(data){
+  let rows=[];
+  if(Array.isArray(data)){rows=data.slice();}
+  else if(typeof data==="string"){
+    for(const line of data.split("\n")){
+      if(!line.trim())continue;
+      const m=line.match(/^\s*-\s*\[\d+,?\]:\s*(.*)$/);
+      rows.push(csvLine(m?m[1]:line.trim()));
+    }
+  }
+  if(rows.length&&(rows[0][0]==="ASIN"||rows[0][1]==="SKU"))rows=rows.slice(1);
+  return rows;
+}
+// SKU-Zeilen: [asin,sku,(title,)sessions,pv,units,rev,cvr,bb] — Sessions/PV/BB sind ASIN-Ebene
+function toSkuRows(data){
+  return toRawRows(data).filter(r=>r.length>=8).map(r=>{
+    const hasTitle=r.length>=9;
+    const o=hasTitle?2:1;
+    return{asin:r[0],sku:r[1],ch:chOf(r[1]),
+      title:hasTitle?r[2]:(TITLES[r[0]]||r[0]),
+      sessions:+r[o+1]||0,pv:+r[o+2]||0,units:+r[o+3]||0,rev:+r[o+4]||0,
+      cvr:+r[o+5]||0,bb:Math.min(100,+r[o+6]||0)};
+  });
+}
+// Pro ASIN aggregieren: Einheiten/Umsatz summieren, FBA/FBM-Split ermitteln
+function aggregate(skuRows){
+  const m=new Map();
+  for(const s of skuRows){
+    if(!m.has(s.asin))m.set(s.asin,{asin:s.asin,title:s.title,sessions:0,pv:0,units:0,rev:0,bb:0,fbaU:0,fbaR:0,fbmU:0,fbmR:0,skus:[]});
+    const p=m.get(s.asin);
+    p.sessions=Math.max(p.sessions,s.sessions);
+    p.pv=Math.max(p.pv,s.pv);
+    p.bb=Math.max(p.bb,s.bb);
+    p.units+=s.units;p.rev+=s.rev;
+    if(s.ch==="FBM"){p.fbmU+=s.units;p.fbmR+=s.rev;}else{p.fbaU+=s.units;p.fbaR+=s.rev;}
+    if(s.title&&s.title!==s.asin)p.title=s.title;
+    p.skus.push({sku:s.sku,ch:s.ch,units:s.units,rev:s.rev});
+  }
+  return[...m.values()].map(p=>({...p,
+    cvr:p.sessions?Math.round(p.units/p.sessions*10000)/100:0,
+    fbmOnly:p.fbaU===0&&p.skus.every(s=>s.ch==="FBM"),
+    fbaOnly:p.fbmU===0&&p.skus.every(s=>s.ch!=="FBM")}));
+}
+function parseRows(data){return aggregate(toSkuRows(data));}
+function classify(p){
+  const tags=[];
+  if(p.units<=2)tags.push("dead");
+  if(p.sessions>=100&&p.cvr<10)tags.push("cvr");
+  if(p.sessions<50)tags.push("traffic");
+  if(p.bb<70)tags.push("bb");
+  return tags;
+}
+/* ---- Varianten-Familien (Kannibalisierungs-Erkennung) ---- */
+let FAMBEST=new Map();
+function famKey(p){
+  const st=shortTitle(p).toLowerCase().replace(/[^a-zäöüß0-9 ]/g," ");
+  const stop=new Set(["mit","für","und","der","die","das","aus","pro","bei","ohne"]);
+  const tk=st.split(/\s+/).filter(w=>w.length>2&&!stop.has(w)).slice(0,2).join(" ");
+  return brandOf(p.title)+"::"+tk;
+}
+function buildFams(rows){
+  const m=new Map();
+  for(const p of rows){const k=famKey(p);if(!m.has(k))m.set(k,[]);m.get(k).push(p);}
+  const best=new Map();
+  for(const[k,arr]of m){
+    if(arr.length<2)continue;
+    const b=[...arr].sort((a,c)=>c.units-a.units)[0];
+    if(b.units>=15)best.set(k,b);
+  }
+  return best;
+}
+function recText(p){
+  const tags=p.tags||[];
+  const r=[];
+  const t=(p.title||"").toLowerCase();
+  const best=FAMBEST.get(famKey(p));
+  const isSummer=/lsf|sonnenmilch|sonnencreme|sonnenöl|sonnenschutz|bräunung/.test(t);
+  const isWinter=/bronchial|erkältung|husten|tannenblut/.test(t);
+  if(best&&best.asin!==p.asin&&(tags.includes("dead")||tags.includes("traffic"))&&p.units<best.units/4){
+    r.push("⚡ Variante von "+best.asin+" ("+fmt(best.units)+" verkauft) — unters Parent-Listing konsolidieren statt einzeln pushen");
+  }
+  if(p.fbmOnly&&p.sessions>=200&&p.bb<70){
+    r.push("🚚 NUR FBM-Angebot — FBA anlegen! Die Buybox bevorzugt Prime, "+fmt(p.sessions)+" Sessions gehen an Wettbewerber");
+  }
+  if(p.fbaU>0&&p.fbmU>p.fbaU*2){
+    r.push("🔄 FBM verkauft "+fmt(p.fbmU)+"× vs. FBA "+fmt(p.fbaU)+"× — FBA-Preis/Lagerbestand prüfen (out of stock?)");
+  }
+  if(tags.includes("bb")&&!(p.fbmOnly&&p.sessions>=200)){
+    r.push(p.sessions>=100
+      ?"Buybox: "+fmt(p.sessions)+" Sessions warten — Preis ggü. Buybox-Gewinner senken, Repricing aktivieren, FBA prüfen"
+      :"Buybox: Preis & Versand prüfen");
+  }
+  if(tags.includes("cvr"))r.push("Listing: Hauptbild + Preis vs. Top-3-Konkurrenz prüfen, Bewertungen aufbauen (Ø-Preis hier: "+(p.units>0?eur(p.rev/p.units):"–")+")");
+  if(tags.includes("traffic")&&!r.some(x=>x.startsWith("⚡"))){
+    r.push("Sichtbarkeit: Hauptkeyword in Titel + Backend, SP-Auto-Kampagne 5–10 €/Tag, 10%-Coupon, Vine");
+  }
+  if(isSummer&&(tags.includes("traffic")||tags.includes("dead")))r.push("☀️ Sommersaison läuft JETZT — sofort Ads pushen");
+  if(isWinter&&tags.includes("dead"))r.push("❄️ Wintersaison-Produkt — Sommerflaute normal, nicht auslisten");
+  if(tags.includes("dead")&&r.length===0)r.push("Reaktivieren oder auslisten: Lagerkosten gegen Potenzial abwägen");
+  const seo=seoFor(p);
+  if(seo&&seo.missing.length&&(tags.includes("traffic")||tags.includes("dead")||tags.includes("cvr"))){
+    r.push("🔎 Fehlt im Titel: "+seo.missing.slice(0,3).join(", "));
+  }
+  return r.join(" · ")+' <button class="btn ghost sm" style="margin-top:3px" onclick="showSeo(\''+p.asin+'\')">SEO-Plan ▸</button>';
+}
+/* ---- Keyword-Bibliothek (meistgesuchte Begriffe je Kategorie, amazon.de, erfahrungsbasiert) ---- */
+const KEYLIB=[
+[/magnesium bisglycinat|magnesium.*chelat/i,"Magnesium Bisglycinat",["magnesium bisglycinat","magnesium hochdosiert","magnesiumglycinat","magnesium kapseln hochdosiert","magnesium bisglycinat 300mg","chelat magnesium","magnesium gut verträglich","magnesium vegan"]],
+[/magnesium kalium/i,"Magnesium + Kalium",["magnesium kalium kapseln","elektrolyte kapseln","magnesium kalium hochdosiert","muskelkrämpfe magnesium","kalium magnesium kombination"]],
+[/magnesium calcium/i,"Magnesium + Calcium",["magnesium calcium tabletten","calcium magnesium kombination","knochen mineralstoffe"]],
+[/magnesium öl/i,"Magnesium-Öl",["magnesiumöl spray","magnesium öl zechstein","magnesiumchlorid spray","magnesium äußerlich"]],
+[/kalium/i,"Kalium",["kalium kapseln hochdosiert","kalium 400mg","kaliumcitrat","elektrolythaushalt kalium","kalium tabletten"]],
+[/magnesium/i,"Magnesium",["magnesium","magnesium hochdosiert","magnesium kapseln","magnesium tabletten","magnesium komplex"]],
+[/ashwagandha|ksm-66|ksm66/i,"Ashwagandha",["ashwagandha kapseln","ashwagandha hochdosiert","ksm-66 ashwagandha","withania somnifera","ashwagandha withanolide","adaptogen stress abbau","ashwagandha vegan"]],
+[/melatonin|einschlaf|sleep/i,"Melatonin / Schlaf",["melatonin spray","einschlafspray","melatonin hochdosiert","schneller einschlafen","schlaf spray melatonin","einschlafhilfe erwachsene","melatonin tropfen"]],
+[/algenöl/i,"Omega-3 Algenöl",["omega 3 vegan","algenöl kapseln","dha epa vegan","omega 3 algenöl hochdosiert","veganes omega 3"]],
+[/omega-3|omega 3|fischöl/i,"Omega-3 Fischöl",["omega 3 kapseln hochdosiert","fischöl kapseln","epa dha kapseln","omega 3 1000mg","fischölkapseln hochdosiert","omega 3 fettsäuren"]],
+[/d3.*k2|k2.*d3/i,"Vitamin D3 + K2",["vitamin d3 k2 tabletten","vitamin d3 k2 hochdosiert","d3 k2 depot","vitamin d3 5000","k2 mk7","vitamin d3 k2 tropfen"]],
+[/vitamin d3|vitamin d\b/i,"Vitamin D3",["vitamin d3 tropfen","vitamin d3 hochdosiert","vitamin d 5000 ie","sonnenvitamin","vitamin d3 öl"]],
+[/vitamin k2/i,"Vitamin K2",["vitamin k2 tropfen","vitamin k2 mk7","k2 hochdosiert","menaquinon mk-7"]],
+[/vitamin b12/i,"Vitamin B12",["vitamin b12 hochdosiert","methylcobalamin","b12 vegan","vitamin b12 tabletten","b12 direktsticks","vitamin b12 energie"]],
+[/folsäure/i,"Folsäure",["folsäure kapseln","folat 5-mthf","folsäure schwangerschaft","folsäure hochdosiert"]],
+[/vitamin c.*zink|zink.*vitamin c/i,"Vitamin C + Zink",["vitamin c zink kapseln","immunsystem stärken kapseln","vitamin c hochdosiert zink","abwehrkräfte stärken"]],
+[/vitamin c/i,"Vitamin C",["vitamin c hochdosiert","vitamin c depot","vitamin c langzeit","ester c","vitamin c 1000mg kapseln"]],
+[/vitamin e/i,"Vitamin E",["vitamin e kapseln","vitamin e hochdosiert","tocopherol kapseln","zellschutz vitamin e"]],
+[/zinkbisglycinat|zink.*histidin/i,"Zink Bisglycinat",["zink bisglycinat","zink hochdosiert","zink kapseln vegan","zink 25mg","zink chelat","zink immunsystem"]],
+[/zink salbe|zinksalbe|wundschutz|windel/i,"Zinksalbe / Wundschutz",["zinksalbe","wundschutzcreme","zinksalbe baby","wundcreme","zink salbe entzündung","wundheilung salbe"]],
+[/zink plus|zink tabletten|\bzink\b/i,"Zink",["zink tabletten hochdosiert","zink biotin","zink haut haare nägel","zink immunsystem tabletten"]],
+[/selen/i,"Selen",["selen kapseln","selen hochdosiert","selen 200","natriumselenit","selen schilddrüse"]],
+[/eisen/i,"Eisen",["eisen kapseln","eisen mit vitamin c","eisen hochdosiert","eisentabletten","eisen vegan","eisenmangel","eisen kautabletten kinder"]],
+[/biotin/i,"Biotin",["biotin hochdosiert","biotin haare","biotin 10000","biotin tabletten haarwachstum","biotin zink selen"]],
+[/haut.*haare.*nägel|silicea|kieselsäure|hair repair/i,"Silicea / Haut-Haare-Nägel",["haut haare nägel kapseln","silicea gel","kieselerde kapseln","kieselsäure gel","haarwachstum kapseln","silizium haare","brüchige nägel"]],
+[/kollagen/i,"Kollagen",["kollagen pulver","collagen komplex","kollagen hochdosiert","kollagen hyaluron","kollagen trinkampullen","kollagen haut"]],
+[/hyaluron/i,"Hyaluron-Pflege",["hyaluron creme gesicht","hyaluronsäure hochdosiert","anti aging creme","hyaluron serum","falten creme","hyaluron ampullen"]],
+[/aloe vera.*(saft|pflanzensaft)/i,"Aloe-Vera-Saft",["aloe vera saft bio","aloe vera trinkgel","aloe vera saft naturtrüb","aloe zum trinken"]],
+[/aloe vera/i,"Aloe-Vera-Pflege",["aloe vera gel","aloe vera creme","after sun aloe vera","aloe vera gesichtscreme","feuchtigkeitscreme aloe","aloe vera 98%"]],
+[/sonnenmilch|sonnencreme|lippenschutz lsf|lsf/i,"Sonnenschutz",["sonnencreme lsf 30","sonnenmilch wasserfest","sonnenschutz gesicht","sonnencreme lsf 20","sonnenmilch spray","alpin sonnencreme"]],
+[/sonnenöl|bräunung|nussöl/i,"Bräunungsöl",["bräunungsöl","bräunungsbeschleuniger","sonnenöl bräunung","nussöl bräunung","bräunungsöl mit lsf","tiroler nussöl"]],
+[/lippen(pflege|balsam)|lip balm/i,"Lippenpflege",["lippenpflege ohne parfüm","lippenbalsam","lippenpflegestift","spröde lippen"]],
+[/magen-darm|magen darm/i,"Magen-Darm",["magen darm mittel","durchfall mittel","magen darm gel","silicea magen darm","magen beruhigen","reisedurchfall","magen darm sticks"]],
+[/bronchial|husten|tannenblut|erkältung|spitzwegerich|hustenbonbons/i,"Erkältung / Bronchial",["hustensaft erwachsene","bronchial sirup","hustensirup pflanzlich","thymian hustensaft","erkältungsbad","halsschmerzen bonbons"]],
+[/weißdorn|weissdorn/i,"Weißdorn",["weißdorn kapseln","weißdorn herz","weißdorn tonikum","crataegus","herz kreislauf stärken"]],
+[/mariendistel|leber/i,"Leber / Mariendistel",["mariendistel kapseln","leber entgiften","silymarin hochdosiert","artischocke mariendistel","leber komplex"]],
+[/glucosamin|arthoro|gelenk|hagebutte/i,"Gelenke",["glucosamin chondroitin","gelenkkapseln","glucosamin hochdosiert","msm glucosamin","gelenke knorpel kapseln","hagebuttenpulver gelenke"]],
+[/sabal|kürbis|prostata/i,"Prostata",["prostata kapseln","kürbiskern kapseln","sabal serrulata","sägepalme prostata","männer blase"]],
+[/venen|bein balsam|rosskastanie|weinlaub/i,"Venen / Beine",["venen kapseln","rosskastanien salbe","schwere beine creme","venencreme","rotes weinlaub","krampfadern creme"]],
+[/probiotika|flora|bakterienstämme|biome|kulturen/i,"Probiotika",["probiotika kapseln","darmflora aufbauen","kulturen komplex","probiotika hochdosiert","darmbakterien kapseln","magensaftresistent probiotika"]],
+[/glucomannan|abnehmen|figur|slim/i,"Abnehmen",["abnehmen kapseln","glucomannan kapseln","appetitzügler","sättigungskapseln","stoffwechsel ankurbeln","diät kapseln"]],
+[/\bopc\b|traubenkern/i,"OPC",["opc traubenkernextrakt","opc hochdosiert","opc kapseln","traubenkernextrakt kapseln","antioxidantien kapseln"]],
+[/\bq10\b|coenzym/i,"Q10",["coenzym q10 100mg","q10 hochdosiert","q10 kapseln","ubiquinol","q10 anti aging"]],
+[/curcuma|kurkuma/i,"Curcuma",["kurkuma kapseln hochdosiert","curcuma piperin","kurkuma extrakt","curcumin hochdosiert","kurkuma tropfen"]],
+[/schwarzkümmel/i,"Schwarzkümmelöl",["schwarzkümmelöl kapseln","schwarzkümmelöl ägyptisch","schwarzkümmelöl kaltgepresst","nigella sativa"]],
+[/ginkgo/i,"Ginkgo",["ginkgo biloba kapseln","ginkgo hochdosiert","konzentration gedächtnis","durchblutung gehirn"]],
+[/ginseng/i,"Ginseng",["ginseng kapseln","panax ginseng","roter ginseng","ginseng hochdosiert","energie kapseln"]],
+[/spirulina/i,"Spirulina",["spirulina tabletten bio","spirulina presslinge","spirulina algen","spirulina hochdosiert"]],
+[/flohsamen/i,"Flohsamenschalen",["flohsamenschalen gemahlen","flohsamenschalen bio","ballaststoffe pulver","darm reinigung flohsamen"]],
+[/blutzucker|zimt/i,"Blutzucker",["blutzucker senken kapseln","ceylon zimt kapseln","chrom blutzucker","zimt kapseln hochdosiert"]],
+[/elektrolyt/i,"Elektrolyte",["elektrolyte pulver","elektrolyte ohne zucker","elektrolyt sticks","natrium kalium magnesium sport","isotonisches getränkepulver"]],
+[/lutein|visiofit|augen.*(kapseln|gesundheit)/i,"Augen-Nährstoffe",["lutein kapseln","augen vitamine","lutein zeaxanthin","sehkraft kapseln","augen kapseln"]],
+[/augenspray|trockene augen/i,"Augenspray",["augenspray trockene augen","liposomales augenspray","augenbefeuchtung","trockene augen mittel"]],
+[/stichheiler|insektenstich|bite away/i,"Stichheiler",["stichheiler elektronisch","insektenstichheiler","mückenstich behandlung","stichheiler bite away","hitzestift insektenstich","bite away"]],
+[/herpes|herpotherm/i,"Lippenherpes",["herpes lippenbläschen","lippenherpes gel","herpes wärmestift","herpotherm","lippenherpes schnelle hilfe"]],
+[/zahncreme|zahnpasta/i,"Zahnpflege",["zahnpasta ohne fluorid","zahncreme naturkosmetik","parodontose zahnpasta","zahnpasta ohne schaumbildner"]],
+[/ingwer/i,"Ingwer",["ingwer tropfen","ingwer extrakt","ingwer shot konzentrat","ingwer kapseln"]],
+[/grünlippmuschel/i,"Grünlippmuschel",["grünlippmuschel kapseln","grünlippmuschel hochdosiert","grünlippmuschel hund mensch","gelenke muschel extrakt"]],
+[/arnika|pferde.?balsam|wärme balsam|weihrauch/i,"Sport-Balsam",["pferdebalsam","arnika salbe","wärmesalbe muskeln","muskelkater salbe","weihrauch salbe","pferdesalbe kühlend"]],
+[/lavendel|passionsblume|beruhigung|innere ruhe/i,"Beruhigung",["lavendel kapseln","passionsblume kapseln","innere ruhe tabletten","stress kapseln pflanzlich","beruhigungsmittel pflanzlich"]],
+[/sanddorn|vollfrucht|granatapfel|mango/i,"Vollfrucht-Säfte",["sanddornsaft","sanddorn vollfrucht","granatapfel muttersaft","vitamin c saft natur"]],
+[/multivital|multi.?vitamin|mineral-tabletten|multi-mineral|a-z/i,"Multivitamin",["multivitamin tabletten","vitamine a-z","multivitamin hochdosiert","multivitamin kinder","mineralstoffe komplex"]],
+[/basen|basis balance|mineralstoffe aktiv/i,"Basen",["basenpulver","basentabletten","säure basen haushalt","basische mineralstoffe"]],
+[/calcium/i,"Calcium",["calcium tabletten","calcium d3","calcium 800mg","knochen calcium"]],
+[/nachtkerzen/i,"Nachtkerzenöl",["nachtkerzenöl kapseln","nachtkerzenöl hochdosiert","gamma linolensäure","nachtkerzenöl haut"]],
+[/wund.*heil|heil-gel|ringelblume/i,"Wundpflege",["wund heilsalbe","ringelblumensalbe","heilsalbe haut","wundgel","narbenpflege"]],
+[/astaxanthin/i,"Astaxanthin",["astaxanthin kapseln","astaxanthin hochdosiert","astaxanthin 8mg","antioxidans astaxanthin"]],
+[/hirse|haar komplex|beauty/i,"Haar-Komplex",["haarkapseln wachstum","haar vitamine","hirseextrakt haare","haarausfall kapseln frauen","biotin haare kapseln"]],
+[/apfelessig/i,"Apfelessig",["apfelessig kapseln","apfelessig stoffwechsel","apple cider vinegar"]],
+[/knoblauch/i,"Knoblauch",["schwarzer knoblauch kapseln","knoblauch geruchlos","fermentierter knoblauch"]],
+[/brennnessel/i,"Brennnessel",["brennnessel kapseln","brennnesselblatt extrakt","brennnessel hochdosiert"]],
+[/gefäß|arterien/i,"Gefäß-Gesundheit",["arginin kapseln","gefäß kapseln","durchblutung kapseln","blutdruck senken natürlich"]],
+[/eisen vital/i,"Eisen-Saft",["eisensaft","eisen trinkampullen","flüssiges eisen","eisen saft vegan"]],
+[/bodylotion|körperlotion|creme|balsam|lotion/i,"Körperpflege",["körperlotion trockene haut","feuchtigkeitscreme körper","pflegelotion sensitive"]],
+];
+/* Echte Amazon-Suchränge aus Brand Analytics (Top-Suchbegriffe, KW28: 05.–11.07.2026, amazon.de).
+   Kleinerer Rang = häufiger gesucht. */
+const BA_WEEK="KW28/2026";
+const BA={
+"Magnesium Bisglycinat":[["magnesium",109],["magnesium bisglycinat",114],["magnesium komplex",399],["magnesium citrate",1749],["magnesium glycinat",2603],["magnesium glycinate",6351],["magnesium komplex hochdosiert",6488],["magnesium malat",14787]],
+"Ashwagandha":[["ashwagandha",294],["ashwagandha ksm-66",4027],["ashwagandha kapseln hochdosiert",9655],["ashwagandha pulver",40325],["ashwagandha kapseln",41725],["ashwagandha gummies",46463],["bio ashwagandha",60790],["ksm 66 ashwagandha",134699]],
+"Melatonin / Schlaf":[["melatonin",1338],["melatonin spray",3049],["melatonin gummies",6739],["melatonin hochdosiert",13172],["melatonin tabletten",35726],["melatonin kinder",48794],["melatonin 1mg",62315],["melatonin spray hochdosiert",93182]],
+"Aloe-Vera-Pflege":[["aloe vera gel",2518],["aloe vera gel 100 prozent",4459],["aloe vera",16713],["aloe vera creme",25005],["aloe vera spray",37626],["after sun aloe vera",116467],["aloe vera gel bio",128071]],
+"Aloe-Vera-Saft":[["aloe vera saft",39793],["aloe vera",16713],["aloe vera drink",117815]],
+"Bräunungsöl":[["bräunungsöl",14322],["sonnenöl",24477],["sonnenöl schnelle bräune",58558],["sonnenöl lsf 50",122079],["sonnenöl lsf 30",259955],["sonnenöl kokos",389712],["sonnenöl spray",389712]],
+"Sonnenschutz":[["sonnenöl lsf 50",122079],["sonnenöl lsf 30",259955],["sonnenöl",24477],["sonnenöl spray",389712]],
+"Magen-Darm":[["hübner magen-darm direkt",196391],["magen darm tee",243510],["magen darm",292575],["magen darm entspannung",354926]],
+"Stichheiler":[["stichheiler",3951],["stichheiler nach insektenstichen",23122],["stichheiler handy",26611],["elektrischer stichheiler",98583],["stichheiler usb c",140094],["elektronischer stichheiler",189576]],
+"Zinksalbe / Wundschutz":[["zinksalbe",3973],["zinksalbe wundsalbe",44937],["zinksalbe gegen pickel",61533],["zinksalbe hochdosiert",174501],["zinksalbe baby",219873]],
+"Silicea / Haut-Haare-Nägel":[["silicea gel",96725],["hübner silicea gel",136434],["silicea",215592]],
+"Omega-3 Fischöl":[["omega 3",115],["omega 3 kapseln hochdosiert",619],["omega 3 vegan",2638],["omega 3 kapseln",5179],["omega 3 kinder",6297]],
+"Omega-3 Algenöl":[["omega 3 algenöl",4109],["omega 3 vegan",2638],["omega 3",115]],
+"Weißdorn":[["weissdorn kapseln hochdosiert",98583],["weissdorn",168900],["weissdorn tee",285421],["weissdorn saft",464205]],
+"Eisen":[["eisen",3602],["eisen hochdosiert",8938],["eisen vitamin c",17740],["liposomales eisen",77494],["eisen tabletten",129663]],
+"Eisen-Saft":[["eisen",3602],["eisen hochdosiert",8938],["liposomales eisen",77494]],
+"Vitamin B12":[["vitamin b12",1124],["b12 vitamin",9442],["vitamin b12 hochdosiert",11662],["vitamin b12 tropfen",36008],["vitamin b12 1000µg",55533]],
+"Vitamin C":[["vitamin c",1211],["vitamin c hochdosiert",11046],["vitamin c zink",27442]],
+"Vitamin C + Zink":[["vitamin c",1211],["zink",1002],["vitamin c hochdosiert",11046],["vitamin c zink",27442]],
+"Vitamin D3 + K2":[["vitamin d3 k2",298],["vitamin d3 k2 tropfen",7565],["vitamin d3 k2 20000 ie",17911],["vitamin d3 k2 hochdosiert",23821]],
+"Vitamin D3":[["vitamin d3 k2",298],["vitamin d3",4200],["vitamin d3 k2 tropfen",7565]],
+"Vitamin K2":[["vitamin d3 k2",298],["vitamin k2",15989],["vitamin d3 k2 tropfen",7565]],
+"Zink":[["zink",1002],["zink tabletten",3999],["biotin zink selen",16675],["zink bisglycinat",18459],["vitamin c zink",27442]],
+"Zink Bisglycinat":[["zink",1002],["zink tabletten",3999],["zink bisglycinat",18459]],
+"Selen":[["selen",3389],["selen hochdosiert",14277],["biotin zink selen",16675],["selen komplex",37469],["selen 200µg",61533],["zink selen",66254]],
+"Biotin":[["biotin",3563],["biotin zink selen",16675],["biotin haare",35298],["biotin hochdosiert",75736],["biotin komplex",81882]],
+"Kollagen":[["kollagen pulver",769],["kollagen",1993],["kollagen kapseln",4113]],
+"Hyaluron-Pflege":[["hyaluron serum",8417],["hyaluron kapseln",11353],["hyaluron",42084]],
+"Folsäure":[["folsäure",4190],["folsäure kinderwunsch",20228],["folsäure tabletten",66719],["folsäure schwangerschaft",75183],["vitamin b12 folsäure",104786]],
+"Gelenke":[["glucosamin",10722],["glucosamin chondroitin hochdosiert",23326],["glucosamin chondroitin",102658],["glucosamin chondroitin msm",128071],["hagebutte",334711]],
+"Venen / Beine":[["venen engel",17767],["venen kapseln",35185],["venen",136434]],
+"Probiotika":[["probiotika",3192],["darmbakterien probiotika",18421],["probiotika darmsanierung",25246]],
+"Abnehmen":[["abnehmen",1417],["abnehmen tabletten",7321],["abnehmen shake",8153]],
+"OPC":[["opc",3524],["opc traubenkernextrakt hochdosiert",4691],["opc kapseln hochdosiert",36008],["opc kapseln",61933],["opc traubenkernextrakt",78120]],
+"Q10":[["q10",3735],["q10 kapseln hochdosiert",9007],["coenzym q10",9889],["q10 ubiquinol",23821]],
+"Curcuma":[["kurkuma kapseln",6082],["kurkuma pulver",11862],["kurkuma",19526],["kurkuma kapseln hochdosiert",27261]],
+"Schwarzkümmelöl":[["schwarzkümmelöl",550],["schwarzkümmelöl kapseln",970],["schwarzkümmelöl bio kaltgepresst",8190]],
+"Ginkgo":[["ginkgo biloba",57546],["ginkgo",104786],["ginkgo biloba hochdosiert",265894]],
+"Ginseng":[["ginseng",29754],["panax ginseng",83244],["ginseng kapseln",98583],["ginseng hochdosiert",105881],["roter ginseng",134699]],
+"Spirulina":[["spirulina",10969],["spirulina pulver",17955],["spirulina tabletten",27348],["chlorella spirulina",105881]],
+"Flohsamenschalen":[["flohsamenschalen",534],["flohsamenschalen gemahlen",3472],["flohsamenschalen kapseln",9104],["flohsamenschalen bio",31701]],
+"Blutzucker":[["ceylon zimt",6668],["zimt",11422],["zimt ceylon",13571]],
+"Elektrolyte":[["elektrolyte",124],["elektrolyte ohne zucker",2505],["elektrolyte pulver",18602],["elektrolyte sticks",20906]],
+"Augen-Nährstoffe":[["lutein",52506],["lutein zeaxanthin kapseln",55199],["lutein zeaxanthin",238337]],
+"Augenspray":[["augentropfen gegen trockene augen",6115],["augentropfen trockene augen",41198],["trockene augen",119198],["augenspray gegen trockene augen",123524]],
+"Lippenherpes":[["lippenherpes creme",57867],["lippenherpes",98583],["lippenherpes-patch",132943],["lippenherpes hitzestift",325456]],
+"Zahnpflege":[["zahnpasta",984],["zahnpasta weisse zähne",9413]],
+"Ingwer":[["ingwer shot",15492],["ingwer",31224],["ingwer kapseln",35185]],
+"Grünlippmuschel":[["grünlippmuschel hund",10516],["grünlippmuschel kapseln",34138],["grünlippmuschel",67611]],
+"Sport-Balsam":[["pferdesalbe",6428],["pferdesalbe kühlend",76908],["pferdesalbe für mensch extra stark",90693],["pferdesalbe für muskeln",233515]],
+"Vollfrucht-Säfte":[["sanddorn",123524]],
+"Multivitamin":[["multivitamin",3893],["multivitamin tabletten",20589],["multivitamin hochdosiert",44719],["multivitamin kapseln",112693]],
+"Basen":[["basenpulver",30567],["basenpulver entsäuerung",365946]],
+"Magnesium":[["magnesium",109],["magnesium bisglycinat",114],["magnesium komplex",399],["magnesium citrate",1749],["magnesium glycinat",2603],["magnesium komplex hochdosiert",6488],["magnesium malat",14787]]
+};
+function seoFor(p){
+  const t=(p.title||"").toLowerCase();
+  for(const[rx,name,libKws]of KEYLIB){
+    if(rx.test(t)){
+      const live=BA[name]||null;
+      const kws=live?live.map(x=>x[0]):libKws;
+      const ranks={};if(live)for(const[k,r]of live)ranks[k]=r;
+      const present=[],missing=[];
+      for(const k of kws){
+        const words=k.toLowerCase().split(/\s+/);
+        (words.every(w=>t.includes(w))?present:missing).push(k);
+      }
+      return{name,kws,present,missing,ranks,live:!!live};
+    }
+  }
+  return null;
+}
+function showSeo(asin){
+  const p=PRODUCTS.find(x=>x.asin===asin);
+  if(!p)return;
+  const seo=seoFor(p)||{name:"Allgemein",kws:[],present:[],missing:[]};
+  const amount=(p.title.match(/\d+\s?(?:x\s?\d+\s?)?(?:kapseln|tabletten|sticks|ml|g|liter|stück)/i)||[""])[0];
+  const brand=brandOf(p.title);
+  const topKw=(seo.kws[0]||"").replace(/\b\w/g,c=>c.toUpperCase());
+  const kw2=seo.kws[1]||"",kw3=seo.kws[2]||"";
+  // Backend: fehlende Wörter, die nicht im Titel stehen — ohne Kommas, max 249 Bytes
+  const tw=new Set(p.title.toLowerCase().split(/[^a-zäöüß0-9]+/));
+  const bw=[...new Set(seo.missing.join(" ").toLowerCase().split(/\s+/))].filter(w=>w&&!tw.has(w));
+  let backend=bw.join(" ");if(backend.length>249)backend=backend.slice(0,249).replace(/\s\S*$/,"");
+  document.getElementById("seomodal-content").innerHTML=`
+    <div style="display:flex;justify-content:space-between;align-items:start;gap:10px">
+      <div><b style="font-size:15px">SEO-Plan · ${p.asin}</b><div style="font-size:12px;color:var(--muted);margin-top:4px">${esc(p.title)}</div></div>
+      <button class="btn ghost sm" onclick="closeSeo()">✕ Schließen</button>
+    </div>
+    <h2>🔑 Top-Suchbegriffe „${esc(seo.name)}" <span class="hint">${seo.live?"— ECHTE Amazon-Suchränge (Brand Analytics "+BA_WEEK+", kleinerer Rang = häufiger gesucht)":"(erfahrungsbasiert — echte Ränge via Brand Analytics folgen)"}</span></h2>
+    <div>${seo.kws.map(k=>`<span class="kw ${seo.present.includes(k)?"ok":"miss"}">${seo.present.includes(k)?"✓":"✗"} ${esc(k)}${seo.ranks&&seo.ranks[k]?' <b style="opacity:.7">· Rang '+fmt(seo.ranks[k])+"</b>":""}</span>`).join("")}</div>
+    <div class="hint">✓ = Wörter bereits im Titel indexiert · ✗ = fehlt — in Titel/Bullets/Backend aufnehmen</div>
+    <h2>📝 Titel-Vorschlag (max. ~200 Zeichen, wichtigste Keywords nach vorn)</h2>
+    <div class="copybox">${esc(brand)} ${esc(topKw)}${kw2?" – "+esc(kw2):""}${kw3?" | "+esc(kw3):""}${amount?" | "+esc(amount):""} | vegan &amp; laborgeprüft</div>
+    <div class="hint">Muster: Marke + Hauptkeyword + 2. Keyword + Menge/Form + USP. Keine Keyword-Wiederholung nötig — Amazon indexiert jedes Wort einmal.</div>
+    <h2>• Bullet-Points (5 Stück, je 1 Nutzen + 1–2 Keywords, max. ~200 Zeichen)</h2>
+    <ol>
+      <li><b>WIRKUNG:</b> Hauptnutzen nennen + „${esc(seo.missing[0]||seo.kws[0]||"")}" einbauen</li>
+      <li><b>QUALITÄT:</b> hochdosiert / laborgeprüft / ohne Zusatzstoffe + „${esc(seo.missing[1]||kw2)}"</li>
+      <li><b>ANWENDUNG:</b> Einnahme/Dosierung + „${esc(seo.missing[2]||kw3)}"</li>
+      <li><b>FÜR WEN:</b> Zielgruppe (z.B. Sportler, Frauen, vegan) + Long-Tail-Keyword</li>
+      <li><b>VERTRAUEN:</b> Made in Germany / Marke seit XX / Zufriedenheitsversprechen</li>
+    </ol>
+    <h2>🔒 Backend-Suchbegriffe (Seller Central → Produkt bearbeiten → Suchbegriffe, max. 249 Bytes)</h2>
+    <div class="copybox">${esc(backend)||"– alle Kategorie-Keywords bereits im Titel –"}</div>
+    <div class="hint">Nur Wörter, die NICHT schon in Titel/Bullets stehen. Keine Kommas, keine Wiederholungen, keine Markennamen von Wettbewerbern.</div>
+    <h2>📄 Beschreibung / A+ Content</h2>
+    <div style="font-size:12.5px">Amazon indexiert: <b>Titel</b> (stärkste Gewichtung) → <b>Backend-Suchbegriffe</b> → <b>Bullets</b> → <b>Beschreibung/A+</b> (schwach, aber CVR-relevant). Beschreibungstext: 2–3 Absätze, jedes ✗-Keyword einmal natürlich einbauen, dazu Anwendung + FAQ. Mit A+ Content (Markenregistrierung) zusätzlich Vergleichstabelle eurer Varianten einbauen — das löst auch das Kannibalisierungs-Problem.</div>`;
+  document.getElementById("seomodal").style.display="block";
+}
+function closeSeo(){document.getElementById("seomodal").style.display="none";}
+function chCell(p){
+  const parts=[];
+  if(p.fbaU>0||!p.fbmOnly)parts.push('<span class="badge b-ok" title="FBA verkauft">FBA '+fmt(p.fbaU)+'</span>');
+  if(p.fbmU>0||p.fbmOnly)parts.push('<span class="badge b-traffic" title="FBM verkauft">FBM '+fmt(p.fbmU)+'</span>');
+  if(p.fbmOnly)parts.push('<span class="badge b-dead" title="Kein FBA-Angebot vorhanden">nur FBM!</span>');
+  return parts.join(" ")||"–";
+}
+
+/* ---- State ---- */
+let PRODUCTS=[],FILTER="all",SORT={key:"rev",dir:-1},topChart=null;
+const LSKEY="asin_dash_v2";
+
+/* ---- Seed data (Amazon.de, letzte 30 Tage, Stand 19.07.2026) ---- */
+const SEED=`
+  - [8,]: B0CX5N9X9Z,"bite away Two, der original Stichheiler, der elektronische Insektenstichheiler für die schnelle Behandlung von Mückenstichen, Hitzestift, bis zu 300 Anwendungen. Ersetzt Nicht den Mückenschutz",161323,211590,5,119.53,0,0.01
+  - [8,]: B0031OS9AU,Tiroler Nussöl Original Nussöl wasserfest | Bräunungsöl Körper | Walnussschalen Extrakt | Pflegeformel mit Mandelöl und Sonnenblumenöl | seidiger Glanz | für Solarium und Sonne | 150 ml,8054,10810,663,10368.81,16.46,149.24
+  - [8,]: B0CGLWLLJX,"hübner® Magen-Darm Direkt – 30 Direktsticks á 15ml für unterwegs, vegan, geschmacksneutral, ohne Zusätze, mit hoher Bindungsfähigkeit für Krankheitserreger & Giftstoffe",4726,6460,855,13612.17,36.18,185.28
+  - [8,]: B074QNH6TG,"Tiroler Nussöl Original DOPPELPACK 2x 150ml |Das Original |Verleiht der Haut schon beim Auftragen eine leichte, natürliche Bräune",4580,6568,482,12686.32,21.05,194.9
+  - [8,]: B0031OORVK,Tiroler Nussöl Original | Sonnenöl LSF 6 | UVA UVB Filter | wasserfestes Pflegeöl mit Mandelöl Sonnenblumenöl Walnussöl | Walnussschalen Extrakt für Bräune | seidiger Glanz 75 ml,3314,4632,280,3386.55,16.9,169.76
+  - [8,]: B0DMSWG759,sovita Zink Salbe100 ml I Hautschutz Wundheilung I Windelbereich Babypflege I Zinkoxid hochdosiert I Heilsalbe für sensible Haut,3136,4106,530,4771.02,33.8,199.16
+  - [8,]: B0041LYKKK,Tiroler Nussöl Original I Sonnenmilch LSF 30 I wasserfest I UVA UVB Filter I Sonnenschutz für ungebräunte normal empfindliche Haut I mit Panthenol Sonnenblumenöl Walnussöl und schalen Extrakt 150ml,2766,3644,185,3842.33,13.37,165.5
+  - [8,]: B0041M5TC2,Tiroler Nussöl Original | Sonnenmilch LSF 20 | wasserfest | UVA UVB Filter | Sonnenschutz für ungebräunte normal empfindliche Haut | mit Panthenol Sonnenblumenöl und Walnussschalen Extrakt 150ml,2397,3324,344,5457.47,14.35,85.9
+  - [8,]: B0031OQRMC,Tiroler Nussöl I Sonnenmilch Spray LSF 6 I UVA UVB Filter I wasserfestes Sonnenschutz Spray für sonnengewöhnte unempfindliche Haut I mit Panthenol Sonnenblumenöl I Walnussschalen Extrakt I 150 ml,2100,2752,209,3211.55,19.9,182.54
+  - [8,]: B0031OSEX2,Tiroler Nussöl Original I Sonnenöl LSF 6 I UVA UVB Filter I wasserfestes Sonnenschutz Öl für sonnengewöhnte Haut I Walnussschalen Extrakt I Pflegeöl mit Mandelöl Sonnenblumenöl Walnussöl I 150 ml,2004,2802,346,5080.58,17.27,70.8
+  - [8,]: B004GH7178,Hübner Magen-Darm Gel (1 x 500 ml),1636,2128,220,3811.31,26.9,178.2
+  - [8,]: B007Q13LI4,"hübner Wund- & Heil-Gel 100 ml | Silicium-Gel mit Kieselsäure | kühlend & entzündungshemmend bei Hautreizungen, Insektenstichen, Sonnenbrand & kleinen Wunden | natürliche Hautpflege für unterwegs",1576,2040,196,1725.56,24.87,194.26
+  - [8,]: B074QKDSDJ,Hübner Aloe Vera Gel Körpergel - Doppelpack (2x100ml),1512,2240,250,4407.49,33.07,197.42
+  - [8,]: B003X4QL6C,"Hübner Original Haut Haare Nägel + Bindegewebe, Silicea Rein mineralisch, vegan, ohne Zusätze, Frei von Gluten, Lactose, Hefe, Koservierungsstoffen und Stabilisatoren",1464,1980,166,2871.16,22.67,191.42
+  - [8,]: B0055E63PC,Hübner Original silicea Lippenherpes-Gel| Kieselsäure-Gel bei Lippenherpes | Herpesbläschen austrocknen | Wirkstoff mineralisches Silicium |,1428,1910,253,2450.14,35.43,198.62
+  - [8,]: B00WWC3Z6K,"sovita Aloe Vera Saft BIO naturtrüb | 99,8 % Aloe Vera aus dem Blattgel der Aloe barbadensis | Ohne Konservierungsstoffe & künstliche Zusätze | Vegan & naturbelassen | 1 Liter Glasflasche",1380,1908,189,2868.39,27.39,199.78
+  - [8,]: B0CCF2XFFJ,"Huebner Haut Haare Nägel Kompakt, 90 Gel-Kapseln (1)",1268,2954,291,9547.8,45.9,185.92
+  - [8,]: B072HDM7CD,"Hübner Original silicea DIRECT Sticks | Kieselsäure-Gel mit Biotin| Nahrungsergänzungsmittel für Haut, Haare, Nägel | Aprikosengeschmack",1056,1450,209,3745.73,39.58,193.36
+  - [8,]: B008QUU36M,"hübner® Bronchial-Sirup – Mit Thymian & Salbei, unterstützt die natürliche Reinigung der Atemwege, ohne Alkohol, Laktose & Gluten, ideal für Hals & Bronchien in der Erkältungszeit, vegetarisch",1038,1412,166,3162.34,31.98,186.94
+  - [8,]: B08YN8D6VL,"3 x Hübner Silicea Magen-Darm Direct, 3 x 30 Sticks (1350 ml)",1026,1414,186,7560.83,36.26,188.1
+  - [8,]: B004GKZ8QQ,Hübner Aloe Vera Gel (100ml),990,1450,155,2031.67,31.32,199.68
+  - [8,]: B078Y4P5GZ,"Hübner Original silicea Nagelaufbauserum | Silicium-Gel, Biotin und Bio-Mandelöl für brüchige Fingernägel |starke und kräftige Nägel |vegan|5ml",940,1188,85,872.6,18.08,142.9
+  - [8,]: B007ZMTR78,Hübner Weißdorn Herz-Kreislauf-Tonikum | Traditionelles Arzneimittel | Unterstützung der Herz-Kreislauf-Funktion | Alkoholfrei | Vegan,932,1284,202,3361.97,43.35,196.98
+  - [8,]: B01IVPQO78,hübner - Original silicea® Balsam - Arzneimittel - 4x500ml -,854,1210,143,6394.15,33.49,170.44
+  - [8,]: B009SI5GHM,Silicea Doppelpack Haut Haare Nägel Bindegewebe,809,1116,233,6341.03,28.8,93.71
+  - [8,]: B0FX9N22N3,"sovita Blutzucker Kapseln mit Ceylon Zimt Extrakt 10:1 | Chrom für normalen Blutzuckerspiegel | Zink & B-Vitamine B1 B6 B12 | Vegan | Stoffwechsel & Energie | 120 Kapseln",714,1044,115,1155.32,32.21,198.28
+  - [8,]: B008QUUDVC,hübner arthoro Glucosamin Multi Komplex - 3-Monatspackung,694,1012,116,6764.37,33.43,184.16
+  - [8,]: B013AR80YM,Hübner Arthoro L-Prolin Direkt | Kollagenunterstützung | Mit Vitamin C | 60 Sticks,670,904,114,3073.62,34.03,197.54
+  - [8,]: B009DHP8TO,hübner - Silicea Balsam 2+1 - Trinksaft - 2x500ml+200ml -,603,838,215,6069.48,35.66,96.83
+  - [8,]: B007Q1A0QU,Hübner - Silicea - Magen-Darm Gel - 200 ml,581,748,54,708.99,9.29,93.8
+  - [8,]: B004GL6TV8,"hübner Augenspray bei Trockenen Augen | Liposomales Spray zur Befeuchtung bei Jucken, Brennen & Fremdkörpergefühl | Kontaktlinsen- & Make-up-geeignet | 10 ml",544,808,87,1304.01,31.98,158.42
+  - [8,]: B0041M7498,Tiroler Nussöl Original I Sonnenmilch Spray LSF 10 I wasserfest I UVA UVB Filter I Spray für sonnengewöhnte Haut I mit Panthenol Glycerin Walnussöl Sonnenblumenöl I Walnussschalen Extrakt I 150 ml,536,703,84,1709.66,15.67,97.46
+  - [8,]: B0081PB3Y8,"Mariendistel L-Tonikum | Hochdosiertes, traditionelles Arzneimittel | Stärkt die Verdauungsfunktion der Leber | Unterstützt während der Entgiftung | Vegan | 250 ml",512,706,125,1474.02,48.83,182.58
+  - [8,]: B074QMLPYQ,"Hübner DOPPELPACK Silicea Direct für Haut, Haare und Nägel 2x30Stück",452,624,60,1869.06,26.55,197.1
+  - [8,]: B076Q85VJ7,"sovita Magnesium Kalium Kapseln | Essenzielle Mineralstoffe für Muskeln, Nerven & Blutdruck | Unterstützt Muskelfunktion & Nervensystem | Trägt zur Regulierung des Blutdrucks bei | Vegan | 120 Kapseln",432,532,55,718.85,25.47,197.6
+  - [8,]: B00GZQUF0S,Tiroler Nussöl Alpin Sonnencreme & Lippenschutz LSF 30 UVA UVB Filter | wasserfester Sonnenschutz für Berge Winter Schnee | mit Walnussschalen Extrakt Walnussöl Sonnenblumenöl | 20 ml,429,507,64,589.37,14.92,100
+  - [8,]: B06XBQ35NN,Vitamin D3 Tropfen | Sonnenvitamin D zur Unterstützung des Immunsystems und für den Knochenstoffwechsel im Körper | Einfache Anwendung | 10 ml,426,652,69,748.89,32.39,191.92
+  - [8,]: B00WAJEAPA,Bio Schwarzkümmel-Öl aus kontrolliert biologischem Anbau | kaltgepresst | 100% rein | 3x 100 ml,414,567,117,3003.16,28.26,72.69
+  - [8,]: B008H1GCYW,"Hübner Original silicea Hair Repair Spray | Zertifizierte Naturkosmetik für strapaziertes, geschädigtes Haar | Sprühkur mit Kieselsäure-Gel und Aloe Vera | vegan | 120 ml",402,558,33,329.11,16.42,152.8
+  - [8,]: B004GKHT7M,Hübner® Haut Haare Nägel + Bindegewebe - Silicea Balsam 200 ml | Natürliches Silicium-Gel | Straffung & Pflege,372,491,78,917.78,20.97,92.59
+  - [8,]: B07PL9GCV5,hübner® Zahncreme Parodontose-Schutz,370,474,69,598.7,37.29,196.4
+  - [8,]: B08BS2Y3CK,Hübner Aloe Vera Tages- & Nachtcreme Set | 30% Aloe Vera Extrakt | Feuchtigkeitspflege Gesicht | Mit Panthenol & Pflanzenölen | Hautregeneration & Schutz | Für alle Hauttypen | je 50 ml,356,462,36,757.97,20.22,199.06
+  - [8,]: B0FTZL429Q,sovita Kalium Opti 400 mg täglich Hochdosiert 120 Kapseln für Muskeln Nerven & Blutdruck | Elektrolythaushalt & Muskelkontraktion | Vegan & ohne Zusatzstoffe | 120 Kapseln,346,473,108,1427.16,31.21,99.31
+  - [8,]: B01H8QZ43Q,"Hübner Original Silicea Balsam Gel 8 X 500ml (4xDoppelback) Traditionelles Arzneimittel mit Kieselsäure-Gel für Haut, Haare, Nägel und Bindegewebe",340,460,91,7264.74,26.76,93.43
+  - [8,]: B0013LIJCQ,"Aloe Vera Gel 50 ml / Hochwirksam, Feuchtigkeitsspender mit 98 % Aloe Vera Blatt-Gel mit Panthenol und Bisabolol zur Pflege und Regeneration",335,445,58,435.44,17.31,93.11
+  - [8,]: B08NPQ24H4,sovita Lavendel Passionsblume Kapseln – 100 mg Lavendelextrakt I 50 mg Passionsblume I 300 mg Magnesium täglich I Innere Ruhe I Entspannung I Schlaf I 90 Kapseln vegan,320,476,33,467.33,20.63,179.72
+  - [8,]: B07XRBXS83,"Hübner Multivital Kids® Direktsticks mit Calcium, Vitamin D3 und 12 Vitaminen | Nahrungsergänzung für Kinder | Wachstum | Knochenentwicklung | Immunsystem",311,461,179,1518.7,57.56,43.46
+  - [8,]: B004GH8VHM,Hübner Tannenblut Bronchial-Sirup (250 ml),310,452,71,1014.59,22.9,95.79
+  - [8,]: B008QUUDD0,hübner Gefäß-Aktiv® Monatspackung Pulver 360 g,309,414,137,5115.99,44.34,98.67
+  - [8,]: B007RQ303Y,Hübner Schwarzkümmel-Öl Kapseln | kaltgepresstes Öl | aus 100% rein ägyptischen Samen | 90 Kapseln,303,400,99,2511.03,32.67,94.84
+  - [8,]: B00319BMHC,Tiroler Nussöl Alpin I Sonnencreme LSF 20 I UVA UVB Filter I wasserfester Sonnenschutz für Berge Winter Schnee I Alpin Sonnencreme Ski Skifahren I mit Walnussschalen Extrakt Walnussöl I 20ml,298,359,43,532.83,14.43,100
+  - [8,]: B00Q1IL9XW,sovita Omega-3 Fischöl I 120 Kapseln I 1500 mg Omega-3-Fettsäuren pro Tagesdosis mit 528 mg EPA 351 mg DHA und 30 mg Vitamin E je Kapsel I Nahrungsergänzungsmittel mit geprüfter Qualität,292,456,53,534.66,36.3,191.86
+  - [8,]: B0DKJPGG64,NEX Sleep Pro Melatonin Einschlafspray | Hochdosiert | 125 Portionen | Einschlafhilfe für Sportler & Reisende | Schneller Einschlafen | 4 Monate Vorrat | Natürliche Pflanzenextrakte | 1x 25 ml,284,360,30,175.26,21.13,182.86
+  - [8,]: B078P1D3XW,hübner® Multi-Mineral Aktiv-Komplex Pulver | basische Mineralstoffe & Vitamine für Sport & Alltag | unterstützt Regeneration & Säure-Basen-Haushalt | vegan & laktosefrei | Zitronengeschmack | 1000 g,280,389,64,2392.33,22.86,84.79
+  - [8,]: B00KKGDYJS,"sovita Vitamin C 300 Langzeit-Kapseln – Hochdosiertes Vitamin C mit Depotwirkung zur Unterstützung des Immunsystems und Zellschutz, 90 Kapseln​",260,350,84,833.16,64.62,200
+  - [8,]: B00KKGDVGO,"sovita Selen Opti 100 Kapseln, Hochdosiertes Monopräparat mit 100 µg Selen, 150 Kapseln",258,352,61,585.77,47.29,200
+  - [8,]: B004GGS538,Hübner Multi-Mineral Kompakt | Essentielle Mineralien & Spurenelemente | Tägliche Vitalstoff-Unterstützung | 180 Kapseln,255,332,62,1878.32,24.31,98.02
+  - [8,]: B00ADY94BE,sovita Aloe Vera Gel | 98 % reiner Aloe-Vera-Blattsaft | Feuchtigkeitspflege für Gesicht & Körper | Ideal nach Sonne & Rasur | Ohne Parabene & Silikone | Dermatologisch getestet | 200 ml,251,377,95,886.22,37.85,100
+  - [8,]: B07XRKZFDQ,Hübner Kollagen Komplex Direkt,240,340,18,448.7,15,110.96
+  - [8,]: B0FG8H7955,"NEX Magnesium Bisglycinat - 120 Kapseln - 300mg reines Magnesium pro Tagesdosis - organisches Aminosäurechelat Chelatform - Laborgeprüft, vegan, hochdosiert, ohne Zusatzstoffe, Pharmaqualität",238,326,28,291.4,23.53,193.64
+  - [8,]: B0DV5FWJRG,"sovita Magnesium Bisglycinat - 120 Kapseln - 300mg reines Magnesium pro Tagesdosis - organisches Aminosäurechelat Chelatform - Laborgeprüft, vegan, hochdosiert, ohne Zusatzstoffe",236,351,94,1207.53,39.83,98.42
+  - [8,]: B004GL4EKQ,"hübner® arthoro Glucosamin | Knochen- und Knorpelschutz | Vitamin C, B6, B12 & E | Grünlippmuschelpulver",232,338,67,2128.36,28.88,94.52
+  - [8,]: B07BGDHY4L,"hübner Multi-Mineral Basis Pulver | Basische Mineralstoffe mit Zink & Chrom für den Stoffwechsel | Vegan, glutenfrei & lactosefrei | Neutraler Geschmack | Leicht löslich | 800 g | 160 Portionen",228,322,55,1494.1,24.12,78.91
+  - [8,]: B008QUUCVS,Hübner Hyaluron Augenbalsam | Intensive Feuchtigkeitspflege | Reduziert Falten & Tränensäcke,219,281,122,2258.15,55.71,96.55
+  - [8,]: B007Q1944E,"Hübner Original silicea DIRECT Sticks | Kieselsäure-Gel mit Biotin| Nahrungsergänzungsmittel für Haut, Haare, Nägel | Rotfruchtgeschmack",217,287,88,1507.73,40.55,95.57
+  - [8,]: B004GGX0OW,Hübner Arthoro Glucosamin Multi Komplex | Gelenkunterstützung | Omega-3 & Vitamine,216,326,29,782.32,26.86,130.06
+  - [8,]: B00WULATEE,"Sovita Pferde-Balsam, erfrischt, belebt und vitalisiert die haut nach Anstrengung und Beanspruchung, 500 ml",210,266,24,172.52,22.86,193.28
+  - [8,]: B0FY71N2B2,violila Slim Balance Kapseln I Glucomannan 3000 mg täglich I Griffonia 5 HTP I Paradieskörner 6 Paradol I Gewichtsverlust bei kalorienarmer Ernährung I vegan u. pflanzlich I 180 Kapseln,207,241,23,357.1,11.11,99.57
+  - [8,]: B0G1C4M2BS,"violila Weissdorn+ Kapseln | Mit 450 mg Weissdornfruchtextrakt & Vitamin B1 für das Herz | 22,5 mg Flavone | Vegan & ohne unnötige Zusatzstoffe | Für hormonelle Balance | 90 Kapseln",202,336,29,491.83,28.71,200
+  - [8,]: B004GNXZZ4,"Donath Vollfrucht Mango ungesüßt | Süßer Fruchtgeschmack | Aus 1 ½ Mangos | Enthält von Natur aus Provitamin A, B-Vitamine und Vitamin C | Vegan und frei von Alkohol, Gluten und Lactose",200,236,31,307.69,15.5,87.68
+  - [8,]: B074QLHBHM,"hübner Aloe Vera Tagescreme 2×50 ml | Feuchtigkeitspflege mit Aloe Vera & Panthenol | Tagescreme bei trockener & sensibler Haut | vegan & pflegend | frischer Teint für normale, Misch- & trockene Haut",187,241,102,1837.61,54.55,99.1
+  - [8,]: B07JLG2F2H,"hübner - Magen-Darm DIRECT - SILICIUM (KIESELSÄURE-GEL) Praktische Direktsticks Frei von Gluten, Laktose, Hefe, vegan und ohne Zusätze",186,277,50,445.95,26.88,97.5
+  - [8,]: B00319IQTY,Tiroler Nussöl Original I Lippenpflege Stift I Lippenbalsam ohne Parfüm ohne Farb und Konservierungsstoffe I ohne mineralische Öle und Wachse I tägliche Pflege für empfindliche Lippen I Lip Balm 5 g,183,219,24,170.68,13.11,97.07
+  - [8,]: B007Q138MS,Hübner Erkältungszeit-Bad (500 ml),172,218,35,525.09,40.69,200
+  - [8,]: B0DMPGWJ8P,sovita Wundschutz Gel | Hydrogel | Schnelle Linderung bei Verbrennungen und Schürfwunden | 100ml,167,217,33,426.96,19.76,99.5
+  - [8,]: B073BNHFKJ,Hübner Ingwer Tropfen (20 ml),165,206,61,547.39,36.97,99.49
+  - [8,]: B0FBX69NGK,sovita Figur Vital Kapseln | Mit Glucomannan zur Unterstützung beim Abnehmen¹ | Griffonia-Extrakt mit 5-HTP | Paradieskörner mit 6-Paradol | Vegan & ohne Gelatine | 120 Kapseln (1),163,210,16,254.18,9.82,100
+  - [8,]: B00KBWFI54,"sovita Q10 Premium Kapseln | Coenzym Q10 60 mg | Traubenkernextrakt mit 95% OPC | Vitamin C, E, B-Komplex, D3 & Selen | Zellschutz & Energie | vegan | 1 Kapsel täglich | 90 Kapseln",158,218,68,655.88,86.08,184.32
+  - [8,]: B004GHCC1I,hübner Eisen Vital® F Eisen Liquid Trinksaft 500 ml,157,223,59,1107.09,37.58,95.57
+  - [8,]: B008MO4WD2,"Hübner Gefäß-Aktiv | Lebensmittel für besondere medizinische Zwecke (bilanzierte Diät) | Bei leichtem Bluthochdruck, Durchblutungsstörungen im Frühstadium der Arteriosklerose und Diabetiker-Durchblutungsstörungen",155,185,15,343.09,9.68,99.42
+  - [8,]: B07BFBKH2D,"Hübner Multi-Mineral Basis (200 g)| basische Mineralstoffmischung für Säure-Basen-Haushalt & Vitalität | mit Magnesium, Zink, Eisen & Spurenelementen | vegan & laktosefrei",154,194,13,95.74,16.88,178.32
+  - [8,]: B00DZO7KFQ,Hübner Aloe Vera Bodylotion | Feuchtigkeitspflege mit BIO-Aloe Vera & Sesamöl | Beruhigend & regenerierend bei trockener Haut | Mit Granatapfel & Rosmarinextrakt | 150 ml,152,190,34,369.67,44.74,197.68
+  - [8,]: B00KKGEVRC,Multi Vitamin + Mineral-Tabletten | Mit wichtigen Vitaminen und Mineralstoffen A-Z | 100 Kapseln,148,236,27,405.59,36.48,169.52
+  - [8,]: B082FGFVN9,Hübner Original silicea Hair Repair Shampoo | Zertifizierte Naturkosmetik für strapaziertes und geschädigtes Haar | Shampoo mit Kieselsäure-Gel und Aloe Vera | vegan | 200 ml,140,184,38,451.71,27.14,88.54
+  - [8,]: B008QUUBAA,Hübner Haut-Haare-Nägel Kompakt 30 St.,136,183,46,801.33,33.82,53.94
+  - [8,]: B01I08LRH8,Hübner Bio BASIS BALANCE Magnesium Öl (1 x 60 ml),135,179,54,625.33,40,98.15
+  - [8,]: B0763N39GP,Vitamin K2 Tropfen | Vitamin K2 zur Unterstützung der Knochengesundheit | Einfache Anwendung | Individuell dosierbar | Vegan | 10 ml,131,169,44,472.15,33.59,96.79
+  - [8,]: B09TZ18ZV4,Tiroler Nussöl Alpin Sonnencreme & Lippenschutz LSF 20 I Sonnenschutz für empfindliche Haut I wasserfester UV Schutz I Alpin Sonnenschutz für Berge Winter Schnee I Lippenpflege mit UV Filter I 20ml,131,164,9,104.96,6.87,100
+  - [8,]: B007Q107BS,Ringelblumen Creme 100ml | Für Gesicht und Körper | Mit pflanzlichen Fetten und Ölen sowie einem natürlichen Repair-Komplex | Fördert Zellerneuerung der Haut | Ohne Lichtschutzfilter,130,164,50,721.04,38.46,99.32
+  - [8,]: B08N6XXKK9,"Hübner Tannenblut BIO Kräutertonikum | Mit BIO Waldhonig und natürlichem Vitamin C | Wohltuend für Rachen, Hals und Atemwege | Alkoholfrei, vegan, ohne Gluten und Lactose | 250 ml",128,172,13,161.17,20.31,200
+  - [8,]: B008QUUA8S,Aloe Vera Skin Repair für Gesicht und Körper | 80 % Aloe Vera-Blatt-Gel & 15 % Silicium | regenerierend bei gereizter Haut | zieht schnell ein & fettet nicht | vegan | 100 ml,125,170,41,636.16,32.8,100
+  - [8,]: B00Q1LFI04,sovita Sabal Kürbis Kapseln | Kürbiskernöl 240 mg pro Tagesdosis | Sägepalmenfrüchte Trockenextrakt 60 mg | Ölsäure Linolsäure Laurinsäure | Nahrungsergänzung für tägliche Einnahme | 360 Kapseln,124,180,18,287.28,29.03,179.32
+  - [8,]: B00319BYKM,Tiroler Nussöl Original I Lippenschutz Stift LSF 25 I Lippenpflege mit UV Schutz für empfindliche Lippen I ohne Parfum Farb und Konservierungsstoffe I ohne mineralische Öle und Wachse I 5g,121,139,20,135.96,16.53,67.94
+  - [8,]: B0D3H737F8,MibeTec HERPOtherm neo,121,159,2,55.8,1.65,6.16
+  - [8,]: B007RQ38FY,"Donath BIO Vollfrucht Sanddorn + Rohrzucker | Inhaltsstoffe aus ökologischem Anbau, in Bio Qualität | Kombination aus Vitaminen und mehrfach gesättigten Fettsäuren | 500 ml",120,164,26,193.38,21.67,64.67
+  - [8,]: B00K7ZUF5S,"Sovita Glucosamin plus Kapseln mit Chondroitinsulfat, 120 Kapseln",120,164,36,498.39,60,194.44
+  - [8,]: B004GK699G,hübner Aloe Vera Nachtcreme | Feuchtigkeitsspendende Gesichtscreme mit Panthenol & Bisabolol | Für normale Haut & Mischhaut | Unterstützt Hautregeneration & Rückfettung | 50 ml,119,156,72,654.93,60.5,97.2
+  - [8,]: B00Q1ILECI,Basen Komplex Tabletten | Basische Nährstoffe und hochwertige Spurenelemente | Nahrungsergänzungsmittel | 120 Tabletten,119,154,13,127.35,10.92,100
+  - [8,]: B0FGDNH4KC,"NEX Omega-3 Kapseln hochdosiert – 528mg EPA & 351mg DHA täglich, mit Vitamin E, 120 Kapseln 30 mg natürlichem Vitamin E | Zellschutz & Herzfunktion | ohne Zusatzstoffe",116,144,16,166.58,27.59,194.2
+  - [8,]: B00IXRAS04,"Hübner Nachtkerzenöl Kompakt | Hochdosiert, 1000mg | Hautgesundheit & Schutz | 90 Kapseln",115,154,36,1331.21,31.3,98.66
+  - [8,]: B01B5JDD6C,Hübner Eisen VITAL Kautabletten | Nahrungsergänzungsmittel mit mikroverkapseltem Eisen und Vitamin C | für Kinder und Erwachsene| unterstützt die Blutbildung | fruchtiger Geschmack | vegan,115,148,73,912.49,63.48,93.43
+  - [8,]: B0G1C9F5CX,"violila Q10 Premium Kapseln mit Coenzym Q10, OPC & Vitaminen | Zellschutz, Energie & Immunsystem | Für aktive Frauen in besonderen Lebensphasen | Hochdosiert & vegan | 90 Kapseln",107,128,15,297.72,14.02,100
+  - [8,]: B00Q1ILBS0,"sovita Brennnessel Opti 500 Kapseln mit 500 mg Brennnesselblattextrakt 10:1 | Hochkonzentrierter Pflanzenextrakt | Vegan & ohne Zusatzstoffe | Pflanzlich | 90 Kapseln",106,156,6,79.5,11.32,200
+  - [8,]: B0F9X766FD,NEX KSM-66 Ashwagandha I Withania somnifera Wurzelextrakt I 300 mg je Kapsel 15 mg Withanolide standardisiert KSM-66 Wurzel ohne Blätter I vegan ohne Gelatine ohne Konservierungsstoffe I 180 Kapseln,103,138,29,317.12,28.16,96.92
+  - [8,]: B004GNU63S,Aloe Vera BIO-Pflanzensaft naturtrüb (0.49 L),98,136,17,279.19,17.35,94.96
+  - [8,]: B07HRQKMQF,hübner® Aloe Vera Bio-Pflanzensaft naturtrüb | 100% naturtrüber Aloe Vera-Saft | Aus kontrolliert biologischem Anbau | Ungefiltert & vegan | Frischer Geschmack | 3 x 490 ml,92,132,13,623.37,14.13,98.28
+  - [8,]: B07SRD8C3L,Curcuma Tropfen (20 ml),91,164,29,214.63,31.87,12.77
+  - [8,]: B007Q0ZUTS,"Arnika Creme | Natürliche Sport- und Massagecreme | Mit wohltuendem Wärme-Effekt | Vor und nach dem Sport geeignet |Bei Muskelkater, Verspannungen oder bei kalten Füßen | Vegan",88,119,22,323.86,25,96.36
+  - [8,]: B0056EPNZC,hübner® Zahncreme mild | Ohne Schaumbildner & Konservierungsstoffe | Mit natürlichem Pfefferminzöl für frischen Atem | Sanfte Zahnpflege mit Silicium & Meersalz | 50 ml,82,118,6,44.55,14.64,160
+  - [8,]: B0BRXSW8JR,sovita Bein Balsam mit Rosskastanie & Rotem Weinlaub | durchblutungsfördernd & vitalisierend für müde Beine | kühlende Pflege mit Pflanzenextrakten | vegan & ohne Silikone | 100 ml | 1x Tube,79,108,1,8.95,1.27,46.39
+  - [8,]: B0CP29P4CB,sovita Venen Kapseln | Venenfunktion | Hochwertige Extrakte | 120 Kapseln,78,102,5,94.88,12.82,200
+  - [8,]: B00KKGDU60,Sovita Visiofit Premium Kapseln mit Zink und Lutein | Nahrungsergänzungsmittel für die Augen | 90 Kapseln,77,100,6,175.68,7.79,97.87
+  - [8,]: B007Q0YGHA,"Hübner Zahncreme Karies-Schutz | Mit bakterienhemmenden Wirkstoffen der Salbei-Pflanze| Ohne zugesetztes Fluorid, Pfefferminzöl und Menthol | Frei von Konservierungsmitteln und Schaumbildnern | Vegan",76,97,28,242.91,36.84,83.52
+  - [8,]: B00KKGESMA,Eisen plus Vitamin C Kapseln | Unterstützung für Blutbildung & Immunsystem | Synergistische Wirkung für Eisenaufnahme & Zellschutz | vegan & pflanzlich | 150 Kapseln,74,102,13,173.79,35.13,200
+  - [8,]: B08BRY9PJS,Hübner Silicea Hair Repair Duo | Shampoo & Spray Set | Für strapaziertes Haar | Mit Biotin & Silicium,74,96,14,250.72,18.92,100
+  - [8,]: B00K7ZUPWQ,"sovita Magnesium Opti 250 | 250 mg Magnesium pro Tablette | Unterstützung für Muskeln, Nerven & Energiestoffwechsel | Vegan & gut verträglich | Entwickelt in Deutschland | 90 Tabletten",71,99,16,184.2,22.54,95.6
+  - [8,]: B00KKGD94I,"Biotin 5 mg N Tabletten | Für Haut, Haare und Nägel - Vitaminpräparat zur Vorbeugung eines Biotin-Mangels | 150 Tabletten",66,98,13,187.48,39.39,200
+  - [8,]: B084GQDW2T,"Hübner arthoro Hagebutte | In BIO Qualität | Pflanzliches Nahrungsergänzungsmittel zur Gesunderhaltung von Knochen und Knorpeln | 100 % Bio-Hagebutten mit Vitamin C |Vegan, ohne Gluten und Lactose",66,90,23,413,34.85,96.2
+  - [8,]: B00D4BZO9E,Nachtkerzen-Öl Kapseln 500mg | Zur Ergänzung der Haut- und Körperpflege von innen und bei Allergien | Enthält mehrfach ungesättigte Omega-6-Fettsäuren | Praktische Kapsel-Form | Vegan,63,77,13,219.82,20.63,94.59
+  - [8,]: B0G1C9XXJG,violila Q10 Kapseln mit 100 mg Coenzym Q10 aus natürlicher Quelle | Hochdosiert | Für Zellenergie & bewusste Lebensphasen | Ohne unnötige Zusatzstoffe | Vegan & gut verträglich | 60 Kapseln,63,74,13,311.27,20.63,98.63
+  - [8,]: B09L4P5TRN,"Hübner Hustenbonbons BIO | Wohltuend für Hals & Atemwege | Mit Kräutern, Menthol & Waldhonig | Natürliches Aroma aus Fenchel, Anis & Eukalyptus | Vegetarisch & lactosefrei | 75 g",62,81,7,34.93,11.29,82.86
+  - [8,]: B07XDWMGDX,"sovita Kalium Opti 400 Kapseln | Hochdosiert 400 mg | Unterstützt Nerven, Muskeln & Blutdruck | Elektrolythaushalt & Muskelkontraktion | Vegan & ohne Zusatzstoffe | 120 Kapseln",61,75,6,95.7,9.84,94.03
+  - [8,]: B0F1DJLWCT,Hübner Vitamin B12 Direktsticks Mit hochdosiertem Vitamin-B12 und wertvollen Eiweißbausteinen für mehr geistige und körperliche Energie und weniger Müdigkeit und Erschöpfung,59,69,30,389.77,50.85,100
+  - [8,]: B004GL40FA,"Donath BIO Vollfrucht Granatapfel ungesüßt | Fein vermahlene Granatapfelkerne mit fruchtig-säuerlichem Geschmack | Vegan und frei von Alkohol, Gluten und Lactose",56,68,9,88.71,16.07,76.92
+  - [8,]: B0F1V8K9H4,violila Magnesium Bisglycinat Kapseln I 300 mg elementares Magnesium pro Tagesdosis I Muskelfunktion Nervensystem Energiestoffwechsel I Müdigkeit Ermüdung I vegan HPMC I 120 Kapseln,56,80,31,294.05,55.36,81.08
+  - [8,]: B0BNHZT7YR,"sovita Zinkbisglycinat + L-Histidin Kapseln | Unterstützung des Immunsystems | Hoch bioverfügbares Zink zur Unterstützung von Immunsystem, Zellschutz, Haut, Haaren & Nägeln, vegan, 90 Kapseln",55,67,13,128.93,23.64,100
+  - [8,]: B004GKYX0S,Aloe Vera Tagescreme | Feuchtigkeitscreme für Gesicht | 30% Aloe Vera Extrakt | Mit Panthenol & Cocos-Extrakten | Schnelles Einziehen | Sanfte Pflege für alle Hauttypen | Make-up Grundlage | 50 ml,54,63,26,254.66,48.15,87.5
+  - [8,]: B01G4QAA1M,"Hübner Basis Balance Mineralstoffe aktiv, 250g",53,66,2,28.01,3.77,96.61
+  - [8,]: B0D9BC1BDH,"NEX Hype Elektrolytes I 900mg Natrium täglich I Hochdosierte Elektrolyte ohne Zucker I Keto u. Vegan I 30 Portionen I Natrium, Kalium & Magnesium vor u. nach dem Sport",53,64,7,97.87,13.21,100
+  - [8,]: B0G1C91FKM,"violila Vitamin C Plus Zink Kapseln | 500 mg Vitamin C + 10 mg Zink pro Kapsel | Für Immunsystem, Zellschutz & Kollagenbildung | Hochdosiert, vegan & ohne unnötige Zusatzstoffe | 60 Kapseln",53,55,8,143.02,15.09,100
+  - [8,]: B08YWBPJDD,Lavendel Lotion | beruhigende Wirkung auf Körper & Geist | 200 ml,51,62,2,19.88,3.92,87.72
+  - [8,]: B0F1V82MV4,violila Ashwagandha KSM-66 Kapseln I Withania somnifera Vollspektrum Wurzelextrakt I 300 mg je Kapsel I 15 mg Withanolide I vegan HPMC Kapselhülle ohne Zusätze I 180 Kapseln,51,62,13,259.3,25.49,98.31
+  - [8,]: B0776ZTLPL,hübner - Gefäß-Aktiv® - Pulver - 3x360g -,48,59,13,1347.76,27.08,48.15
+  - [8,]: B00K7ZYGSK,"sovita Grünlippmuschel Kapseln | Mit Kupfer, Vitamin C, E & B-Vitaminen | Hochwertiges Grünlippmuschelpulver aus Neuseeland | Unterstützung für Bindegewebe & Immunsystem | 120 Kapseln",47,78,11,252.43,23.4,72.86
+  - [8,]: B007TIUAQK,"Sovita Weihrauch-Balsam, entspannende und kühlende Pflege für Haut und Muskeln, mit Boswellia serreta, 100ml",45,58,7,69.64,15.56,86.79
+  - [8,]: B0G6MVJTJS,"sovita Knochen & Knorpel |Glucosamin Chondroitin Kapseln mit Teufelskralle, Astaxanthin, Vitamin C, E, B2, Zink, Selen & Mangan | Für Knorpel, Knochen & Zellschutz | Gelenk-Komplex vegan | 120 Kapseln",42,56,6,114.46,14.29,100
+  - [8,]: B004GKHR4M,DONATH Vollfrucht Sanddorn ungesüßt 500 ml,40,53,36,260.94,90,51.02
+  - [8,]: B0711YQX24,"sovita Kräuterbad Lavendel – wohltuender Badezusatz mit Lavendelduft zur Entspannung bei Stress & innerer Unruhe | für Massage- & Sprudelbad geeignet | ohne Parabene, Silikone, PEG | 20 Anwendungen",38,52,7,52.43,18.42,95.83
+  - [8,]: B0DV5FY476,"sovita KSM-66® Ashwagandha Wurzelextrakt 300 mg – Hochwertiges Adaptogen zur Stressbewältigung, Energie & mentale Klarheit, 15 mg Withanolide, vegan",38,51,8,162.7,21.05,100
+  - [8,]: B0G1C1HCN6,violila Ginkgo Kapseln mit 70 mg Ginkgo biloba Trockenextrakt | Standardisiert auf Flavonglycoside & Terpenlactone | Pflanzlich & vegan | Für geistige Klarheit & Durchblutung | 90 Kapseln,38,41,10,118.95,26.32,100
+  - [8,]: B0050H94GY,hübner® Eisen Vital 250ml | Nährstoffreicher Trinksaft | Unterstützt die Eisenaufnahme,37,47,7,87.49,18.92,88.64
+  - [8,]: B004GO0I5S,DONATH Vollfrucht Sanddorn Acerola+Agavendicksaft 500 ml,34,51,18,180,52.94,87.23
+  - [8,]: B0GH125JK9,"sovita Weissdorn Plus Kapseln | Mit 450mg Weissdornfruchtextrakt & 0,2mg Thiamin (Vitamin B1) zur Unterstützung der Herzfunktion | Pflanzlich & vegan | Für Herz & Kreislauf | 90 Kapseln",34,57,9,152.55,26.47,100
+  - [8,]: B007Q106CS,Hübner Silicea Zahnpasta ohne Menthol | Mineralische Reinigung | Homöopathie-geeignet,33,49,5,35.42,15.15,83.33
+  - [8,]: B0FQVBP1VN,sovita Q10 100 mg Kapseln mit natürlichem Coenzym Q10 | Hochdosiert & vegan zur Unterstützung des Energiestoffwechsels | Ohne tierische Inhaltsstoffe | 60 Kapseln,33,43,8,152.27,24.24,100
+  - [8,]: B01CIWQW6I,Anton Hübner Schwarzkümmelöl-Kapseln (24 g),32,37,4,55.79,12.5,97.06
+  - [8,]: B0FQTYXVSS,"Vitamin D3 + K2 Tabletten | Hochdosiert & synergistisch kombiniert | Für Knochen, Muskeln & Calcium-Stoffwechsel | Vegane Hülle ohne Gelatine | 180 Stück",32,46,5,64.82,31.25,200
+  - [8,]: B0FGDB3Q25,NEX Vitamin D3 + K2 Tabletten I 180 Stück I Vegetarisch 2000 I.E.+ 50µg K2 I Tagesbedarf perfekt dosiert I Knochengesundheit - Knochenaufbau I Calcium I Immunsystem Muskelfunktion Laborgeprüft,31,47,10,114.24,32.26,97.73
+  - [8,]: B002P4TXVG,"Sovita Aloe Vera Creme, Aquabalance 24, leichte Pflege für den natürlichen Feuchtigkeitshaushalt der Haut, 100ml",30,38,7,69.3,23.33,100
+  - [8,]: B0CVRXMQ3V,sovita Vitamin C 500 Plus Zink Kapseln hochdosiert | Mit 500 mg Vitamin C & 10 mg Zink zur Unterstützung des Immunsystems | Vegan | Zellschutz & weniger Müdigkeit | 60 Kapseln,30,44,12,189.6,80,200
+  - [8,]: B0FG8HC5DP,"NEX Magnesium Bisglycinat hochdosiert 300mg | vegan & ohne Zusatzstoffe | besonders gut verträglich | für Muskeln, Nerven & Energie | Chelat-Form | bei Stress & Sport | 240 Kapseln (2)",30,43,2,37.9,6.67,92.31
+  - [8,]: B0G1C53H19,"violila Omega-3 Fischöl Kapseln mit EPA & DHA plus Vitamin E | Für Herzfunktion, Gehirn & Sehkraft | Zellschutz durch natürliches Vitamin E | Hochdosiert | Reines Fischöl |120 Kapseln",29,34,6,59.7,20.69,100
+  - [8,]: B0FGQ29YGQ,"sovita Flora Opti Kapseln | 100 Mrd. KBE mit 23 probiotischen Bakterienstämmen & Akazienfaser | mit Vitamin B2 & B6 für Immunsystem, Darm & Schleimhäute | 90 Kapseln (1)",28,38,5,79.75,17.86,100
+  - [8,]: B0FQV2478S,sovita Knoblauch Kapseln mit ABG10+® Extrakt aus fermentiertem schwarzem Knoblauch | Geruchsneutral & standardisiert auf S-Allylcystein | Hohe Bioverfügbarkeit | 90 Kapseln (1),28,34,5,84.89,17.86,90.91
+  - [8,]: B01NCWSP6L,Vitamin E Opti 400 Kapseln | Hochdosiert mit 400 I.E. mit Vitamin E pro Kapsel | Zellschutz vor oxidativem Stress | Unterstützung bei Umweltbelastung & unausgewogener Ernährung | 120 Kapseln,26,26,3,56.85,23.07,200
+  - [8,]: B0FG8K7582,"NEX Magnesium Bisglycinat hochdosiert 300mg | vegan & ohne Zusatzstoffe | besonders gut verträglich | für Muskeln, Nerven & Energie | Chelat-Form | bei Stress & Sport | 540 Kapseln",26,41,5,139.75,19.23,51.43
+  - [8,]: B007Q42V50,"Sovita Care Apfelessig Plus Kapseln, 90 St",24,24,1,14.18,4.17,60
+  - [8,]: B00KKGEUH8,Sovita Calcium + D3 Tabletten | Für Knochenerhalt & normale Calciumaufnahme | 800 mg Calcium + 5 µg D3 pro Tag | Wachstumsphase | Sport | Senioren | 100 Tabletten,23,30,4,42.92,17.39,100
+  - [8,]: B0F9LHRQTG,"sovita Leber Komplex Kapseln | mit Artischockenextrakt, Mariendistelextrakt & Cholin | Silymarin & Cynarin aus Pflanzenextrakten | vegane Leberunterstützung mit Mikronährstoffen für den Stoffwechsel",23,30,6,89.96,26.09,100
+  - [8,]: B0G4N8G8WQ,"sovita Spitzwegerich Sirup | Pflanzlicher Spitzwegerich Extrakt mit Aucubin | 1,6 g Spitzwegerichextrakt pro Tagesdosis | Frischer Geschmack mit Pfefferminzöl | Veganer Spitzwegerich Sirup",23,28,2,5.9,8.7,92.31
+  - [8,]: B00K7ZYCW0,"sovita Magnesium Calcium Tabletten für Muskeln, Knochen & Energiestoffwechsel | Mit 240 mg Magnesium & 400 mg Calcium pro Tagesdosis | Vegan & gut verträglich | 120 Tabletten",22,28,5,74.92,22.73,96.43
+  - [8,]: B00KKGERBM,Schwarzkümmelöl plus Kapseln | Mit den wertvollen ungesättigten Fettsäuren Linolsäure und Ölsäure | Nahrungsergänzungsmittel | 180 Kapseln,22,30,11,236,100,200
+  - [8,]: B0G2YBNL8G,"sovita Grünlippmuschel Balsam | Mit Menthol, Kampfer & ätherischen Ölen zur wohltuenden Hautpflege | Jojobaöl, Kokosöl & Vitamin B3 für geschmeidige Haut | Kühlend beim Einmassieren | Hautfreundlich &",22,23,1,10.95,4.55,100
+  - [8,]: B0FGD8FXS1,NEX Beauty Essentials Kapseln I Hirseextrakt 300 mg Miliacin 3 mg I Biotin Selen Kupfer I Zellschutz oxidativer Stress I Piperin 2 mg I vegan ohne Farbstoffe Konservierungsmittel I 90 Kapseln,19,25,3,39.24,15.79,90.48
+  - [8,]: B0G3XHKXCC,sovita Hyaluron Elixier mit Niacinamid gegen Falten | intensive Feuchtigkeitspflege mit Hyaluronsäure für straffe Haut | Anti-Aging Ampullen | 30 x 3 ml,18,21,3,117.68,16.67,95
+  - [8,]: B007Q13L4I,hübner Biotin Intensiv | 30 Tabletten | Förderung von Haar- & Nagelwachstum | Vitamin H,17,19,6,101.7,35.29,66.67
+  - [8,]: B0F1V8RV28,violila Haar Komplex Kapseln 120 Kapseln - Haare Haut Nägel - Hirseextrakt Miliacin - Biotin Selen Kupfer - Piperin Schwarzer Pfeffer Extrakt - vegan,17,22,1,13,5.88,100
+  - [8,]: B0FQV4532J,"sovita Vitamin B12 hochdosiert 200 µg Methylcobalamin | Vegan & laktosefrei | Unterstützung für Nerven, Energie & Blutbildung | Nur 1 Tablette täglich | 120 Tabletten",17,24,8,95.6,47.06,95.65
+  - [8,]: B0F1V7NPQQ,violila Eisen Vitamin C Kapseln I 5 mg Eisen 20 mg Vitamin C I Blutbildung Hämoglobin Sauerstofftransport I Energiestoffwechsel Müdigkeit Immunsystem I Eisenaufnahme I vegan 150 Kapseln,16,22,4,50.14,25,100
+  - [8,]: B0FGDMNNJN,NEX Omega-3 Kapseln Fischöl | 528 mg EPA & 351 mg DHA pro Tagesdosis | mit 30 mg natürlichem Vitamin E | Zellschutz & Herzfunktion | ohne Zusatzstoffe | 120 Kapseln (2),16,24,1,18.85,6.25,90.91
+  - [8,]: B0FLDRZRLM,sovita Astaxanthin 8 mg hochdosiert aus Mikroalge Haematococcus pluvialis | Natürliches Carotinoid aus Algen | Vegan & ohne Zusatzstoffe | Laborgeprüft | Antioxidative Eigenschaften | 120 Kapseln,16,16,4,78.45,50,200
+  - [8,]: B00Q1ILDTM,sovita Schwarzkümmelöl | kaltgepresst & nativ | 100% reines Nigella sativa Öl | reich an Linol- & Ölsäure | würzig-pfeffriger Geschmack | 100 ml,15,17,3,38.97,20,100
+  - [8,]: B0FG8FTGJC,"NEX Magnesium Bisglycinat hochdosiert 300mg | vegan & ohne Zusatzstoffe | besonders gut verträglich | für Muskeln, Nerven & Energie | Chelat-Form | bei Stress & Sport | 240 Kapseln (4)",15,17,1,37.95,6.67,47.06
+  - [8,]: B0FGD99RGT,"NEX Vitamin D3 + K2 Tabletten | 50 µg D3 & 100 µg K2 pro Tablette | für Knochen, Muskelfunktion & Calciumstoffwechsel | hochergiebig & vegetarisch | 540 Tabletten",15,18,1,12.95,6.67,61.11
+  - [8,]: B0FP592LZ4,"hübner Wärme Balsam 100 ml | Wärmende Pflege für Muskeln & Gelenke | Mit Grünlippmuschel, Menthol, Lavendelöl & Weihrauch | Wohltuende Massagecreme bei Verspannung & Muskelermüdung |",15,18,3,48.18,20,94.12
+  - [8,]: B0FQTXWHT7,"sovita Haar Komplex Kapseln mit Hirseextrakt & Biotin | Mit Kupfer, Selen & Schwarzem Pfeffer zur Unterstützung von Haaren, Haut & Bindegewebe | Nahrungsergänzung | 90 Kapseln",15,19,2,27.95,13.33,88.24
+  - [8,]: B00KKGDZZQ,"sovita Folsäure plus | mit Vitamin B6, B3 und Vitamin B12 | mit höchster Bioverfügbarkeit und geprüfter Qualität | 180 Kapseln | Neues Design",14,21,2,38.72,14.29,100
+  - [8,]: B00WW74MM6,Indische Flohsamenschalen | fein gemahlen zur ballaststoffreichen Ernährung | Lebensmittel | 500 g,13,17,4,79.84,30.77,93.75
+  - [8,]: B07JL91YVQ,"Zink Plus Tabletten | Mit Zink, Biotin & Pantothensäure für Haut, Haare, Nägel & Immunsystem | Unterstützt Energiestoffwechsel & mentale Leistung | Vegan | 1 Tablette täglich | 150 Tabletten",13,22,8,79.58,61.54,100
+  - [8,]: B0FQVD4TSW,sovita Q10 100 mg Kapseln mit natürlichem Coenzym Q10 | Hochdosiert & vegan zur Unterstützung des Energiestoffwechsels | Ohne tierische Inhaltsstoffe | 60 Kapseln (2),13,26,3,44.88,23.08,96.15
+  - [8,]: B0G1C98Y7T,"violila Blutzucker Kapseln | Mit Ceylon-Zimt, Chrom, Zink & B-Vitaminen für Zuckerstoffwechsel & Energie | Vegan & ohne unnötige Zusatzstoffe | 120 Kapseln",13,16,1,18.95,7.69,100
+  - [8,]: B0G4WVNW9V,"sovita aloe vera creme | feuchtigkeitsspendende gesichtspflege mit aloe vera blattsaft | beruhigende tages- und nachtcreme mit süßmandelöl, vitamin e & panthenol | leichte textur 100 ml",13,15,1,11.03,7.69,100
+  - [8,]: B086WD27HL,"OM - Hyaluron Creme - Gesichtscreme - 50 ml - Made in Germany- ohne Parabene, Paraffine, Silikone",10,10,3,121.22,30,60
+  - [8,]: B0CYC7S55Y,sovita Lutein Kapseln für Augengesundheit mit Beta-Carotin & Pflanzenextrakten | Tagetes & Heidelbeer-Extrakt für Sehkraft & Zellfunktion | Nahrungsergänzung | 90 Kapseln,9,11,1,15.95,11.11,100
+  - [8,]: B0G4DT6QSD,NEX Glucomannan 3000mg Täglich Hochdosiert I Sättigungskapseln Konjak Konjakwurzel I 120 Vegane Kapseln I 5-HTP aus Griffonia Extrakt I Paradieskörner I Appetitzügler Hunger Blocker,9,11,1,19.95,11.11,100
+  - [8,]: B00ITIX124,sovita Curcuma Opti Kapseln | Hochdosierter Curcumaextrakt mit Piperin für optimale Bioverfügbarkeit | 120 Kapseln,8,8,3,50.85,37.5,87.5
+  - [8,]: B00Q1IL9QY,"sovita Calcium Opti 800 | 100 Tabletten mit hochdosiertem Calcium | 800 mg pro Tagesdosis | Für Knochen- & Zahngesundheit | Unterstützt Muskeln, Nerven & Blutgerinnung",8,9,1,11.95,12.5,62.5
+  - [8,]: B00Q1ILARW,sovita Nachtkerzenöl-Kapseln | Mit den mehrfach ungesättigten Fettsäuren Linolsäure und Gamma- Linolensäure sowie natürlichem Vitamin E | Nahrungsergänzungsmittel | 180 Kapseln,8,12,1,25.96,12.5,100
+  - [8,]: B0842VVM5B,"OM - Hyaluronsäure Masken - Tuchmaske - 5 Stück - Made in Germany, ohne synthetische Farbstoffe, ohne Tierversuche",8,8,1,34.9,12.5,87.5
+  - [8,]: B0BVQTKVDZ,sovita Ginkgo 70 Kapseln | Hochwertigem Ginkgoextrakt | Veganes Nahrungsergänzungsmittel,8,10,3,29.82,37.5,100
+  - [8,]: B0D9BD1P3G,"NEX Hype Elektrolytes - Hochdosierte Elektrolyt-Sticks nach schweißtreibender Aktivität - nach dem Sport, Fitnesstraining oder Festival | Elektrolyte ohne Zucker | Natrium, Kalium & Magnesium, 3er Set",8,12,2,77.9,25,91.67
+  - [8,]: B00Q1IF2JO,sovita Vitamin D Tabletten | zum Erhalt normaler Knochen | Nahrungsergänzungsmittel | 180 Tabletten,7,8,1,8.95,14.29,100
+  - [8,]: B092DRLFQT,sovita BIO Spirulina Tabletten 500 mg | 100 % reines Spirulina platensis Pulver | Vegan & ohne Zusatzstoffe | Hoher Proteingehalt | Bio-zertifiziert DE-ÖKO-003 | 360 Tabletten,7,10,2,37.62,28.57,100
+  - [8,]: B00KCMKYJS,"sovita Hyaluron Creme | Straffende Tages- & Nachtcreme mit Hyaluronsäure, Konjac Mannan & Milchproteinen | Feuchtigkeitspflege für jeden Hauttyp (50 ml)",6,7,2,45.9,33.33,100
+  - [8,]: B0BP274WS1,sovita Omega 3 Algenöl | Vegane Omega 3 Fettsäuren | 90 Kapseln,6,7,2,39.9,33.33,100
+  - [8,]: B0FJS7F5FN,Sovita OPC Kapseln hochdosiert aus Traubenkernextrakt | 350 mg OPC & 554 mg Polyphenole pro Tagesdosis | vegane Flavonoide aus roten Weintrauben | Made in Germany | 120 Kapseln,5,10,3,66.04,60,88.89
+  - [8,]: B0G1C472J5,"violila Vitamin B12 Opti 200 Kapseln mit 200 µg Methylcobalamin | Hochdosiert & bioverfügbar | Für Energiestoffwechsel, Nervenfunktion & Blutbildung | Ideal bei veganer Ernährung | 120 Kapseln",4,5,1,11.95,25,100
+  - [8,]: B0G4RJV8NT,NEX I Biome Pro Probiotika 90 Kapseln I 1 täglich mit 10 Milliarden KBE I 23 dokumentierte Bakterienkulturen mit Akazienfaser Vitamin B2 B6 I vegan pflanzlich magensaftresistent,4,4,1,19.95,25,100
+  - [8,]: B0FN4F6T99,NEX OPC Kapseln | 583 mg Traubenkernextrakt mit 350 mg OPC & 554 mg Polyphenolen | hochdosiert & vegan | ohne Zusatzstoffe | pflanzliche Antioxidantien aus roten Weintrauben | 120 Kapseln,3,3,1,20.3,33.33,100
+  - [8,]: B071X41JTW,"Ginseng Plus Kapseln mit Vitamin B12 & natürlichem Vitamin E | Panax Ginseng Extrakt mit Ginsenosiden 4,5 mg | Für Energie, geistige Klarheit & Zellschutz | Nahrungsergänzung | 120 Kapseln",2,2,2,29.9,100,100
+  - [8,]: B0F24D16QL,"violila Flora+ Kapseln | Mit 23 Bakterienstämmen, Vitamin B2 & B6 für Schleimhäute, Immunsystem & Energie | 10 Mrd. KBE pro Portion | magensaftresistent | 90 Kapseln",2,2,1,15.95,50,100
+  - [8,]: B0FGD7P86M,"NEX Beauty Essentials Kapseln | Hirseextrakt mit 3 mg Miliacin & 2 mg Piperin | Biotin, Selen & Kupfer für Haare, Haut & Nägel | pflanzlich, vegan & ohne Zusatzstoffe | 90 Kapseln (2)",2,2,1,24.95,50,100
+  - [8,]: B0G4N6198V,NEX Omega-3 Algenöl 300mg DHA + 100mg EPA täglich • 90 Vegan-Kapseln • Hochdosiert Geschmacksneutrale - Aus Mikroalge Fischfrei Gehirn Sehkraft Herz,2,2,1,24.95,50,100
+  - [8,]: B0FQPLWJFG,sovita Lutein Kapseln für Augengesundheit mit Beta-Carotin & Pflanzenextrakten | Tagetes & Heidelbeer-Extrakt für Sehkraft & Zellfunktion | Nahrungsergänzung | 270 Kapseln,1,1,1,44.5,100,100
+  - [8,]: B0G1C4CH23,violila Astaxanthin Kapseln 8 mg | Natürliches Carotinoid aus Haematococcus pluvialis | Hochdosiert aus Mikroalgen | Vegan | Pflanzlich inspiriert | Für hormonelle Balance & Zellschutz |120 Kapseln,0,0,1,20.94,0,0
+`;
+/* Titel-Lookup aus dem ASIN-Seed */
+const TITLES={};
+for(const line of SEED.split("\n")){
+  const m=line.match(/^\s*-\s*\[\d+,?\]:\s*(.*)$/);
+  if(m){const c=csvLine(m[1]);if(c.length>=2)TITLES[c[0]]=c[1];}
+}
+/* SKU-Ebene (FBA/FBM getrennt), Amazon.de, letzte 30 Tage, Stand 19.07.2026
+   Spalten: asin,sku,sessions,pv,units,rev,cvr,bb — Sessions/PV/BB gelten je ASIN */
+const SEED_SKU=`
+B0CX5N9X9Z,1001367FBM,161323,211590,5,119.53,0,0.01
+B0031OS9AU,"1000953",4027,5405,568,8948.56,14.1,74.62
+B0031OS9AU,1000953FBM,4027,5405,95,1420.25,2.36,74.62
+B0041M5TC2,FT8955,2397,3324,344,5457.47,14.35,85.9
+B0CGLWLLJX,"1001362",2363,3230,824,13180.96,34.87,92.64
+B0CGLWLLJX,1001362FBM,2363,3230,31,431.21,1.31,92.64
+B074QNH6TG,FTS100,2290,3284,471,12353.69,20.57,97.45
+B074QNH6TG,TS100,2290,3284,11,332.63,0.48,97.45
+B0031OSEX2,"1001021",2004,2802,346,5080.58,17.27,70.8
+B0031OORVK,"1000060",1657,2316,278,3360.65,16.78,84.88
+B0031OORVK,1000060FBM,1657,2316,2,25.9,0.12,84.88
+B0DMSWG759,1001469FBA,1568,2053,527,4747.17,33.61,99.58
+B0DMSWG759,1001469FBM,1568,2053,3,23.85,0.19,99.58
+B0041LYKKK,"1000962",1383,1822,119,2459.59,8.6,82.75
+B0041LYKKK,1000962FBM,1383,1822,66,1382.74,4.77,82.75
+B0031OQRMC,1000992FBM,1050,1376,12,182.12,1.14,91.27
+B0031OQRMC,FT8854,1050,1376,197,3029.43,18.76,91.27
+B004GH7178,"1001358",818,1064,217,3763.28,26.53,89.1
+B004GH7178,1001358FBM,818,1064,3,48.03,0.37,89.1
+B009SI5GHM,"1000988",809,1116,233,6341.03,28.8,93.71
+B007Q13LI4,1002059FBA,788,1020,168,1502.12,21.32,97.13
+B007Q13LI4,1002059FBM,788,1020,28,223.44,3.55,97.13
+B074QKDSDJ,"1001019",756,1120,214,3759.85,28.31,98.71
+B074QKDSDJ,1001019FBM,756,1120,36,647.64,4.76,98.71
+B003X4QL6C,"1001352",732,990,164,2839.14,22.4,95.71
+B003X4QL6C,1001352FBM,732,990,2,32.02,0.27,95.71
+B0055E63PC,"1001417",714,955,249,2422.34,34.87,99.31
+B0055E63PC,1001417FBM,714,955,4,27.8,0.56,99.31
+B00WWC3Z6K,1001223FBM,690,954,6,95.4,0.87,99.89
+B00WWC3Z6K,1001223_FBA,690,954,183,2772.99,26.52,99.89
+B0CCF2XFFJ,1001351FBA,634,1477,263,8626.6,41.48,92.96
+B0CCF2XFFJ,1001351FBM,634,1477,28,921.2,4.42,92.96
+B009DHP8TO,"1001024",603,838,215,6069.48,35.66,96.83
+B007Q1A0QU,"1001363",581,748,54,708.99,9.29,93.8
+B0041M7498,FT8848,536,703,84,1709.66,15.67,97.46
+B072HDM7CD,"1001302",528,725,207,3709.83,39.2,96.68
+B072HDM7CD,1001302FBM,528,725,2,35.9,0.38,96.68
+B008QUU36M,"1001369",519,706,165,3143.39,31.79,93.47
+B008QUU36M,1001369FBM,519,706,1,18.95,0.19,93.47
+B08YN8D6VL,"1001382",513,707,119,4808.63,23.2,94.05
+B08YN8D6VL,1001382FBM,513,707,67,2752.2,13.06,94.05
+B004GKZ8QQ,1002113FBA,495,725,152,1992.82,30.71,99.84
+B004GKZ8QQ,1002113FBM,495,725,3,38.85,0.61,99.84
+B078Y4P5GZ,"1001386",470,594,84,862.6,17.87,71.45
+B078Y4P5GZ,1001386FBM,470,594,1,10,0.21,71.45
+B007ZMTR78,"1001461",466,642,2,32.3,0.43,98.49
+B007ZMTR78,1001461FBA,466,642,200,3329.67,42.92,98.49
+B00GZQUF0S,FT8769,429,507,64,589.37,14.92,100
+B01IVPQO78,"1001015",427,605,5,224.5,1.17,85.22
+B01IVPQO78,1001015FBA,427,605,138,6169.65,32.32,85.22
+B00WAJEAPA,"1001376",414,567,117,3003.16,28.26,72.69
+B004GKHT7M,"1001360",372,491,78,917.78,20.97,92.59
+B0FX9N22N3,1002382FBA,357,522,78,823.8,21.85,99.14
+B0FX9N22N3,1002382FBM,357,522,37,331.52,10.36,99.14
+B008QUUDVC,"1001532",347,506,9,505.58,2.59,92.08
+B008QUUDVC,1001532FBA,347,506,107,6258.79,30.84,92.08
+B0FTZL429Q,1001563-FBA,346,473,108,1427.16,31.21,99.31
+B01H8QZ43Q,1001023FBM,340,460,91,7264.74,26.76,93.43
+B0013LIJCQ,1002339FBA,335,445,58,435.44,17.31,93.11
+B013AR80YM,1001577FBA,335,452,110,2971.66,32.84,98.77
+B013AR80YM,1001577FBM,335,452,4,101.96,1.19,98.77
+B07XRBXS83,"1001314",311,461,179,1518.7,57.56,43.46
+B004GH8VHM,"1001359",310,452,71,1014.59,22.9,95.79
+B008QUUDD0,"1001402",309,414,137,5115.99,44.34,98.67
+B007RQ303Y,"1001381",303,400,99,2511.03,32.67,94.84
+B00319BMHC,S9-AZ7V-PLFX,298,359,43,532.83,14.43,100
+B078P1D3XW,1002114FBA,280,389,64,2392.33,22.86,84.79
+B004GL6TV8,1002447FBA,272,404,84,1267.65,30.88,79.21
+B004GL6TV8,1002447FBM,272,404,3,36.36,1.1,79.21
+B0081PB3Y8,"1001501",256,353,12,144.3,4.69,91.29
+B0081PB3Y8,1001501FBA,256,353,113,1329.72,44.14,91.29
+B004GGS538,1001442FBA,255,332,62,1878.32,24.31,98.02
+B00ADY94BE,1000162FBA,251,377,95,886.22,37.85,100
+B0DV5FWJRG,1001617FBA,236,351,94,1207.53,39.83,98.42
+B004GL4EKQ,1001516FBA,232,338,67,2128.36,28.88,94.52
+B07BGDHY4L,1002506FBA,228,322,55,1494.1,24.12,78.91
+B074QMLPYQ,"1001003",226,312,59,1838.11,26.11,98.55
+B074QMLPYQ,1001003FBM,226,312,1,30.95,0.44,98.55
+B008QUUCVS,1001441FBA,219,281,122,2258.15,55.71,96.55
+B007Q1944E,"1001361",217,287,88,1507.73,40.55,95.57
+B076Q85VJ7,1001664FBA,216,266,53,690.95,24.54,98.8
+B076Q85VJ7,1001664FBM,216,266,2,27.9,0.93,98.8
+B06XBQ35NN,1001462FBA,213,326,68,736.94,31.92,95.96
+B06XBQ35NN,1001462FBM,213,326,1,11.95,0.47,95.96
+B0FY71N2B2,1001770FBA,207,241,23,357.1,11.11,99.57
+B008H1GCYW,1002176FBA,201,279,31,309.21,15.42,76.4
+B008H1GCYW,1002176FBM,201,279,2,19.9,1,76.4
+B004GNXZZ4,FH2350,200,236,31,307.69,15.5,87.68
+B074QLHBHM,1000956FBA,187,241,102,1837.61,54.55,99.1
+B07JLG2F2H,"1001320",186,277,50,445.95,26.88,97.5
+B07PL9GCV5,1002093FBA,185,237,63,562.88,34.05,98.2
+B07PL9GCV5,1002093FBM,185,237,6,35.82,3.24,98.2
+B00319IQTY,FT9567,183,219,24,170.68,13.11,97.07
+B08BS2Y3CK,1000958FBA,178,231,35,738.07,19.66,99.53
+B08BS2Y3CK,1000958FBM,178,231,1,19.9,0.56,99.53
+B0DMPGWJ8P,1001468FBA,167,217,33,426.96,19.76,99.5
+B073BNHFKJ,"1001371",165,206,61,547.39,36.97,99.49
+B0FBX69NGK,1001771FBA,163,210,16,254.18,9.82,100
+B08NPQ24H4,"1000480",160,238,16,225.93,10,89.86
+B08NPQ24H4,1000480FBM,160,238,17,241.4,10.63,89.86
+B004GHCC1I,"1001372",157,223,59,1107.09,37.58,95.57
+B008MO4WD2,"1001401",155,185,15,343.09,9.68,99.42
+B00Q1IL9XW,1001688FBA,146,228,52,524.71,35.62,95.93
+B00Q1IL9XW,1001688FBM,146,228,1,9.95,0.68,95.93
+B0DKJPGG64,1001432FBA,142,180,12,68.16,8.45,91.43
+B0DKJPGG64,1001432FBM,142,180,18,107.1,12.68,91.43
+B082FGFVN9,"1001408",140,184,38,451.71,27.14,88.54
+B008QUUBAA,"1001350",136,183,46,801.33,33.82,53.94
+B01I08LRH8,"1001415",135,179,54,625.33,40,98.15
+B0763N39GP,"1001375",131,169,44,472.15,33.59,96.79
+B09TZ18ZV4,"1000990",131,164,9,104.96,6.87,100
+B007Q107BS,1002445FBA,130,164,50,721.04,38.46,99.32
+B00KKGDYJS,1000332FBA,130,175,83,823.21,63.85,100
+B00KKGDYJS,1000332FBM,130,175,1,9.95,0.77,100
+B00KKGDVGO,"1000675",129,176,60,575.82,46.51,100
+B00KKGDVGO,1000675FBM,129,176,1,9.95,0.78,100
+B008QUUA8S,1002236FBA,125,170,41,636.16,32.8,100
+B00319BYKM,"1000938",121,139,20,135.96,16.53,67.94
+B0D3H737F8,"1001475",121,159,2,55.8,1.65,6.16
+B007RQ38FY,FH2024,120,164,26,193.38,21.67,64.67
+B07XRKZFDQ,1001357FBA,120,170,14,348.9,11.67,55.48
+B07XRKZFDQ,1001357FBM,120,170,4,99.8,3.33,55.48
+B004GK699G,1002444FBA,119,156,72,654.93,60.5,97.2
+B00Q1ILECI,F263,119,154,13,127.35,10.92,100
+B0FG8H7955,1001623FBA,119,163,27,279.45,22.69,96.82
+B0FG8H7955,1001623FBM,119,163,1,11.95,0.84,96.82
+B00IXRAS04,1001502FBA,115,154,36,1331.21,31.3,98.66
+B01B5JDD6C,"1001440",115,148,73,912.49,63.48,93.43
+B004GGX0OW,"1001474",108,163,1,25.11,0.93,65.03
+B004GGX0OW,1001474FBA,108,163,28,757.21,25.93,65.03
+B0G1C9F5CX,1001749FBA,107,128,15,297.72,14.02,100
+B00WULATEE,"734",105,133,7,55.65,6.67,96.64
+B00WULATEE,"1000237",105,133,17,116.87,16.19,96.64
+B0F9X766FD,1001644FBA,103,138,29,317.12,28.16,96.92
+B0G1C4M2BS,1001744FBA,101,168,23,390.13,22.77,100
+B0G1C4M2BS,1001744FBM,101,168,6,101.7,5.94,100
+B004GNU63S,1001687FBA,98,136,17,279.19,17.35,94.96
+B07HRQKMQF,1002071FBA,92,132,13,623.37,14.13,98.28
+B07SRD8C3L,1001355FBA,91,164,29,214.63,31.87,12.77
+B007Q0ZUTS,1001605FBA,88,119,22,323.86,25,96.36
+B007Q138MS,"1001414",86,109,34,510.14,39.53,100
+B007Q138MS,1001414FBM,86,109,1,14.95,1.16,100
+B00KBWFI54,1001748FBA,79,109,15,181,18.99,92.16
+B00KBWFI54,1001748FBM,79,109,53,474.88,67.09,92.16
+B0BRXSW8JR,1001233FBM,79,108,1,8.95,1.27,46.39
+B00KKGDU60,1000768FBA,77,100,6,175.68,7.79,97.87
+B07BFBKH2D,1002259FBA,77,97,1,7.78,1.3,89.16
+B07BFBKH2D,1002259FBM,77,97,12,87.96,15.58,89.16
+B007Q0YGHA,"1001379",76,97,28,242.91,36.84,83.52
+B00DZO7KFQ,1002422FBA,76,95,33,361.71,43.42,98.84
+B00DZO7KFQ,1002422FBM,76,95,1,7.96,1.32,98.84
+B00KKGEVRC,1000028FBA,74,118,18,271.49,24.32,84.76
+B00KKGEVRC,1000028FBM,74,118,9,134.1,12.16,84.76
+B08BRY9PJS,1000959FBA,74,96,14,250.72,18.92,100
+B00K7ZUPWQ,1002511FBA,71,99,16,184.2,22.54,95.6
+B084GQDW2T,1002237FBA,66,90,23,413,34.85,96.2
+B08N6XXKK9,"1001373",64,86,12,149.22,18.75,100
+B08N6XXKK9,1001373FBM,64,86,1,11.95,1.56,100
+B00D4BZO9E,"1001514",63,77,13,219.82,20.63,94.59
+B0G1C9XXJG,1002135FBA,63,74,13,311.27,20.63,98.63
+B00Q1LFI04,1001692FBA,62,90,13,207.53,20.97,89.66
+B00Q1LFI04,1001692FBM,62,90,5,79.75,8.06,89.66
+B09L4P5TRN,1001589FBM,62,81,7,34.93,11.29,82.86
+B07XDWMGDX,1001563FBM,61,75,6,95.7,9.84,94.03
+B00K7ZUF5S,1001755FBA,60,82,34,470.51,56.67,97.22
+B00K7ZUF5S,1001755FBM,60,82,2,27.88,3.33,97.22
+B0F1DJLWCT,1001606-FBA,59,69,30,389.77,50.85,100
+B0FGDNH4KC,1001689FBA,58,72,14,146.68,24.14,97.1
+B0FGDNH4KC,1001689FBM,58,72,2,19.9,3.45,97.1
+B004GL40FA,FH2245,56,68,9,88.71,16.07,76.92
+B0F1V8K9H4,1001622FBA,56,80,31,294.05,55.36,81.08
+B0BNHZT7YR,"1000921",55,67,13,128.93,23.64,100
+B004GKYX0S,1002070FBA,54,63,26,254.66,48.15,87.5
+B00Q1ILBS0,1002265FBA,53,78,5,65.55,9.43,100
+B00Q1ILBS0,1002265FBM,53,78,1,13.95,1.89,100
+B01G4QAA1M,1002502FBA,53,66,2,28.01,3.77,96.61
+B0D9BC1BDH,1001353-FBA,53,64,7,97.87,13.21,100
+B0G1C91FKM,1002358FBA,53,55,8,143.02,15.09,100
+B08YWBPJDD,"1000934",51,62,2,19.88,3.92,87.72
+B0F1V82MV4,1001645FBA,51,62,13,259.3,25.49,98.31
+B0776ZTLPL,"1000960",48,59,13,1347.76,27.08,48.15
+B00K7ZYGSK,1001880FBA,47,78,11,252.43,23.4,72.86
+B007TIUAQK,1002178FBM,45,58,7,69.64,15.56,86.79
+B0G6MVJTJS,1002344FBA,42,56,6,114.46,14.29,100
+B0056EPNZC,1001691FBA,41,59,3,23.7,7.32,80
+B0056EPNZC,1001691FBM,41,59,3,20.85,7.32,80
+B004GKHR4M,FH2020,40,53,36,260.94,90,51.02
+B0CP29P4CB,"1001341",39,51,4,75.98,10.26,100
+B0CP29P4CB,1001341FBM,39,51,1,18.9,2.56,100
+B0711YQX24,"661",38,52,7,52.43,18.42,95.83
+B0DV5FY476,1001640FBA,38,51,8,162.7,21.05,100
+B0G1C1HCN6,1002172FBA,38,41,10,118.95,26.32,100
+B0050H94GY,"1001374",37,47,7,87.49,18.92,88.64
+B00KKGESMA,1001544FBA,37,51,12,161.84,32.43,100
+B00KKGESMA,1001544FBM,37,51,1,11.95,2.7,100
+B004GO0I5S,FH2354,34,51,18,180,52.94,87.23
+B0GH125JK9,1001743FBM,34,57,9,152.55,26.47,100
+B007Q106CS,1001438FBA,33,49,5,35.42,15.15,83.33
+B00KKGD94I,1000100FBA,33,49,9,143.68,27.27,100
+B00KKGD94I,1000100FBM,33,49,4,43.8,12.12,100
+B0FQVBP1VN,1002109FBA,33,43,8,152.27,24.24,100
+B01CIWQW6I,"1001380",32,37,4,55.79,12.5,97.06
+B0FGDB3Q25,1001739FBA,31,47,10,114.24,32.26,97.73
+B002P4TXVG,F741,30,38,7,69.3,23.33,100
+B0FG8HC5DP,1001628FBM,30,43,2,37.9,6.67,92.31
+B0G1C53H19,1001690FBA,29,34,6,59.7,20.69,100
+B0FGQ29YGQ,1001495FBA,28,38,5,79.75,17.86,100
+B0FQV2478S,1001411_FBA,28,34,5,84.89,17.86,90.91
+B0FG8K7582,1001629FBM,26,41,5,139.75,19.23,51.43
+B007Q42V50,F206,24,24,1,14.18,4.17,60
+B00KKGEUH8,1002372FBA,23,30,4,42.92,17.39,100
+B0F9LHRQTG,1001758FBA,23,30,6,89.96,26.09,100
+B0G4N8G8WQ,1002449FBM,23,28,2,5.9,8.7,92.31
+B00K7ZYCW0,1001753FBA,22,28,5,74.92,22.73,96.43
+B0G2YBNL8G,1002185FBA,22,23,1,10.95,4.55,100
+B0FGD8FXS1,1001658FBA,19,25,3,39.24,15.79,90.48
+B0G3XHKXCC,1001559FBA,18,21,3,117.68,16.67,95
+B007Q13L4I,1001613FBA,17,19,6,101.7,35.29,66.67
+B0F1V8RV28,1001540FBA,17,22,1,13,5.88,100
+B0FQV4532J,1002520FBA,17,24,8,95.6,47.06,95.65
+B0F1V7NPQQ,1001660FBA,16,22,4,50.14,25,100
+B0FGDMNNJN,1002082FBM,16,24,1,18.85,6.25,90.91
+B0FQTYXVSS,1001737FBA,16,23,4,51.87,25,100
+B0FQTYXVSS,1001737_FBM,16,23,1,12.95,6.25,100
+B00Q1ILDTM,F260,15,17,3,38.97,20,100
+B0CVRXMQ3V,1002352FBA,15,22,11,173.65,73.33,100
+B0CVRXMQ3V,1002352FBM,15,22,1,15.95,6.67,100
+B0FG8FTGJC,1001630FBM,15,17,1,37.95,6.67,47.06
+B0FGD99RGT,1002079FBM,15,18,1,12.95,6.67,61.11
+B0FP592LZ4,1002238FBA,15,18,3,48.18,20,94.12
+B0FQTXWHT7,1001538FBA,15,19,2,27.95,13.33,88.24
+B00KKGDZZQ,"1001284",14,21,2,38.72,14.29,100
+B00WW74MM6,"1001396",13,17,4,79.84,30.77,93.75
+B01NCWSP6L,1002250FBA,13,13,2,37.9,15.38,100
+B01NCWSP6L,1002250FBM,13,13,1,18.95,7.69,100
+B07JL91YVQ,1002201FBA,13,22,8,79.58,61.54,100
+B0FQVD4TSW,1002110FBM,13,26,3,44.88,23.08,96.15
+B0G1C98Y7T,1002389FBA,13,16,1,18.95,7.69,100
+B0G4WVNW9V,1000027FBA,13,15,1,11.03,7.69,100
+B00KKGERBM,"1001330",11,15,5,104.3,45.45,100
+B00KKGERBM,1001330FBM,11,15,6,131.7,54.55,100
+B086WD27HL,F766om,10,10,3,121.22,30,60
+B0CYC7S55Y,1001287FBA,9,11,1,15.95,11.11,100
+B0G4DT6QSD,1001769FBM,9,11,1,19.95,11.11,100
+B00ITIX124,1001548FBA,8,8,3,50.85,37.5,87.5
+B00Q1IL9QY,1000425FBM,8,9,1,11.95,12.5,62.5
+B00Q1ILARW,1001318FBM,8,12,1,25.96,12.5,100
+B0842VVM5B,F795om,8,8,1,34.9,12.5,87.5
+B0BVQTKVDZ,"1001229",8,10,3,29.82,37.5,100
+B0D9BD1P3G,1001486-FBA,8,12,2,77.9,25,91.67
+B0FLDRZRLM,1001714FBA,8,8,3,58.5,37.5,100
+B0FLDRZRLM,1001714FBM,8,8,1,19.95,12.5,100
+B00Q1IF2JO,1000607FBA,7,8,1,8.95,14.29,100
+B092DRLFQT,1002472FBA,7,10,2,37.62,28.57,100
+B00KCMKYJS,"1000352",6,7,2,45.9,33.33,100
+B0BP274WS1,1001724FBA,6,7,2,39.9,33.33,100
+B0FJS7F5FN,1002066FBA,5,10,3,66.04,60,88.89
+B0G1C472J5,1001730FBA,4,5,1,11.95,25,100
+B0G4RJV8NT,1001525FBA,4,4,1,19.95,25,100
+B0FN4F6T99,1002065FBA,3,3,1,20.3,33.33,100
+B071X41JTW,1000787FBM,2,2,2,29.9,100,100
+B0F24D16QL,1001496FBA,2,2,1,15.95,50,100
+B0FGD7P86M,1002086FBM,2,2,1,24.95,50,100
+B0G4N6198V,1001725FBM,2,2,1,24.95,50,100
+B0FQPLWJFG,1001934FBM,1,1,1,44.5,100,100
+B0G1C4CH23,1001713FBA,0,0,1,20.94,0,0
+`;
+
+/* ---- Data loading ---- */
+function unwrap(res){
+  if(res.isError)throw new Error(typeof res.content==="string"?res.content:(res.content&&res.content[0]&&res.content[0].text)||"MCP-Fehler");
+  let p=res.structuredContent;
+  if(!p&&res.content&&res.content[0]&&res.content[0].text){try{p=JSON.parse(res.content[0].text);}catch(e){throw new Error("Antwort nicht lesbar");}}
+  return p;
+}
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+function setStatus(msg,err){const s=document.getElementById("status");s.textContent=msg;s.className=err?"err":"";}
+async function loadData(){
+  const btn=document.getElementById("refresh"),spin=document.getElementById("spin");
+  btn.disabled=true;spin.style.display="block";
+  const mp=document.getElementById("mp").value,range=document.getElementById("range").value;
+  try{
+    setStatus("Abfrage gestartet — Amazon antwortet langsam, kann 2–5 Min. dauern…");
+    const q=await window.cowork.callMcpTool("mcp__"+SERVER+"__data_query",{
+      ds_id:"ASELL",ds_accounts:mp,fields:FIELDS.join(","),
+      date_range_type:range,timezone:"Europe/Berlin",max_rows:2000,
+      settings:{report_type:"sales_and_traffic_by_asin",exclude_invalid_accounts:true}});
+    const qp=unwrap(q);
+    const sid=(qp.data&&qp.data.schedule_id)||qp.schedule_id;
+    if(!sid)throw new Error((qp.error)||"Keine Schedule-ID erhalten");
+    for(let i=0;i<75;i++){
+      await sleep(8000);
+      setStatus("Warte auf Amazon… ("+Math.round((i+1)*8/60*10)/10+" Min.)");
+      const r=await window.cowork.callMcpTool("mcp__"+SERVER+"__get_async_query_results",{schedule_id:sid,compress:true});
+      const rp=unwrap(r);
+      const st=(rp.data&&rp.data.status)||rp.status;
+      if(st==="completed"){
+        const rows=parseRows((rp.data&&rp.data.data)||rp.data);
+        if(!rows.length)throw new Error("Keine Daten für diesen Marktplatz/Zeitraum");
+        PRODUCTS=rows;
+        localStorage.setItem(LSKEY,JSON.stringify({ts:Date.now(),mp,range,rows}));
+        renderAll(mp,range,Date.now());
+        setStatus("✓ "+rows.length+" ASINs geladen");
+        btn.disabled=false;spin.style.display="none";
+        return;
+      }
+      if(st==="failed"||st==="error")throw new Error("Abfrage fehlgeschlagen: "+JSON.stringify(rp.error||st));
+    }
+    throw new Error("Zeitüberschreitung — bitte später erneut versuchen");
+  }catch(e){
+    setStatus("Fehler: "+e.message,true);
+  }
+  btn.disabled=false;spin.style.display="none";
+}
+
+/* ---- Rendering ---- */
+const RANGES={last_30_days:"Letzte 30 Tage",last_7_days:"Letzte 7 Tage",last_month:"Letzter Monat",last_90_days:"Letzte 90 Tage"};
+function renderAll(mp,range,ts){
+  const mpName=(MARKETPLACES.find(m=>m[0]===mp)||["","?"])[1];
+  document.getElementById("meta").textContent=mpName+" · "+(RANGES[range]||range)+" · Stand: "+new Date(ts).toLocaleString("de-DE",{dateStyle:"medium",timeStyle:"short"})+(range==="last_7_days"?" · ⚠ Kurzer Zeitraum — Klassifizierung nur eingeschränkt aussagekräftig, für Bewertung 30 Tage nutzen":"");
+  const P=PRODUCTS;
+  const sum=k=>P.reduce((a,p)=>a+p[k],0);
+  const rev=sum("rev"),units=sum("units"),sess=sum("sessions");
+  const probs=P.filter(p=>classify(p).length>0);
+  const wCvr=sess?P.reduce((a,p)=>a+p.cvr*p.sessions,0)/sess:0;
+  document.getElementById("kpis").innerHTML=`
+    <div class="card stat"><div class="lbl">Umsatz</div><div class="val pos">${eur(rev)}</div></div>
+    <div class="card stat"><div class="lbl">Verkaufte Einheiten</div><div class="val">${fmt(units)}</div></div>
+    <div class="card stat"><div class="lbl">Sessions</div><div class="val">${fmt(sess)}</div></div>
+    <div class="card stat"><div class="lbl">Ø Conversion (gew.)</div><div class="val">${wCvr.toFixed(1)}%</div></div>
+    <div class="card stat"><div class="lbl">ASINs gesamt</div><div class="val">${P.length}</div></div>
+    <div class="card stat"><div class="lbl">⚠ Problem-ASINs</div><div class="val neg">${probs.length}</div></div>`;
+  // Top chart
+  const top=[...P].sort((a,b)=>b.rev-a.rev).slice(0,10);
+  const ctx=document.getElementById("topChart");
+  if(topChart){topChart.destroy();topChart=null;}
+  topChart=new Chart(ctx,{type:"bar",data:{labels:top.map(p=>p.title.slice(0,32)+"…"),
+    datasets:[{label:"Umsatz €",data:top.map(p=>p.rev),backgroundColor:"#ff9900",borderRadius:5}]},
+    options:{indexAxis:"y",responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+      scales:{x:{ticks:{color:"#8b93a5"},grid:{color:"rgba(255,255,255,.05)"}},y:{ticks:{color:"#8b93a5",font:{size:10}},grid:{display:false}}}}});
+  // Worst: traffic without sales
+  const worst=[...P].filter(p=>p.sessions>=50).map(p=>({...p,waste:p.sessions*(1-Math.min(p.cvr,100)/100)}))
+    .sort((a,b)=>(b.sessions*(b.cvr<10?1:0))-(a.sessions*(a.cvr<10?1:0))||b.sessions-a.sessions)
+    .filter(p=>p.cvr<10).slice(0,6);
+  const dom=DOMAINS[mp]||"amazon.de";
+  document.getElementById("worst").innerHTML=worst.length?worst.map(p=>`
+    <div style="padding:8px 0;border-bottom:1px solid var(--border);font-size:12.5px">
+      <div style="display:flex;gap:8px;justify-content:space-between">
+        <a href="https://www.${dom}/dp/${p.asin}" target="_blank" style="color:var(--blue);text-decoration:none">${p.asin}</a>
+        <span class="neg">CVR ${p.cvr.toFixed(1)}%</span></div>
+      <div style="color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(p.title)}</div>
+      <div style="color:var(--dim);font-size:11px">${fmt(p.sessions)} Sessions → nur ${p.units} Verkäufe (${eur(p.rev)})</div>
+    </div>`).join(""):'<div class="empty">Keine akuten Fälle 🎉</div>';
+  renderTable();
+}
+let VIEW="group";
+let GSORT={key:"rev",dir:-1};
+function gSort(k){
+  if(GSORT.key===k)GSORT.dir*=-1;else{GSORT.key=k;GSORT.dir=-1;}
+  renderTable();
+}
+function setView(v,btn){
+  VIEW=v;
+  document.querySelectorAll("[data-v]").forEach(b=>b.classList.toggle("on",b===btn));
+  document.getElementById("tablewrap").style.display=v==="table"?"":"none";
+  document.getElementById("groupwrap").style.display=v==="group"?"":"none";
+  renderTable();
+}
+function setFilter(f,btn){
+  FILTER=f;
+  document.querySelectorAll("[data-f]").forEach(b=>b.classList.toggle("on",b===btn));
+  renderTable();
+}
+/* ---- Marken/Familien-Gruppierung ---- */
+function brandOf(title){
+  const t=(title||"").toLowerCase();
+  if(t.includes("tiroler nussöl"))return"Tiroler Nussöl";
+  if(t.includes("bite away"))return"bite away";
+  if(t.includes("herpotherm")||t.includes("mibetec"))return"MibeTec";
+  if(t.includes("violila"))return"violila";
+  if(t.startsWith("nex")||t.includes("nex "))return"NEX";
+  if(t.includes("sovita"))return"sovita";
+  if(t.includes("donath"))return"Donath";
+  if(t.startsWith("om -")||t.startsWith("om –"))return"OM";
+  if(t.includes("hübner")||t.includes("huebner")||t.includes("silicea")||t.includes("tannenblut")||t.includes("arthoro"))return"Hübner";
+  return"Weitere (ohne Markenname im Titel)";
+}
+function shortTitle(p){
+  // Titel ohne Markenpräfix, gekürzt — dient als "Variante"
+  let t=p.title||"";
+  t=t.replace(/^(hübner|huebner|sovita|violila|nex|donath|tiroler nussöl|anton hübner)[®™]?\s*[-–—:|]?\s*/i,"");
+  return t.length>90?t.slice(0,90)+"…":t;
+}
+function renderGroups(rows,dom){
+  const groups=new Map();
+  for(const p of rows){
+    const b=brandOf(p.title);
+    if(!groups.has(b))groups.set(b,[]);
+    groups.get(b).push(p);
+  }
+  const order=[...groups.entries()].sort((a,b)=>b[1].reduce((x,p)=>x+p.rev,0)-a[1].reduce((x,p)=>x+p.rev,0));
+  const bd={dead:'<span class="badge b-dead">Tot</span>',cvr:'<span class="badge b-cvr">CVR</span>',traffic:'<span class="badge b-traffic">Traffic</span>',bb:'<span class="badge b-bb">Buybox</span>'};
+  const ga=k=>GSORT.key===k?(GSORT.dir<0?" ↓":" ↑"):"";
+  const ghead=`<tr>
+    <th style="width:110px" onclick="gSort('asin')">ASIN${ga("asin")}</th>
+    <th onclick="gSort('title')">Produkt / Variante${ga("title")}</th>
+    <th class="num" style="width:80px" onclick="gSort('sessions')">Sessions${ga("sessions")}</th>
+    <th class="num" style="width:70px" onclick="gSort('units')">Einheiten${ga("units")}</th>
+    <th class="num" style="width:90px" onclick="gSort('rev')">Umsatz${ga("rev")}</th>
+    <th class="num" style="width:60px" onclick="gSort('cvr')">CVR${ga("cvr")}</th>
+    <th class="num" style="width:55px" onclick="gSort('bb')">Buybox${ga("bb")}</th>
+    <th style="width:110px" onclick="gSort('fbmU')">FBA / FBM${ga("fbmU")}</th>
+    <th style="width:150px">Status</th><th>Empfehlung</th></tr>`;
+  let html="";
+  for(const[brand,members]of order){
+    members.sort((a,b)=>{
+      const av=a[GSORT.key],bv=b[GSORT.key];
+      if(typeof av==="string")return av.localeCompare(bv,"de")*GSORT.dir;
+      return((av>bv?1:av<bv?-1:0))*GSORT.dir;
+    });
+    const rev=members.reduce((a,p)=>a+p.rev,0);
+    const units=members.reduce((a,p)=>a+p.units,0);
+    const probs=members.filter(p=>p.tags.length>0).length;
+    html+=`<div style="margin-bottom:22px">
+      <div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;padding:10px 8px;border-bottom:2px solid var(--accent);margin-bottom:2px">
+        <span style="font-size:15px;font-weight:800">${esc(brand)}</span>
+        <span style="font-size:12px;color:var(--muted)">${members.length} ASINs · ${eur(rev)} · ${fmt(units)} Einheiten</span>
+        ${probs?`<span class="badge b-dead" style="margin-left:auto">${probs} mit Problemen</span>`:`<span class="badge b-ok" style="margin-left:auto">alles OK</span>`}
+      </div>
+      <table style="width:100%">
+      ${ghead}
+      ${members.map(p=>`<tr>
+        <td style="width:110px"><a href="https://www.${dom}/dp/${p.asin}" target="_blank">${p.asin}</a></td>
+        <td class="title-cell" style="max-width:380px" title="${esc(p.title)}">${esc(shortTitle(p))}</td>
+        <td class="num" style="width:80px">${fmt(p.sessions)}</td>
+        <td class="num" style="width:70px">${fmt(p.units)} St.</td>
+        <td class="num" style="width:90px">${eur(p.rev)}</td>
+        <td class="num ${p.cvr<10?"neg":p.cvr>=25?"pos":""}" style="width:60px">${p.cvr.toFixed(1)}%</td>
+        <td class="num ${p.bb<70?"neg":""}" style="width:55px">${p.bb.toFixed(0)}%</td>
+        <td style="width:110px;white-space:nowrap">${chCell(p)}</td>
+        <td style="width:150px">${p.tags.length?p.tags.map(t=>bd[t]).join(""):'<span class="badge b-ok">OK</span>'}</td>
+        <td class="rec">${recText(p)}</td>
+      </tr>`).join("")}
+      </table></div>`;
+  }
+  document.getElementById("groupwrap").innerHTML=html||'<div class="empty">Keine Treffer</div>';
+}
+function sortBy(k){
+  if(SORT.key===k)SORT.dir*=-1;else{SORT.key=k;SORT.dir=-1;}
+  renderTable();
+}
+function renderTable(){
+  const q=(document.getElementById("search").value||"").toLowerCase();
+  const mp=document.getElementById("mp").value,dom=DOMAINS[mp]||"amazon.de";
+  const allRows=PRODUCTS.map(p=>({...p,tags:classify(p)}));
+  FAMBEST=buildFams(allRows);
+  let rows=allRows;
+  if(FILTER!=="all")rows=rows.filter(p=>p.tags.includes(FILTER));
+  if(q)rows=rows.filter(p=>p.asin.toLowerCase().includes(q)||p.title.toLowerCase().includes(q));
+  if(VIEW==="group")renderGroups(rows,dom);
+  rows.sort((a,b)=>(a[SORT.key]>b[SORT.key]?1:a[SORT.key]<b[SORT.key]?-1:0)*SORT.dir);
+  const arrow=k=>SORT.key===k?(SORT.dir<0?" ↓":" ↑"):"";
+  const badge={dead:'<span class="badge b-dead">Tot</span>',cvr:'<span class="badge b-cvr">CVR</span>',traffic:'<span class="badge b-traffic">Traffic</span>',bb:'<span class="badge b-bb">Buybox</span>'};
+  let html=`<tr>
+    <th onclick="sortBy('asin')">ASIN${arrow("asin")}</th><th onclick="sortBy('title')">Titel${arrow("title")}</th>
+    <th class="num" onclick="sortBy('sessions')">Sessions${arrow("sessions")}</th>
+    <th class="num" onclick="sortBy('units')">Einheiten${arrow("units")}</th>
+    <th class="num" onclick="sortBy('rev')">Umsatz${arrow("rev")}</th>
+    <th class="num" onclick="sortBy('cvr')">CVR %${arrow("cvr")}</th>
+    <th class="num" onclick="sortBy('bb')">Buybox %${arrow("bb")}</th>
+    <th>FBA / FBM</th>
+    <th>Status</th><th>Empfehlung</th></tr>`;
+  html+=rows.map(p=>`<tr>
+    <td><a href="https://www.${dom}/dp/${p.asin}" target="_blank">${p.asin}</a></td>
+    <td class="title-cell" title="${esc(p.title)}">${esc(p.title)}</td>
+    <td class="num">${fmt(p.sessions)}</td>
+    <td class="num">${fmt(p.units)}</td>
+    <td class="num">${eur(p.rev)}</td>
+    <td class="num ${p.cvr<10?"neg":p.cvr>=25?"pos":""}">${p.cvr.toFixed(1)}</td>
+    <td class="num ${p.bb<70?"neg":""}">${p.bb.toFixed(0)}</td>
+    <td style="white-space:nowrap">${chCell(p)}</td>
+    <td>${p.tags.length?p.tags.map(t=>badge[t]).join(""):'<span class="badge b-ok">OK</span>'}</td>
+    <td class="rec">${recText(p)}</td></tr>`).join("");
+  document.getElementById("tbl").innerHTML=html;
+  if(!rows.length)document.getElementById("tbl").innerHTML=html+`<tr><td colspan="10"><div class="empty">Keine Treffer</div></td></tr>`;
+}
+
+/* ---- Init ---- */
+document.getElementById("mp").innerHTML=MARKETPLACES.map(m=>`<option value="${m[0]}">${m[1]}</option>`).join("");
+(function init(){
+  let cached=null;
+  try{cached=JSON.parse(localStorage.getItem(LSKEY)||"null");}catch(e){}
+  if(cached&&cached.rows&&cached.rows.length){
+    PRODUCTS=cached.rows;
+    document.getElementById("mp").value=cached.mp||"A1PA6795UKMFR9";
+    document.getElementById("range").value=cached.range||"last_30_days";
+    renderAll(cached.mp||"A1PA6795UKMFR9",cached.range||"last_30_days",cached.ts||Date.now());
+  }else{
+    PRODUCTS=parseRows(SEED_SKU);
+    renderAll("A1PA6795UKMFR9","last_30_days",new Date("2026-07-19T12:00:00").getTime());
+  }
+})();
+</script>
+</body>
+</html>

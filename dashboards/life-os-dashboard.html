@@ -1,0 +1,991 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Life OS</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.js" integrity="sha384-iU8HYtnGQ8Cy4zl7gbNMOhsDTTKX02BTXptVP/vqAWIaTfM7isw76iyZCsjL2eVi" crossorigin="anonymous"></script>
+<style>
+:root{
+  color-scheme: dark;
+  --bg:#0d0f14; --bg2:#12151c; --card:#181c25; --card2:#1e232e;
+  --border:#262c38; --text:#e8eaf0; --muted:#8b93a5; --dim:#5c6373;
+  --accent:#7c6cff; --accent2:#4ecdc4; --green:#3ddc84; --red:#ff6b6b;
+  --yellow:#ffd166; --orange:#ff9f43; --pink:#ff6b9d; --blue:#54a0ff;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Inter,Roboto,sans-serif;background:var(--bg);color:var(--text);height:100vh;display:flex;overflow:hidden}
+::-webkit-scrollbar{width:8px;height:8px}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+/* ---------- Sidebar ---------- */
+#sidebar{width:220px;min-width:220px;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:20px 12px}
+#logo{font-size:18px;font-weight:800;padding:0 12px 20px;letter-spacing:.5px}
+#logo span{background:linear-gradient(90deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;color:transparent}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;cursor:pointer;color:var(--muted);font-size:14px;font-weight:500;margin-bottom:2px;transition:.15s;user-select:none}
+.nav-item:hover{background:var(--card);color:var(--text)}
+.nav-item.active{background:linear-gradient(90deg,rgba(124,108,255,.18),rgba(78,205,196,.08));color:var(--text);box-shadow:inset 2px 0 0 var(--accent)}
+.nav-item .ico{width:20px;text-align:center}
+#sidebar .foot{margin-top:auto;padding:12px;font-size:11px;color:var(--dim)}
+/* ---------- Main ---------- */
+#main{flex:1;overflow-y:auto;padding:28px 32px}
+.section{display:none;animation:fade .2s ease}
+.section.active{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+h1{font-size:24px;font-weight:800;margin-bottom:4px}
+.sub{color:var(--muted);font-size:13px;margin-bottom:24px}
+h2{font-size:15px;font-weight:700;margin:22px 0 12px}
+/* ---------- Cards / grid ---------- */
+.grid{display:grid;gap:14px}
+.g4{grid-template-columns:repeat(auto-fit,minmax(170px,1fr))}
+.g2{grid-template-columns:repeat(auto-fit,minmax(320px,1fr))}
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px}
+.stat .lbl{font-size:12px;color:var(--muted);margin-bottom:6px;display:flex;align-items:center;gap:6px}
+.stat .val{font-size:26px;font-weight:800}
+.stat .delta{font-size:12px;margin-top:4px}
+.pos{color:var(--green)}.neg{color:var(--red)}
+/* ---------- Forms ---------- */
+input,select,button,textarea{font-family:inherit;font-size:13px;color:var(--text)}
+input,select{background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;outline:none}
+input:focus,select:focus{border-color:var(--accent)}
+input[type=date]{color-scheme:dark}
+.btn{background:linear-gradient(90deg,var(--accent),#9b8cff);border:none;border-radius:8px;padding:8px 16px;font-weight:600;cursor:pointer;color:#fff;transition:.15s}
+.btn:hover{filter:brightness(1.1)}
+.btn.ghost{background:var(--card2);border:1px solid var(--border);color:var(--muted)}
+.btn.ghost:hover{color:var(--text)}
+.btn.sm{padding:4px 10px;font-size:12px}
+.formrow{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:16px}
+.formrow input[type=text],.formrow input[type=number]{flex:1;min-width:120px}
+/* ---------- Todos ---------- */
+.prio-col{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;min-height:120px}
+.prio-col h3{font-size:13px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.dot{width:8px;height:8px;border-radius:50%;display:inline-block}
+.todo{display:flex;align-items:center;gap:10px;padding:9px 10px;background:var(--card2);border-radius:9px;margin-bottom:8px;font-size:13px}
+.todo input[type=checkbox]{accent-color:var(--accent);width:16px;height:16px;cursor:pointer}
+.todo.done .txt{text-decoration:line-through;color:var(--dim)}
+.todo .txt{flex:1}
+.todo .due{font-size:11px;color:var(--muted)}
+.todo .due.late{color:var(--red)}
+.x{background:none;border:none;color:var(--dim);cursor:pointer;font-size:14px;padding:2px 6px;border-radius:6px}
+.x:hover{color:var(--red);background:rgba(255,107,107,.1)}
+/* ---------- Calendar ---------- */
+#calgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.cal-head{text-align:center;font-size:11px;color:var(--muted);font-weight:600;padding:4px}
+.cal-day{background:var(--card2);border:1px solid transparent;border-radius:10px;min-height:74px;padding:6px;cursor:pointer;font-size:12px;transition:.15s}
+.cal-day:hover{border-color:var(--accent)}
+.cal-day.other{opacity:.35}
+.cal-day.today{border-color:var(--accent2);background:rgba(78,205,196,.08)}
+.cal-day .n{font-weight:700;font-size:11px;color:var(--muted)}
+.cal-day.today .n{color:var(--accent2)}
+.ev{background:rgba(124,108,255,.25);border-left:2px solid var(--accent);border-radius:4px;padding:1px 4px;margin-top:3px;font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ev-item{display:flex;align-items:center;gap:10px;padding:9px 10px;background:var(--card2);border-radius:9px;margin-bottom:8px;font-size:13px}
+.ev-item .d{color:var(--accent2);font-weight:700;font-size:12px;min-width:90px}
+/* ---------- Finance ---------- */
+.tx{display:flex;align-items:center;gap:10px;padding:9px 10px;background:var(--card2);border-radius:9px;margin-bottom:8px;font-size:13px}
+.tx .amt{font-weight:700;min-width:90px;text-align:right}
+.tx .cat{font-size:11px;background:var(--card);border:1px solid var(--border);padding:2px 8px;border-radius:20px;color:var(--muted)}
+.chartbox{position:relative;height:260px}
+/* ---------- Habits ---------- */
+#habitgrid{width:100%;border-collapse:separate;border-spacing:0 6px}
+#habitgrid th{font-size:11px;color:var(--muted);font-weight:600;padding:4px;text-align:center}
+#habitgrid th:first-child{text-align:left}
+#habitgrid td{text-align:center;padding:4px}
+#habitgrid td:first-child{text-align:left;font-size:13px;padding-left:10px;background:var(--card2);border-radius:9px 0 0 9px}
+#habitgrid td:last-child{border-radius:0 9px 9px 0}
+#habitgrid tr.hrow td{background:var(--card2)}
+.hcheck{width:26px;height:26px;border-radius:8px;border:1px solid var(--border);background:var(--card);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;font-size:13px;transition:.15s}
+.hcheck.on{background:linear-gradient(135deg,var(--accent),var(--accent2));border-color:transparent}
+.streak{font-size:11px;color:var(--orange);font-weight:700}
+/* ---------- Goals ---------- */
+.goal{background:var(--card2);border-radius:12px;padding:14px;margin-bottom:12px}
+.goal .top{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.goal .title{flex:1;font-weight:600;font-size:14px}
+.goal .pct{font-weight:800;color:var(--accent2);font-size:14px}
+.bar{height:8px;background:var(--card);border-radius:6px;overflow:hidden}
+.bar>div{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:6px;transition:width .3s}
+.goal .meta{font-size:11px;color:var(--muted);margin-top:8px;display:flex;gap:10px;align-items:center}
+.empty{color:var(--dim);font-size:13px;padding:14px;text-align:center}
+.badge{font-size:11px;padding:2px 8px;border-radius:20px;font-weight:600}
+/* ---------- Amazon ---------- */
+.amz-badge{display:inline-block;font-size:10px;padding:2px 7px;border-radius:20px;font-weight:700;margin:1px 2px 1px 0;white-space:nowrap}
+.b-dead{background:rgba(255,107,107,.15);color:var(--red)}
+.b-cvr{background:rgba(255,159,67,.15);color:var(--orange)}
+.b-traffic{background:rgba(255,209,102,.15);color:var(--yellow)}
+.b-bb{background:rgba(84,160,255,.15);color:var(--blue)}
+.b-ok{background:rgba(61,220,132,.12);color:var(--green)}
+#amz-tbl{width:100%;border-collapse:collapse;font-size:12.5px}
+#amz-tbl th{color:var(--muted);font-size:11px;text-align:left;padding:8px;border-bottom:1px solid var(--border);cursor:pointer;user-select:none;white-space:nowrap}
+#amz-tbl th.num,#amz-tbl td.num{text-align:right}
+#amz-tbl td{padding:8px;border-bottom:1px solid var(--border);vertical-align:top}
+#amz-tbl tr:hover td{background:var(--card2)}
+#amz-tbl a{color:var(--blue);text-decoration:none;font-family:ui-monospace,monospace;font-size:12px}
+.amz-title{max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.amz-rec{font-size:11px;color:var(--muted);max-width:200px;white-space:normal}
+#amz-spin{display:none;width:14px;height:14px;border:2px solid var(--border);border-top-color:#ff9900;border-radius:50%;animation:sp 1s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+#amz-status{font-size:12px;color:var(--muted)}
+#amz-status.err{color:var(--red)}
+@media(max-width:760px){#sidebar{width:64px;min-width:64px}.nav-item .txt,#logo,#sidebar .foot{display:none}#main{padding:18px}}
+</style>
+</head>
+<body>
+<nav id="sidebar">
+  <div id="logo">⚡ <span>Life OS</span></div>
+  <div class="nav-item active" data-s="home"><span class="ico">🏠</span><span class="txt">Home</span></div>
+  <div class="nav-item" data-s="amz"><span class="ico">🛒</span><span class="txt">Amazon</span></div>
+  <div class="nav-item" data-s="todos"><span class="ico">✅</span><span class="txt">To-Dos</span></div>
+  <div class="nav-item" data-s="cal"><span class="ico">📅</span><span class="txt">Kalender</span></div>
+  <div class="nav-item" data-s="fin"><span class="ico">💰</span><span class="txt">Finanzen</span></div>
+  <div class="nav-item" data-s="yt"><span class="ico">▶️</span><span class="txt">YouTube</span></div>
+  <div class="nav-item" data-s="ig"><span class="ico">📸</span><span class="txt">Instagram</span></div>
+  <div class="nav-item" data-s="hab"><span class="ico">🔥</span><span class="txt">Habits</span></div>
+  <div class="nav-item" data-s="goals"><span class="ico">🎯</span><span class="txt">Ziele</span></div>
+  <div class="foot">Daten lokal gespeichert</div>
+</nav>
+
+<main id="main">
+
+<!-- ================= HOME ================= -->
+<section class="section active" id="s-home">
+  <h1 id="greet"></h1>
+  <div class="sub" id="today-str"></div>
+  <div class="grid g4">
+    <div class="card stat"><div class="lbl">🛒 Amazon Umsatz</div><div class="val pos" id="h-amz">–</div><div class="delta" id="h-amz-d"></div></div>
+    <div class="card stat"><div class="lbl">⚠ Problem-ASINs</div><div class="val neg" id="h-amzp">–</div><div class="delta" id="h-amzp-d"></div></div>
+    <div class="card stat"><div class="lbl">✅ Offene To-Dos</div><div class="val" id="h-todos">0</div><div class="delta" id="h-todos-d"></div></div>
+    <div class="card stat"><div class="lbl">📅 Termine heute</div><div class="val" id="h-events">0</div><div class="delta" id="h-events-d"></div></div>
+    <div class="card stat"><div class="lbl">💰 Saldo (Monat)</div><div class="val" id="h-fin">0 €</div><div class="delta" id="h-fin-d"></div></div>
+    <div class="card stat"><div class="lbl">🔥 Habits heute</div><div class="val" id="h-hab">–</div><div class="delta" id="h-hab-d"></div></div>
+    <div class="card stat"><div class="lbl">▶️ Abonnenten</div><div class="val" id="h-yt">–</div><div class="delta" id="h-yt-d"></div></div>
+    <div class="card stat"><div class="lbl">📸 Follower</div><div class="val" id="h-ig">–</div><div class="delta" id="h-ig-d"></div></div>
+  </div>
+  <div class="grid g2" style="margin-top:14px">
+    <div class="card"><h2 style="margin-top:0">📌 Heute fällig</h2><div id="h-duelist"></div></div>
+    <div class="card"><h2 style="margin-top:0">🎯 Ziel-Fortschritt</h2><div id="h-goals"></div></div>
+  </div>
+</section>
+
+<!-- ================= AMAZON ================= -->
+<section class="section" id="s-amz">
+  <h1>🛒 Amazon Seller</h1><div class="sub" id="amz-meta">ASIN-Analyse via Supermetrics (Seller Central)</div>
+  <div class="formrow">
+    <select id="amz-mp"></select>
+    <select id="amz-range">
+      <option value="last_30_days" selected>Letzte 30 Tage</option>
+      <option value="last_7_days">Letzte 7 Tage</option>
+      <option value="last_month">Letzter Monat</option>
+      <option value="last_90_days">Letzte 90 Tage</option>
+    </select>
+    <button class="btn" id="amz-refresh" onclick="amzLoad()">🔄 Live-Daten laden</button>
+    <div id="amz-spin"></div><span id="amz-status"></span>
+  </div>
+  <div class="grid g4" id="amz-kpis"></div>
+  <div class="formrow" style="margin-top:14px">
+    <button class="btn ghost sm on" data-af="all" onclick="amzFilter('all',this)">Alle</button>
+    <button class="btn ghost sm" data-af="dead" onclick="amzFilter('dead',this)">🔴 Tote ASINs</button>
+    <button class="btn ghost sm" data-af="cvr" onclick="amzFilter('cvr',this)">🟠 Conversion</button>
+    <button class="btn ghost sm" data-af="traffic" onclick="amzFilter('traffic',this)">🟡 Wenig Traffic</button>
+    <button class="btn ghost sm" data-af="bb" onclick="amzFilter('bb',this)">🔵 Buybox</button>
+    <input type="text" id="amz-search" placeholder="🔍 ASIN oder Titel…" oninput="amzTable()" style="margin-left:auto;min-width:180px">
+  </div>
+  <div class="card" style="overflow-x:auto"><table id="amz-tbl"></table></div>
+  <div class="sub" style="margin-top:10px">Kriterien: 🔴 ≤2 Einheiten · 🟠 ≥100 Sessions &amp; CVR &lt;10% · 🟡 &lt;50 Sessions · 🔵 Buybox &lt;70%. Erste Live-Abfrage kann 2–5 Min. dauern (Amazon-API).</div>
+</section>
+
+<!-- ================= TODOS ================= -->
+<section class="section" id="s-todos">
+  <h1>To-Dos</h1><div class="sub">Aufgaben nach Priorität</div>
+  <div class="formrow">
+    <input type="text" id="todo-in" placeholder="Neue Aufgabe…">
+    <select id="todo-prio"><option value="hoch">🔴 Hoch</option><option value="mittel" selected>🟡 Mittel</option><option value="niedrig">🟢 Niedrig</option></select>
+    <input type="date" id="todo-due">
+    <button class="btn" onclick="addTodo()">Hinzufügen</button>
+  </div>
+  <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(260px,1fr))">
+    <div class="prio-col"><h3><span class="dot" style="background:var(--red)"></span>Hoch</h3><div id="col-hoch"></div></div>
+    <div class="prio-col"><h3><span class="dot" style="background:var(--yellow)"></span>Mittel</h3><div id="col-mittel"></div></div>
+    <div class="prio-col"><h3><span class="dot" style="background:var(--green)"></span>Niedrig</h3><div id="col-niedrig"></div></div>
+  </div>
+  <h2>Erledigt <button class="btn ghost sm" onclick="clearDone()">Erledigte löschen</button></h2>
+  <div id="col-done"></div>
+</section>
+
+<!-- ================= KALENDER ================= -->
+<section class="section" id="s-cal">
+  <h1>Kalender</h1><div class="sub">Klicke auf einen Tag, um einen Termin anzulegen</div>
+  <div class="formrow">
+    <button class="btn ghost sm" onclick="calMove(-1)">←</button>
+    <strong id="cal-title" style="min-width:150px;text-align:center"></strong>
+    <button class="btn ghost sm" onclick="calMove(1)">→</button>
+    <button class="btn ghost sm" onclick="calToday()">Heute</button>
+  </div>
+  <div class="card"><div id="calgrid"></div></div>
+  <h2>Nächste Termine</h2>
+  <div id="ev-list"></div>
+</section>
+
+<!-- ================= FINANZEN ================= -->
+<section class="section" id="s-fin">
+  <h1>Finanzen</h1><div class="sub">Einnahmen &amp; Ausgaben</div>
+  <div class="formrow">
+    <select id="fin-type"><option value="ein">＋ Einnahme</option><option value="aus">－ Ausgabe</option></select>
+    <input type="number" id="fin-amt" placeholder="Betrag €" step="0.01" min="0" style="max-width:120px">
+    <input type="text" id="fin-note" placeholder="Beschreibung…">
+    <select id="fin-cat"><option>Gehalt</option><option>Business</option><option>Wohnen</option><option>Essen</option><option>Transport</option><option>Freizeit</option><option>Abos</option><option>Sonstiges</option></select>
+    <input type="date" id="fin-date">
+    <button class="btn" onclick="addTx()">Buchen</button>
+  </div>
+  <div class="grid g4">
+    <div class="card stat"><div class="lbl pos">↑ Einnahmen (Monat)</div><div class="val pos" id="f-in">0 €</div></div>
+    <div class="card stat"><div class="lbl neg">↓ Ausgaben (Monat)</div><div class="val neg" id="f-out">0 €</div></div>
+    <div class="card stat"><div class="lbl">Σ Saldo (Monat)</div><div class="val" id="f-bal">0 €</div></div>
+  </div>
+  <div class="card" style="margin-top:14px"><h2 style="margin-top:0">Verlauf (6 Monate)</h2><div class="chartbox"><canvas id="finChart"></canvas></div></div>
+  <h2>Transaktionen</h2>
+  <div id="tx-list"></div>
+</section>
+
+<!-- ================= YOUTUBE ================= -->
+<section class="section" id="s-yt">
+  <h1>YouTube Stats</h1><div class="sub">Trage regelmäßig deine Kanalzahlen ein — der Verlauf wird automatisch getrackt</div>
+  <div class="formrow">
+    <input type="number" id="yt-subs" placeholder="Abonnenten" min="0">
+    <input type="number" id="yt-views" placeholder="Aufrufe (gesamt)" min="0">
+    <input type="number" id="yt-videos" placeholder="Videos" min="0" style="max-width:110px">
+    <input type="date" id="yt-date">
+    <button class="btn" onclick="addSnap('yt')">Speichern</button>
+  </div>
+  <div class="grid g4" id="yt-stats"></div>
+  <div class="card" style="margin-top:14px"><h2 style="margin-top:0">Abonnenten-Verlauf</h2><div class="chartbox"><canvas id="ytChart"></canvas></div></div>
+  <div id="yt-hist"></div>
+</section>
+
+<!-- ================= INSTAGRAM ================= -->
+<section class="section" id="s-ig">
+  <h1>Instagram Tracking</h1><div class="sub">Follower &amp; Engagement im Blick</div>
+  <div class="formrow">
+    <input type="number" id="ig-subs" placeholder="Follower" min="0">
+    <input type="number" id="ig-views" placeholder="Reichweite (30 T.)" min="0">
+    <input type="number" id="ig-videos" placeholder="Beiträge" min="0" style="max-width:110px">
+    <input type="date" id="ig-date">
+    <button class="btn" onclick="addSnap('ig')">Speichern</button>
+  </div>
+  <div class="grid g4" id="ig-stats"></div>
+  <div class="card" style="margin-top:14px"><h2 style="margin-top:0">Follower-Verlauf</h2><div class="chartbox"><canvas id="igChart"></canvas></div></div>
+  <div id="ig-hist"></div>
+</section>
+
+<!-- ================= HABITS ================= -->
+<section class="section" id="s-hab">
+  <h1>Habits Tracker</h1><div class="sub" id="hab-week"></div>
+  <div class="formrow">
+    <input type="text" id="hab-in" placeholder="Neue Gewohnheit… (z.B. Sport, Lesen, Meditation)">
+    <button class="btn" onclick="addHabit()">Hinzufügen</button>
+  </div>
+  <div class="card"><table id="habitgrid"></table></div>
+</section>
+
+<!-- ================= ZIELE ================= -->
+<section class="section" id="s-goals">
+  <h1>Ziele</h1><div class="sub">Große Ziele, sichtbarer Fortschritt</div>
+  <div class="formrow">
+    <input type="text" id="goal-in" placeholder="Neues Ziel…">
+    <input type="date" id="goal-date">
+    <button class="btn" onclick="addGoal()">Hinzufügen</button>
+  </div>
+  <div id="goal-list"></div>
+</section>
+
+</main>
+
+<script>
+"use strict";
+/* ============ State ============ */
+const KEY="lifeos_v1";
+const defaults={todos:[],events:[],tx:[],yt:[],ig:[],habits:[],checks:{},goals:[]};
+let S;
+try{S=Object.assign({},defaults,JSON.parse(localStorage.getItem(KEY)||"{}"));}catch(e){S=Object.assign({},defaults);}
+const save=()=>localStorage.setItem(KEY,JSON.stringify(S));
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const fmt=n=>new Intl.NumberFormat("de-DE").format(n);
+const eur=n=>new Intl.NumberFormat("de-DE",{style:"currency",currency:"EUR"}).format(n);
+const iso=d=>d.toISOString().slice(0,10);
+const todayIso=()=>{const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");};
+const dedate=s=>{const[y,m,d]=s.split("-");return d+"."+m+"."+y.slice(2);};
+const MONTHS=["Januar","Februar","März","April","Mai","Juni","Juli","August","September","Oktober","November","Dezember"];
+
+/* ============ Navigation ============ */
+document.querySelectorAll(".nav-item").forEach(n=>n.addEventListener("click",()=>{
+  document.querySelectorAll(".nav-item").forEach(x=>x.classList.remove("active"));
+  document.querySelectorAll(".section").forEach(x=>x.classList.remove("active"));
+  n.classList.add("active");
+  document.getElementById("s-"+n.dataset.s).classList.add("active");
+  if(n.dataset.s==="fin")renderFinChart();
+  if(n.dataset.s==="yt")renderSnapChart("yt");
+  if(n.dataset.s==="ig")renderSnapChart("ig");
+}));
+
+/* ============ Home ============ */
+function renderHome(){
+  const h=new Date().getHours();
+  const g=h<5?"Gute Nacht":h<11?"Guten Morgen":h<18?"Hallo":"Guten Abend";
+  document.getElementById("greet").textContent=g+" 👋";
+  document.getElementById("today-str").textContent=new Date().toLocaleDateString("de-DE",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
+  const open=S.todos.filter(t=>!t.done);
+  document.getElementById("h-todos").textContent=open.length;
+  const high=open.filter(t=>t.prio==="hoch").length;
+  document.getElementById("h-todos-d").innerHTML=high?`<span class="neg">${high}× hohe Priorität</span>`:`<span class="pos">nichts Dringendes</span>`;
+  const tEvents=S.events.filter(e=>e.date===todayIso());
+  document.getElementById("h-events").textContent=tEvents.length;
+  document.getElementById("h-events-d").textContent=tEvents.length?tEvents.map(e=>e.title).slice(0,2).join(", "):"frei 🎉";
+  const m=todayIso().slice(0,7);
+  const inM=S.tx.filter(t=>t.date.slice(0,7)===m);
+  const bal=inM.reduce((a,t)=>a+(t.type==="ein"?t.amt:-t.amt),0);
+  const el=document.getElementById("h-fin");el.textContent=eur(bal);el.className="val "+(bal>=0?"pos":"neg");
+  document.getElementById("h-fin-d").textContent=inM.length+" Buchungen";
+  const done=S.habits.filter(hb=>(S.checks[hb.id]||[]).includes(todayIso())).length;
+  document.getElementById("h-hab").textContent=S.habits.length?done+"/"+S.habits.length:"–";
+  document.getElementById("h-hab-d").innerHTML=S.habits.length&&done===S.habits.length?'<span class="pos">Alle geschafft! 🔥</span>':"";
+  for(const k of["yt","ig"]){
+    const arr=[...S[k]].sort((a,b)=>a.date.localeCompare(b.date));
+    const last=arr[arr.length-1],prev=arr[arr.length-2];
+    document.getElementById("h-"+k).textContent=last?fmt(last.subs):"–";
+    const d=document.getElementById("h-"+k+"-d");
+    d.innerHTML=last&&prev?(last.subs-prev.subs>=0?`<span class="pos">+${fmt(last.subs-prev.subs)}</span>`:`<span class="neg">${fmt(last.subs-prev.subs)}</span>`):"";
+  }
+  const due=open.filter(t=>t.due&&t.due<=todayIso()).sort((a,b)=>a.due.localeCompare(b.due));
+  document.getElementById("h-duelist").innerHTML=due.length?due.map(todoHtml).join(""):'<div class="empty">Heute ist nichts fällig ✨</div>';
+  document.getElementById("h-goals").innerHTML=S.goals.length?S.goals.slice(0,4).map(g=>`
+    <div style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:5px"><span>${esc(g.title)}</span><b style="color:var(--accent2)">${g.pct}%</b></div><div class="bar"><div style="width:${g.pct}%"></div></div></div>`).join(""):'<div class="empty">Noch keine Ziele angelegt</div>';
+}
+
+/* ============ Todos ============ */
+function todoHtml(t){
+  const late=t.due&&t.due<todayIso()&&!t.done;
+  return `<div class="todo ${t.done?"done":""}">
+    <input type="checkbox" ${t.done?"checked":""} onchange="toggleTodo('${t.id}')">
+    <span class="txt">${esc(t.text)}</span>
+    ${t.due?`<span class="due ${late?"late":""}">${late?"⚠ ":""}${dedate(t.due)}</span>`:""}
+    <button class="x" onclick="delTodo('${t.id}')">✕</button></div>`;
+}
+function renderTodos(){
+  for(const p of["hoch","mittel","niedrig"]){
+    const list=S.todos.filter(t=>t.prio===p&&!t.done);
+    document.getElementById("col-"+p).innerHTML=list.length?list.map(todoHtml).join(""):'<div class="empty">Leer</div>';
+  }
+  const done=S.todos.filter(t=>t.done);
+  document.getElementById("col-done").innerHTML=done.length?done.map(todoHtml).join(""):'<div class="empty">Noch nichts erledigt</div>';
+}
+function addTodo(){
+  const el=document.getElementById("todo-in");if(!el.value.trim())return;
+  S.todos.push({id:uid(),text:el.value.trim(),prio:document.getElementById("todo-prio").value,due:document.getElementById("todo-due").value||null,done:false});
+  el.value="";document.getElementById("todo-due").value="";save();renderTodos();renderHome();
+}
+function toggleTodo(id){const t=S.todos.find(t=>t.id===id);if(t)t.done=!t.done;save();renderTodos();renderHome();}
+function delTodo(id){S.todos=S.todos.filter(t=>t.id!==id);save();renderTodos();renderHome();}
+function clearDone(){S.todos=S.todos.filter(t=>!t.done);save();renderTodos();renderHome();}
+document.getElementById("todo-in").addEventListener("keydown",e=>{if(e.key==="Enter")addTodo();});
+
+/* ============ Kalender ============ */
+let calY=new Date().getFullYear(),calM=new Date().getMonth();
+function calMove(d){calM+=d;if(calM<0){calM=11;calY--;}if(calM>11){calM=0;calY++;}renderCal();}
+function calToday(){calY=new Date().getFullYear();calM=new Date().getMonth();renderCal();}
+function renderCal(){
+  document.getElementById("cal-title").textContent=MONTHS[calM]+" "+calY;
+  const g=document.getElementById("calgrid");
+  let html=["Mo","Di","Mi","Do","Fr","Sa","So"].map(d=>`<div class="cal-head">${d}</div>`).join("");
+  const first=new Date(calY,calM,1);
+  const start=(first.getDay()+6)%7;
+  const days=new Date(calY,calM+1,0).getDate();
+  const prevDays=new Date(calY,calM,0).getDate();
+  const cells=Math.ceil((start+days)/7)*7;
+  for(let i=0;i<cells;i++){
+    let d,mo=calM,yr=calY,other=false;
+    if(i<start){d=prevDays-start+1+i;mo=calM-1;other=true;}
+    else if(i>=start+days){d=i-start-days+1;mo=calM+1;other=true;}
+    else d=i-start+1;
+    const dt=new Date(yr,mo,d);
+    const dIso=dt.getFullYear()+"-"+String(dt.getMonth()+1).padStart(2,"0")+"-"+String(dt.getDate()).padStart(2,"0");
+    const evs=S.events.filter(e=>e.date===dIso);
+    html+=`<div class="cal-day ${other?"other":""} ${dIso===todayIso()?"today":""}" onclick="dayClick('${dIso}')">
+      <div class="n">${d}</div>${evs.map(e=>`<div class="ev">${e.time?e.time+" ":""}${esc(e.title)}</div>`).join("")}</div>`;
+  }
+  g.innerHTML=html;
+  const up=S.events.filter(e=>e.date>=todayIso()).sort((a,b)=>(a.date+(a.time||"")).localeCompare(b.date+(b.time||""))).slice(0,10);
+  document.getElementById("ev-list").innerHTML=up.length?up.map(e=>`
+    <div class="ev-item"><span class="d">${dedate(e.date)}${e.time?" · "+e.time:""}</span><span style="flex:1">${esc(e.title)}</span>
+    <button class="x" onclick="delEv('${e.id}')">✕</button></div>`).join(""):'<div class="empty">Keine anstehenden Termine</div>';
+}
+function dayClick(dIso){
+  const title=prompt("Termin am "+dedate(dIso)+":\n\nTitel eingeben (leer = abbrechen)");
+  if(!title||!title.trim())return;
+  const time=prompt("Uhrzeit? (z.B. 14:30 — leer lassen für ganztägig)")||"";
+  S.events.push({id:uid(),date:dIso,time:time.trim(),title:title.trim()});
+  save();renderCal();renderHome();
+}
+function delEv(id){S.events=S.events.filter(e=>e.id!==id);save();renderCal();renderHome();}
+
+/* ============ Finanzen ============ */
+let finChart=null;
+function addTx(){
+  const amt=parseFloat(document.getElementById("fin-amt").value);
+  if(!amt||amt<=0)return;
+  S.tx.push({id:uid(),type:document.getElementById("fin-type").value,amt,
+    note:document.getElementById("fin-note").value.trim()||"(ohne Beschreibung)",
+    cat:document.getElementById("fin-cat").value,
+    date:document.getElementById("fin-date").value||todayIso()});
+  document.getElementById("fin-amt").value="";document.getElementById("fin-note").value="";
+  save();renderFin();renderFinChart();renderHome();
+}
+function delTx(id){S.tx=S.tx.filter(t=>t.id!==id);save();renderFin();renderFinChart();renderHome();}
+function renderFin(){
+  const m=todayIso().slice(0,7);
+  const cur=S.tx.filter(t=>t.date.slice(0,7)===m);
+  const ein=cur.filter(t=>t.type==="ein").reduce((a,t)=>a+t.amt,0);
+  const aus=cur.filter(t=>t.type==="aus").reduce((a,t)=>a+t.amt,0);
+  document.getElementById("f-in").textContent=eur(ein);
+  document.getElementById("f-out").textContent=eur(aus);
+  const b=document.getElementById("f-bal");b.textContent=eur(ein-aus);b.className="val "+(ein-aus>=0?"pos":"neg");
+  const list=[...S.tx].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,30);
+  document.getElementById("tx-list").innerHTML=list.length?list.map(t=>`
+    <div class="tx"><span class="d" style="color:var(--muted);font-size:12px;min-width:60px">${dedate(t.date)}</span>
+    <span style="flex:1">${esc(t.note)}</span><span class="cat">${esc(t.cat)}</span>
+    <span class="amt ${t.type==="ein"?"pos":"neg"}">${t.type==="ein"?"+":"−"}${eur(t.amt)}</span>
+    <button class="x" onclick="delTx('${t.id}')">✕</button></div>`).join(""):'<div class="empty">Noch keine Buchungen — lege oben los!</div>';
+}
+function renderFinChart(){
+  const labels=[],eins=[],auss=[];
+  const now=new Date();
+  for(let i=5;i>=0;i--){
+    const d=new Date(now.getFullYear(),now.getMonth()-i,1);
+    const key=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0");
+    labels.push(MONTHS[d.getMonth()].slice(0,3));
+    eins.push(S.tx.filter(t=>t.type==="ein"&&t.date.slice(0,7)===key).reduce((a,t)=>a+t.amt,0));
+    auss.push(S.tx.filter(t=>t.type==="aus"&&t.date.slice(0,7)===key).reduce((a,t)=>a+t.amt,0));
+  }
+  const ctx=document.getElementById("finChart");
+  if(finChart){finChart.data.labels=labels;finChart.data.datasets[0].data=eins;finChart.data.datasets[1].data=auss;finChart.update();return;}
+  finChart=new Chart(ctx,{type:"bar",data:{labels,datasets:[
+    {label:"Einnahmen",data:eins,backgroundColor:"#3ddc84",borderRadius:6},
+    {label:"Ausgaben",data:auss,backgroundColor:"#ff6b6b",borderRadius:6}]},
+    options:chartOpts()});
+}
+function chartOpts(){return{responsive:true,maintainAspectRatio:false,
+  plugins:{legend:{labels:{color:"#8b93a5",font:{size:11}}}},
+  scales:{x:{ticks:{color:"#8b93a5"},grid:{color:"rgba(255,255,255,.04)"}},
+          y:{ticks:{color:"#8b93a5"},grid:{color:"rgba(255,255,255,.06)"}}}};}
+
+/* ============ YouTube / Instagram Snapshots ============ */
+const snapCharts={yt:null,ig:null};
+const snapCfg={
+  yt:{color:"#ff6b6b",label:"Abonnenten",f1:"Abonnenten",f2:"Aufrufe",f3:"Videos"},
+  ig:{color:"#ff6b9d",label:"Follower",f1:"Follower",f2:"Reichweite",f3:"Beiträge"}
+};
+function addSnap(k){
+  const subs=parseInt(document.getElementById(k+"-subs").value);
+  if(isNaN(subs))return;
+  const views=parseInt(document.getElementById(k+"-views").value)||0;
+  const videos=parseInt(document.getElementById(k+"-videos").value)||0;
+  const date=document.getElementById(k+"-date").value||todayIso();
+  S[k]=S[k].filter(s=>s.date!==date);
+  S[k].push({date,subs,views,videos});
+  ["subs","views","videos"].forEach(f=>document.getElementById(k+"-"+f).value="");
+  save();renderSnap(k);renderSnapChart(k);renderHome();
+}
+function delSnap(k,date){S[k]=S[k].filter(s=>s.date!==date);save();renderSnap(k);renderSnapChart(k);renderHome();}
+function renderSnap(k){
+  const c=snapCfg[k];
+  const arr=[...S[k]].sort((a,b)=>a.date.localeCompare(b.date));
+  const last=arr[arr.length-1],prev=arr[arr.length-2];
+  const delta=(a,b)=>a&&b?(a-b>=0?`<div class="delta pos">▲ +${fmt(a-b)}</div>`:`<div class="delta neg">▼ ${fmt(a-b)}</div>`):"";
+  document.getElementById(k+"-stats").innerHTML=last?`
+    <div class="card stat"><div class="lbl">${c.f1}</div><div class="val" style="color:${c.color}">${fmt(last.subs)}</div>${delta(last.subs,prev&&prev.subs)}</div>
+    <div class="card stat"><div class="lbl">${c.f2}</div><div class="val">${fmt(last.views)}</div>${delta(last.views,prev&&prev.views)}</div>
+    <div class="card stat"><div class="lbl">${c.f3}</div><div class="val">${fmt(last.videos)}</div>${delta(last.videos,prev&&prev.videos)}</div>
+    <div class="card stat"><div class="lbl">Stand</div><div class="val" style="font-size:18px">${dedate(last.date)}</div></div>`
+    :'<div class="empty card" style="grid-column:1/-1">Noch keine Daten — trage oben deine ersten Zahlen ein 📈</div>';
+  document.getElementById(k+"-hist").innerHTML=arr.length>1?"<h2>Verlauf</h2>"+[...arr].reverse().slice(0,15).map(s=>`
+    <div class="tx"><span style="color:var(--muted);font-size:12px;min-width:70px">${dedate(s.date)}</span>
+    <span style="flex:1">${c.f1}: <b>${fmt(s.subs)}</b> · ${c.f2}: ${fmt(s.views)} · ${c.f3}: ${fmt(s.videos)}</span>
+    <button class="x" onclick="delSnap('${k}','${s.date}')">✕</button></div>`).join(""):"";
+}
+function renderSnapChart(k){
+  const c=snapCfg[k];
+  const arr=[...S[k]].sort((a,b)=>a.date.localeCompare(b.date));
+  const labels=arr.map(s=>dedate(s.date)),data=arr.map(s=>s.subs);
+  const ctx=document.getElementById(k+"Chart");
+  if(snapCharts[k]){snapCharts[k].data.labels=labels;snapCharts[k].data.datasets[0].data=data;snapCharts[k].update();return;}
+  snapCharts[k]=new Chart(ctx,{type:"line",data:{labels,datasets:[{label:c.label,data,
+    borderColor:c.color,backgroundColor:c.color+"22",fill:true,tension:.35,pointRadius:4,pointBackgroundColor:c.color}]},
+    options:chartOpts()});
+}
+
+/* ============ Habits ============ */
+function weekDates(){
+  const now=new Date();
+  const mon=new Date(now);mon.setDate(now.getDate()-((now.getDay()+6)%7));
+  return Array.from({length:7},(_,i)=>{const d=new Date(mon);d.setDate(mon.getDate()+i);
+    return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");});
+}
+function streak(id){
+  const set=new Set(S.checks[id]||[]);let n=0;const d=new Date();
+  if(!set.has(todayIso()))d.setDate(d.getDate()-1);
+  while(set.has(d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"))){n++;d.setDate(d.getDate()-1);}
+  return n;
+}
+function renderHabits(){
+  const week=weekDates();
+  document.getElementById("hab-week").textContent="Woche vom "+dedate(week[0])+" bis "+dedate(week[6]);
+  const names=["Mo","Di","Mi","Do","Fr","Sa","So"];
+  let html="<tr><th>Gewohnheit</th>"+week.map((d,i)=>`<th style="${d===todayIso()?"color:var(--accent2)":""}">${names[i]}<br><span style="font-weight:400">${d.slice(8)}</span></th>`).join("")+"<th>Serie</th><th></th></tr>";
+  if(!S.habits.length)html+=`<tr><td colspan="10"><div class="empty">Füge oben deine erste Gewohnheit hinzu 🔥</div></td></tr>`;
+  for(const h of S.habits){
+    const checks=new Set(S.checks[h.id]||[]);
+    html+=`<tr class="hrow"><td>${esc(h.name)}</td>`+week.map(d=>
+      `<td><button class="hcheck ${checks.has(d)?"on":""}" onclick="toggleCheck('${h.id}','${d}')">${checks.has(d)?"✓":""}</button></td>`).join("")+
+      `<td><span class="streak">🔥 ${streak(h.id)}</span></td><td><button class="x" onclick="delHabit('${h.id}')">✕</button></td></tr>`;
+  }
+  document.getElementById("habitgrid").innerHTML=html;
+}
+function addHabit(){
+  const el=document.getElementById("hab-in");if(!el.value.trim())return;
+  S.habits.push({id:uid(),name:el.value.trim()});el.value="";save();renderHabits();renderHome();
+}
+function delHabit(id){S.habits=S.habits.filter(h=>h.id!==id);delete S.checks[id];save();renderHabits();renderHome();}
+function toggleCheck(id,d){
+  const arr=S.checks[id]||(S.checks[id]=[]);
+  const i=arr.indexOf(d);
+  if(i>=0)arr.splice(i,1);else arr.push(d);
+  save();renderHabits();renderHome();
+}
+document.getElementById("hab-in").addEventListener("keydown",e=>{if(e.key==="Enter")addHabit();});
+
+/* ============ Ziele ============ */
+function renderGoals(){
+  document.getElementById("goal-list").innerHTML=S.goals.length?S.goals.map(g=>`
+    <div class="goal"><div class="top"><span class="title">${esc(g.title)}</span><span class="pct">${g.pct}%</span></div>
+    <div class="bar"><div style="width:${g.pct}%"></div></div>
+    <div class="meta">${g.date?"🗓 bis "+dedate(g.date):""}
+      <span style="margin-left:auto"></span>
+      <button class="btn ghost sm" onclick="bumpGoal('${g.id}',-10)">−10%</button>
+      <button class="btn ghost sm" onclick="bumpGoal('${g.id}',10)">+10%</button>
+      ${g.pct>=100?'<span class="badge" style="background:rgba(61,220,132,.15);color:var(--green)">Erreicht 🎉</span>':""}
+      <button class="x" onclick="delGoal('${g.id}')">✕</button></div></div>`).join(""):'<div class="empty">Noch keine Ziele — was willst du erreichen? 🎯</div>';
+}
+function addGoal(){
+  const el=document.getElementById("goal-in");if(!el.value.trim())return;
+  S.goals.push({id:uid(),title:el.value.trim(),date:document.getElementById("goal-date").value||null,pct:0});
+  el.value="";document.getElementById("goal-date").value="";save();renderGoals();renderHome();
+}
+function bumpGoal(id,d){const g=S.goals.find(g=>g.id===id);if(g)g.pct=Math.max(0,Math.min(100,g.pct+d));save();renderGoals();renderHome();}
+function delGoal(id){S.goals=S.goals.filter(g=>g.id!==id);save();renderGoals();renderHome();}
+document.getElementById("goal-in").addEventListener("keydown",e=>{if(e.key==="Enter")addGoal();});
+
+/* ============ Amazon Seller ============ */
+const AMZ_SERVER="c5bac003-68f0-42ee-98f7-88275d319461";
+const AMZ_FIELDS="asin,title,sessions,page_views,units_ordered,ordered_product_sales,unit_session_percentage,buy_box_percentage";
+const AMZ_MP=[["A1PA6795UKMFR9","Amazon.de"],["A13V1IB3VIYZZH","Amazon.fr"],["A1F83G8C2ARO7P","Amazon.co.uk"],["APJ6JRA9NG5V4","Amazon.it"],["A1RKKUPIHCS9HS","Amazon.es"],["A1805IZSGTT6HS","Amazon.nl"],["A1C3SOZRARQ6R3","Amazon.pl"],["A2NODRKZP88ZB9","Amazon.se"],["AMEN7PMS3EDWL","Amazon.com.be"],["A28R8C7NBKEWEA","Amazon.ie"],["A17E79C6D8DWNP","Amazon.sa"],["A2VIGQ35RCS4UG","Amazon.ae"]];
+const AMZ_DOM={"A1PA6795UKMFR9":"amazon.de","A13V1IB3VIYZZH":"amazon.fr","A1F83G8C2ARO7P":"amazon.co.uk","APJ6JRA9NG5V4":"amazon.it","A1RKKUPIHCS9HS":"amazon.es","A1805IZSGTT6HS":"amazon.nl","A1C3SOZRARQ6R3":"amazon.pl","A2NODRKZP88ZB9":"amazon.se","AMEN7PMS3EDWL":"amazon.com.be","A28R8C7NBKEWEA":"amazon.ie","A17E79C6D8DWNP":"amazon.sa","A2VIGQ35RCS4UG":"amazon.ae"};
+const AMZ_LSKEY="lifeos_amz_v1";
+const eurA=n=>new Intl.NumberFormat("de-DE",{style:"currency",currency:"EUR",maximumFractionDigits:0}).format(n);
+let AMZ=[],AMZ_FILTER="all",AMZ_SORT={key:"rev",dir:-1};
+const AMZ_SEED=`
+  - [8,]: B0CX5N9X9Z,"bite away Two, der original Stichheiler, der elektronische Insektenstichheiler für die schnelle Behandlung von Mückenstichen, Hitzestift, bis zu 300 Anwendungen. Ersetzt Nicht den Mückenschutz",161323,211590,5,119.53,0,0.01
+  - [8,]: B0031OS9AU,Tiroler Nussöl Original Nussöl wasserfest | Bräunungsöl Körper | Walnussschalen Extrakt | Pflegeformel mit Mandelöl und Sonnenblumenöl | seidiger Glanz | für Solarium und Sonne | 150 ml,8054,10810,663,10368.81,16.46,149.24
+  - [8,]: B0CGLWLLJX,"hübner® Magen-Darm Direkt – 30 Direktsticks á 15ml für unterwegs, vegan, geschmacksneutral, ohne Zusätze, mit hoher Bindungsfähigkeit für Krankheitserreger & Giftstoffe",4726,6460,855,13612.17,36.18,185.28
+  - [8,]: B074QNH6TG,"Tiroler Nussöl Original DOPPELPACK 2x 150ml |Das Original |Verleiht der Haut schon beim Auftragen eine leichte, natürliche Bräune",4580,6568,482,12686.32,21.05,194.9
+  - [8,]: B0031OORVK,Tiroler Nussöl Original | Sonnenöl LSF 6 | UVA UVB Filter | wasserfestes Pflegeöl mit Mandelöl Sonnenblumenöl Walnussöl | Walnussschalen Extrakt für Bräune | seidiger Glanz 75 ml,3314,4632,280,3386.55,16.9,169.76
+  - [8,]: B0DMSWG759,sovita Zink Salbe100 ml I Hautschutz Wundheilung I Windelbereich Babypflege I Zinkoxid hochdosiert I Heilsalbe für sensible Haut,3136,4106,530,4771.02,33.8,199.16
+  - [8,]: B0041LYKKK,Tiroler Nussöl Original I Sonnenmilch LSF 30 I wasserfest I UVA UVB Filter I Sonnenschutz für ungebräunte normal empfindliche Haut I mit Panthenol Sonnenblumenöl Walnussöl und schalen Extrakt 150ml,2766,3644,185,3842.33,13.37,165.5
+  - [8,]: B0041M5TC2,Tiroler Nussöl Original | Sonnenmilch LSF 20 | wasserfest | UVA UVB Filter | Sonnenschutz für ungebräunte normal empfindliche Haut | mit Panthenol Sonnenblumenöl und Walnussschalen Extrakt 150ml,2397,3324,344,5457.47,14.35,85.9
+  - [8,]: B0031OQRMC,Tiroler Nussöl I Sonnenmilch Spray LSF 6 I UVA UVB Filter I wasserfestes Sonnenschutz Spray für sonnengewöhnte unempfindliche Haut I mit Panthenol Sonnenblumenöl I Walnussschalen Extrakt I 150 ml,2100,2752,209,3211.55,19.9,182.54
+  - [8,]: B0031OSEX2,Tiroler Nussöl Original I Sonnenöl LSF 6 I UVA UVB Filter I wasserfestes Sonnenschutz Öl für sonnengewöhnte Haut I Walnussschalen Extrakt I Pflegeöl mit Mandelöl Sonnenblumenöl Walnussöl I 150 ml,2004,2802,346,5080.58,17.27,70.8
+  - [8,]: B004GH7178,Hübner Magen-Darm Gel (1 x 500 ml),1636,2128,220,3811.31,26.9,178.2
+  - [8,]: B007Q13LI4,"hübner Wund- & Heil-Gel 100 ml | Silicium-Gel mit Kieselsäure | kühlend & entzündungshemmend bei Hautreizungen, Insektenstichen, Sonnenbrand & kleinen Wunden | natürliche Hautpflege für unterwegs",1576,2040,196,1725.56,24.87,194.26
+  - [8,]: B074QKDSDJ,Hübner Aloe Vera Gel Körpergel - Doppelpack (2x100ml),1512,2240,250,4407.49,33.07,197.42
+  - [8,]: B003X4QL6C,"Hübner Original Haut Haare Nägel + Bindegewebe, Silicea Rein mineralisch, vegan, ohne Zusätze, Frei von Gluten, Lactose, Hefe, Koservierungsstoffen und Stabilisatoren",1464,1980,166,2871.16,22.67,191.42
+  - [8,]: B0055E63PC,Hübner Original silicea Lippenherpes-Gel| Kieselsäure-Gel bei Lippenherpes | Herpesbläschen austrocknen | Wirkstoff mineralisches Silicium |,1428,1910,253,2450.14,35.43,198.62
+  - [8,]: B00WWC3Z6K,"sovita Aloe Vera Saft BIO naturtrüb | 99,8 % Aloe Vera aus dem Blattgel der Aloe barbadensis | Ohne Konservierungsstoffe & künstliche Zusätze | Vegan & naturbelassen | 1 Liter Glasflasche",1380,1908,189,2868.39,27.39,199.78
+  - [8,]: B0CCF2XFFJ,"Huebner Haut Haare Nägel Kompakt, 90 Gel-Kapseln (1)",1268,2954,291,9547.8,45.9,185.92
+  - [8,]: B072HDM7CD,"Hübner Original silicea DIRECT Sticks | Kieselsäure-Gel mit Biotin| Nahrungsergänzungsmittel für Haut, Haare, Nägel | Aprikosengeschmack",1056,1450,209,3745.73,39.58,193.36
+  - [8,]: B008QUU36M,"hübner® Bronchial-Sirup – Mit Thymian & Salbei, unterstützt die natürliche Reinigung der Atemwege, ohne Alkohol, Laktose & Gluten, ideal für Hals & Bronchien in der Erkältungszeit, vegetarisch",1038,1412,166,3162.34,31.98,186.94
+  - [8,]: B08YN8D6VL,"3 x Hübner Silicea Magen-Darm Direct, 3 x 30 Sticks (1350 ml)",1026,1414,186,7560.83,36.26,188.1
+  - [8,]: B004GKZ8QQ,Hübner Aloe Vera Gel (100ml),990,1450,155,2031.67,31.32,199.68
+  - [8,]: B078Y4P5GZ,"Hübner Original silicea Nagelaufbauserum | Silicium-Gel, Biotin und Bio-Mandelöl für brüchige Fingernägel |starke und kräftige Nägel |vegan|5ml",940,1188,85,872.6,18.08,142.9
+  - [8,]: B007ZMTR78,Hübner Weißdorn Herz-Kreislauf-Tonikum | Traditionelles Arzneimittel | Unterstützung der Herz-Kreislauf-Funktion | Alkoholfrei | Vegan,932,1284,202,3361.97,43.35,196.98
+  - [8,]: B01IVPQO78,hübner - Original silicea® Balsam - Arzneimittel - 4x500ml -,854,1210,143,6394.15,33.49,170.44
+  - [8,]: B009SI5GHM,Silicea Doppelpack Haut Haare Nägel Bindegewebe,809,1116,233,6341.03,28.8,93.71
+  - [8,]: B0FX9N22N3,"sovita Blutzucker Kapseln mit Ceylon Zimt Extrakt 10:1 | Chrom für normalen Blutzuckerspiegel | Zink & B-Vitamine B1 B6 B12 | Vegan | Stoffwechsel & Energie | 120 Kapseln",714,1044,115,1155.32,32.21,198.28
+  - [8,]: B008QUUDVC,hübner arthoro Glucosamin Multi Komplex - 3-Monatspackung,694,1012,116,6764.37,33.43,184.16
+  - [8,]: B013AR80YM,Hübner Arthoro L-Prolin Direkt | Kollagenunterstützung | Mit Vitamin C | 60 Sticks,670,904,114,3073.62,34.03,197.54
+  - [8,]: B009DHP8TO,hübner - Silicea Balsam 2+1 - Trinksaft - 2x500ml+200ml -,603,838,215,6069.48,35.66,96.83
+  - [8,]: B007Q1A0QU,Hübner - Silicea - Magen-Darm Gel - 200 ml,581,748,54,708.99,9.29,93.8
+  - [8,]: B004GL6TV8,"hübner Augenspray bei Trockenen Augen | Liposomales Spray zur Befeuchtung bei Jucken, Brennen & Fremdkörpergefühl | Kontaktlinsen- & Make-up-geeignet | 10 ml",544,808,87,1304.01,31.98,158.42
+  - [8,]: B0041M7498,Tiroler Nussöl Original I Sonnenmilch Spray LSF 10 I wasserfest I UVA UVB Filter I Spray für sonnengewöhnte Haut I mit Panthenol Glycerin Walnussöl Sonnenblumenöl I Walnussschalen Extrakt I 150 ml,536,703,84,1709.66,15.67,97.46
+  - [8,]: B0081PB3Y8,"Mariendistel L-Tonikum | Hochdosiertes, traditionelles Arzneimittel | Stärkt die Verdauungsfunktion der Leber | Unterstützt während der Entgiftung | Vegan | 250 ml",512,706,125,1474.02,48.83,182.58
+  - [8,]: B074QMLPYQ,"Hübner DOPPELPACK Silicea Direct für Haut, Haare und Nägel 2x30Stück",452,624,60,1869.06,26.55,197.1
+  - [8,]: B076Q85VJ7,"sovita Magnesium Kalium Kapseln | Essenzielle Mineralstoffe für Muskeln, Nerven & Blutdruck | Unterstützt Muskelfunktion & Nervensystem | Trägt zur Regulierung des Blutdrucks bei | Vegan | 120 Kapseln",432,532,55,718.85,25.47,197.6
+  - [8,]: B00GZQUF0S,Tiroler Nussöl Alpin Sonnencreme & Lippenschutz LSF 30 UVA UVB Filter | wasserfester Sonnenschutz für Berge Winter Schnee | mit Walnussschalen Extrakt Walnussöl Sonnenblumenöl | 20 ml,429,507,64,589.37,14.92,100
+  - [8,]: B06XBQ35NN,Vitamin D3 Tropfen | Sonnenvitamin D zur Unterstützung des Immunsystems und für den Knochenstoffwechsel im Körper | Einfache Anwendung | 10 ml,426,652,69,748.89,32.39,191.92
+  - [8,]: B00WAJEAPA,Bio Schwarzkümmel-Öl aus kontrolliert biologischem Anbau | kaltgepresst | 100% rein | 3x 100 ml,414,567,117,3003.16,28.26,72.69
+  - [8,]: B008H1GCYW,"Hübner Original silicea Hair Repair Spray | Zertifizierte Naturkosmetik für strapaziertes, geschädigtes Haar | Sprühkur mit Kieselsäure-Gel und Aloe Vera | vegan | 120 ml",402,558,33,329.11,16.42,152.8
+  - [8,]: B004GKHT7M,Hübner® Haut Haare Nägel + Bindegewebe - Silicea Balsam 200 ml | Natürliches Silicium-Gel | Straffung & Pflege,372,491,78,917.78,20.97,92.59
+  - [8,]: B07PL9GCV5,hübner® Zahncreme Parodontose-Schutz,370,474,69,598.7,37.29,196.4
+  - [8,]: B08BS2Y3CK,Hübner Aloe Vera Tages- & Nachtcreme Set | 30% Aloe Vera Extrakt | Feuchtigkeitspflege Gesicht | Mit Panthenol & Pflanzenölen | Hautregeneration & Schutz | Für alle Hauttypen | je 50 ml,356,462,36,757.97,20.22,199.06
+  - [8,]: B0FTZL429Q,sovita Kalium Opti 400 mg täglich Hochdosiert 120 Kapseln für Muskeln Nerven & Blutdruck | Elektrolythaushalt & Muskelkontraktion | Vegan & ohne Zusatzstoffe | 120 Kapseln,346,473,108,1427.16,31.21,99.31
+  - [8,]: B01H8QZ43Q,"Hübner Original Silicea Balsam Gel 8 X 500ml (4xDoppelback) Traditionelles Arzneimittel mit Kieselsäure-Gel für Haut, Haare, Nägel und Bindegewebe",340,460,91,7264.74,26.76,93.43
+  - [8,]: B0013LIJCQ,"Aloe Vera Gel 50 ml / Hochwirksam, Feuchtigkeitsspender mit 98 % Aloe Vera Blatt-Gel mit Panthenol und Bisabolol zur Pflege und Regeneration",335,445,58,435.44,17.31,93.11
+  - [8,]: B08NPQ24H4,sovita Lavendel Passionsblume Kapseln – 100 mg Lavendelextrakt I 50 mg Passionsblume I 300 mg Magnesium täglich I Innere Ruhe I Entspannung I Schlaf I 90 Kapseln vegan,320,476,33,467.33,20.63,179.72
+  - [8,]: B07XRBXS83,"Hübner Multivital Kids® Direktsticks mit Calcium, Vitamin D3 und 12 Vitaminen | Nahrungsergänzung für Kinder | Wachstum | Knochenentwicklung | Immunsystem",311,461,179,1518.7,57.56,43.46
+  - [8,]: B004GH8VHM,Hübner Tannenblut Bronchial-Sirup (250 ml),310,452,71,1014.59,22.9,95.79
+  - [8,]: B008QUUDD0,hübner Gefäß-Aktiv® Monatspackung Pulver 360 g,309,414,137,5115.99,44.34,98.67
+  - [8,]: B007RQ303Y,Hübner Schwarzkümmel-Öl Kapseln | kaltgepresstes Öl | aus 100% rein ägyptischen Samen | 90 Kapseln,303,400,99,2511.03,32.67,94.84
+  - [8,]: B00319BMHC,Tiroler Nussöl Alpin I Sonnencreme LSF 20 I UVA UVB Filter I wasserfester Sonnenschutz für Berge Winter Schnee I Alpin Sonnencreme Ski Skifahren I mit Walnussschalen Extrakt Walnussöl I 20ml,298,359,43,532.83,14.43,100
+  - [8,]: B00Q1IL9XW,sovita Omega-3 Fischöl I 120 Kapseln I 1500 mg Omega-3-Fettsäuren pro Tagesdosis mit 528 mg EPA 351 mg DHA und 30 mg Vitamin E je Kapsel I Nahrungsergänzungsmittel mit geprüfter Qualität,292,456,53,534.66,36.3,191.86
+  - [8,]: B0DKJPGG64,NEX Sleep Pro Melatonin Einschlafspray | Hochdosiert | 125 Portionen | Einschlafhilfe für Sportler & Reisende | Schneller Einschlafen | 4 Monate Vorrat | Natürliche Pflanzenextrakte | 1x 25 ml,284,360,30,175.26,21.13,182.86
+  - [8,]: B078P1D3XW,hübner® Multi-Mineral Aktiv-Komplex Pulver | basische Mineralstoffe & Vitamine für Sport & Alltag | unterstützt Regeneration & Säure-Basen-Haushalt | vegan & laktosefrei | Zitronengeschmack | 1000 g,280,389,64,2392.33,22.86,84.79
+  - [8,]: B00KKGDYJS,"sovita Vitamin C 300 Langzeit-Kapseln – Hochdosiertes Vitamin C mit Depotwirkung zur Unterstützung des Immunsystems und Zellschutz, 90 Kapseln​",260,350,84,833.16,64.62,200
+  - [8,]: B00KKGDVGO,"sovita Selen Opti 100 Kapseln, Hochdosiertes Monopräparat mit 100 µg Selen, 150 Kapseln",258,352,61,585.77,47.29,200
+  - [8,]: B004GGS538,Hübner Multi-Mineral Kompakt | Essentielle Mineralien & Spurenelemente | Tägliche Vitalstoff-Unterstützung | 180 Kapseln,255,332,62,1878.32,24.31,98.02
+  - [8,]: B00ADY94BE,sovita Aloe Vera Gel | 98 % reiner Aloe-Vera-Blattsaft | Feuchtigkeitspflege für Gesicht & Körper | Ideal nach Sonne & Rasur | Ohne Parabene & Silikone | Dermatologisch getestet | 200 ml,251,377,95,886.22,37.85,100
+  - [8,]: B07XRKZFDQ,Hübner Kollagen Komplex Direkt,240,340,18,448.7,15,110.96
+  - [8,]: B0FG8H7955,"NEX Magnesium Bisglycinat - 120 Kapseln - 300mg reines Magnesium pro Tagesdosis - organisches Aminosäurechelat Chelatform - Laborgeprüft, vegan, hochdosiert, ohne Zusatzstoffe, Pharmaqualität",238,326,28,291.4,23.53,193.64
+  - [8,]: B0DV5FWJRG,"sovita Magnesium Bisglycinat - 120 Kapseln - 300mg reines Magnesium pro Tagesdosis - organisches Aminosäurechelat Chelatform - Laborgeprüft, vegan, hochdosiert, ohne Zusatzstoffe",236,351,94,1207.53,39.83,98.42
+  - [8,]: B004GL4EKQ,"hübner® arthoro Glucosamin | Knochen- und Knorpelschutz | Vitamin C, B6, B12 & E | Grünlippmuschelpulver",232,338,67,2128.36,28.88,94.52
+  - [8,]: B07BGDHY4L,"hübner Multi-Mineral Basis Pulver | Basische Mineralstoffe mit Zink & Chrom für den Stoffwechsel | Vegan, glutenfrei & lactosefrei | Neutraler Geschmack | Leicht löslich | 800 g | 160 Portionen",228,322,55,1494.1,24.12,78.91
+  - [8,]: B008QUUCVS,Hübner Hyaluron Augenbalsam | Intensive Feuchtigkeitspflege | Reduziert Falten & Tränensäcke,219,281,122,2258.15,55.71,96.55
+  - [8,]: B007Q1944E,"Hübner Original silicea DIRECT Sticks | Kieselsäure-Gel mit Biotin| Nahrungsergänzungsmittel für Haut, Haare, Nägel | Rotfruchtgeschmack",217,287,88,1507.73,40.55,95.57
+  - [8,]: B004GGX0OW,Hübner Arthoro Glucosamin Multi Komplex | Gelenkunterstützung | Omega-3 & Vitamine,216,326,29,782.32,26.86,130.06
+  - [8,]: B00WULATEE,"Sovita Pferde-Balsam, erfrischt, belebt und vitalisiert die haut nach Anstrengung und Beanspruchung, 500 ml",210,266,24,172.52,22.86,193.28
+  - [8,]: B0FY71N2B2,violila Slim Balance Kapseln I Glucomannan 3000 mg täglich I Griffonia 5 HTP I Paradieskörner 6 Paradol I Gewichtsverlust bei kalorienarmer Ernährung I vegan u. pflanzlich I 180 Kapseln,207,241,23,357.1,11.11,99.57
+  - [8,]: B0G1C4M2BS,"violila Weissdorn+ Kapseln | Mit 450 mg Weissdornfruchtextrakt & Vitamin B1 für das Herz | 22,5 mg Flavone | Vegan & ohne unnötige Zusatzstoffe | Für hormonelle Balance | 90 Kapseln",202,336,29,491.83,28.71,200
+  - [8,]: B004GNXZZ4,"Donath Vollfrucht Mango ungesüßt | Süßer Fruchtgeschmack | Aus 1 ½ Mangos | Enthält von Natur aus Provitamin A, B-Vitamine und Vitamin C | Vegan und frei von Alkohol, Gluten und Lactose",200,236,31,307.69,15.5,87.68
+  - [8,]: B074QLHBHM,"hübner Aloe Vera Tagescreme 2×50 ml | Feuchtigkeitspflege mit Aloe Vera & Panthenol | Tagescreme bei trockener & sensibler Haut | vegan & pflegend | frischer Teint für normale, Misch- & trockene Haut",187,241,102,1837.61,54.55,99.1
+  - [8,]: B07JLG2F2H,"hübner - Magen-Darm DIRECT - SILICIUM (KIESELSÄURE-GEL) Praktische Direktsticks Frei von Gluten, Laktose, Hefe, vegan und ohne Zusätze",186,277,50,445.95,26.88,97.5
+  - [8,]: B00319IQTY,Tiroler Nussöl Original I Lippenpflege Stift I Lippenbalsam ohne Parfüm ohne Farb und Konservierungsstoffe I ohne mineralische Öle und Wachse I tägliche Pflege für empfindliche Lippen I Lip Balm 5 g,183,219,24,170.68,13.11,97.07
+  - [8,]: B007Q138MS,Hübner Erkältungszeit-Bad (500 ml),172,218,35,525.09,40.69,200
+  - [8,]: B0DMPGWJ8P,sovita Wundschutz Gel | Hydrogel | Schnelle Linderung bei Verbrennungen und Schürfwunden | 100ml,167,217,33,426.96,19.76,99.5
+  - [8,]: B073BNHFKJ,Hübner Ingwer Tropfen (20 ml),165,206,61,547.39,36.97,99.49
+  - [8,]: B0FBX69NGK,sovita Figur Vital Kapseln | Mit Glucomannan zur Unterstützung beim Abnehmen¹ | Griffonia-Extrakt mit 5-HTP | Paradieskörner mit 6-Paradol | Vegan & ohne Gelatine | 120 Kapseln (1),163,210,16,254.18,9.82,100
+  - [8,]: B00KBWFI54,"sovita Q10 Premium Kapseln | Coenzym Q10 60 mg | Traubenkernextrakt mit 95% OPC | Vitamin C, E, B-Komplex, D3 & Selen | Zellschutz & Energie | vegan | 1 Kapsel täglich | 90 Kapseln",158,218,68,655.88,86.08,184.32
+  - [8,]: B004GHCC1I,hübner Eisen Vital® F Eisen Liquid Trinksaft 500 ml,157,223,59,1107.09,37.58,95.57
+  - [8,]: B008MO4WD2,"Hübner Gefäß-Aktiv | Lebensmittel für besondere medizinische Zwecke (bilanzierte Diät) | Bei leichtem Bluthochdruck, Durchblutungsstörungen im Frühstadium der Arteriosklerose und Diabetiker-Durchblutungsstörungen",155,185,15,343.09,9.68,99.42
+  - [8,]: B07BFBKH2D,"Hübner Multi-Mineral Basis (200 g)| basische Mineralstoffmischung für Säure-Basen-Haushalt & Vitalität | mit Magnesium, Zink, Eisen & Spurenelementen | vegan & laktosefrei",154,194,13,95.74,16.88,178.32
+  - [8,]: B00DZO7KFQ,Hübner Aloe Vera Bodylotion | Feuchtigkeitspflege mit BIO-Aloe Vera & Sesamöl | Beruhigend & regenerierend bei trockener Haut | Mit Granatapfel & Rosmarinextrakt | 150 ml,152,190,34,369.67,44.74,197.68
+  - [8,]: B00KKGEVRC,Multi Vitamin + Mineral-Tabletten | Mit wichtigen Vitaminen und Mineralstoffen A-Z | 100 Kapseln,148,236,27,405.59,36.48,169.52
+  - [8,]: B082FGFVN9,Hübner Original silicea Hair Repair Shampoo | Zertifizierte Naturkosmetik für strapaziertes und geschädigtes Haar | Shampoo mit Kieselsäure-Gel und Aloe Vera | vegan | 200 ml,140,184,38,451.71,27.14,88.54
+  - [8,]: B008QUUBAA,Hübner Haut-Haare-Nägel Kompakt 30 St.,136,183,46,801.33,33.82,53.94
+  - [8,]: B01I08LRH8,Hübner Bio BASIS BALANCE Magnesium Öl (1 x 60 ml),135,179,54,625.33,40,98.15
+  - [8,]: B0763N39GP,Vitamin K2 Tropfen | Vitamin K2 zur Unterstützung der Knochengesundheit | Einfache Anwendung | Individuell dosierbar | Vegan | 10 ml,131,169,44,472.15,33.59,96.79
+  - [8,]: B09TZ18ZV4,Tiroler Nussöl Alpin Sonnencreme & Lippenschutz LSF 20 I Sonnenschutz für empfindliche Haut I wasserfester UV Schutz I Alpin Sonnenschutz für Berge Winter Schnee I Lippenpflege mit UV Filter I 20ml,131,164,9,104.96,6.87,100
+  - [8,]: B007Q107BS,Ringelblumen Creme 100ml | Für Gesicht und Körper | Mit pflanzlichen Fetten und Ölen sowie einem natürlichen Repair-Komplex | Fördert Zellerneuerung der Haut | Ohne Lichtschutzfilter,130,164,50,721.04,38.46,99.32
+  - [8,]: B08N6XXKK9,"Hübner Tannenblut BIO Kräutertonikum | Mit BIO Waldhonig und natürlichem Vitamin C | Wohltuend für Rachen, Hals und Atemwege | Alkoholfrei, vegan, ohne Gluten und Lactose | 250 ml",128,172,13,161.17,20.31,200
+  - [8,]: B008QUUA8S,Aloe Vera Skin Repair für Gesicht und Körper | 80 % Aloe Vera-Blatt-Gel & 15 % Silicium | regenerierend bei gereizter Haut | zieht schnell ein & fettet nicht | vegan | 100 ml,125,170,41,636.16,32.8,100
+  - [8,]: B00Q1LFI04,sovita Sabal Kürbis Kapseln | Kürbiskernöl 240 mg pro Tagesdosis | Sägepalmenfrüchte Trockenextrakt 60 mg | Ölsäure Linolsäure Laurinsäure | Nahrungsergänzung für tägliche Einnahme | 360 Kapseln,124,180,18,287.28,29.03,179.32
+  - [8,]: B00319BYKM,Tiroler Nussöl Original I Lippenschutz Stift LSF 25 I Lippenpflege mit UV Schutz für empfindliche Lippen I ohne Parfum Farb und Konservierungsstoffe I ohne mineralische Öle und Wachse I 5g,121,139,20,135.96,16.53,67.94
+  - [8,]: B0D3H737F8,MibeTec HERPOtherm neo,121,159,2,55.8,1.65,6.16
+  - [8,]: B007RQ38FY,"Donath BIO Vollfrucht Sanddorn + Rohrzucker | Inhaltsstoffe aus ökologischem Anbau, in Bio Qualität | Kombination aus Vitaminen und mehrfach gesättigten Fettsäuren | 500 ml",120,164,26,193.38,21.67,64.67
+  - [8,]: B00K7ZUF5S,"Sovita Glucosamin plus Kapseln mit Chondroitinsulfat, 120 Kapseln",120,164,36,498.39,60,194.44
+  - [8,]: B004GK699G,hübner Aloe Vera Nachtcreme | Feuchtigkeitsspendende Gesichtscreme mit Panthenol & Bisabolol | Für normale Haut & Mischhaut | Unterstützt Hautregeneration & Rückfettung | 50 ml,119,156,72,654.93,60.5,97.2
+  - [8,]: B00Q1ILECI,Basen Komplex Tabletten | Basische Nährstoffe und hochwertige Spurenelemente | Nahrungsergänzungsmittel | 120 Tabletten,119,154,13,127.35,10.92,100
+  - [8,]: B0FGDNH4KC,"NEX Omega-3 Kapseln hochdosiert – 528mg EPA & 351mg DHA täglich, mit Vitamin E, 120 Kapseln 30 mg natürlichem Vitamin E | Zellschutz & Herzfunktion | ohne Zusatzstoffe",116,144,16,166.58,27.59,194.2
+  - [8,]: B00IXRAS04,"Hübner Nachtkerzenöl Kompakt | Hochdosiert, 1000mg | Hautgesundheit & Schutz | 90 Kapseln",115,154,36,1331.21,31.3,98.66
+  - [8,]: B01B5JDD6C,Hübner Eisen VITAL Kautabletten | Nahrungsergänzungsmittel mit mikroverkapseltem Eisen und Vitamin C | für Kinder und Erwachsene| unterstützt die Blutbildung | fruchtiger Geschmack | vegan,115,148,73,912.49,63.48,93.43
+  - [8,]: B0G1C9F5CX,"violila Q10 Premium Kapseln mit Coenzym Q10, OPC & Vitaminen | Zellschutz, Energie & Immunsystem | Für aktive Frauen in besonderen Lebensphasen | Hochdosiert & vegan | 90 Kapseln",107,128,15,297.72,14.02,100
+  - [8,]: B00Q1ILBS0,"sovita Brennnessel Opti 500 Kapseln mit 500 mg Brennnesselblattextrakt 10:1 | Hochkonzentrierter Pflanzenextrakt | Vegan & ohne Zusatzstoffe | Pflanzlich | 90 Kapseln",106,156,6,79.5,11.32,200
+  - [8,]: B0F9X766FD,NEX KSM-66 Ashwagandha I Withania somnifera Wurzelextrakt I 300 mg je Kapsel 15 mg Withanolide standardisiert KSM-66 Wurzel ohne Blätter I vegan ohne Gelatine ohne Konservierungsstoffe I 180 Kapseln,103,138,29,317.12,28.16,96.92
+  - [8,]: B004GNU63S,Aloe Vera BIO-Pflanzensaft naturtrüb (0.49 L),98,136,17,279.19,17.35,94.96
+  - [8,]: B07HRQKMQF,hübner® Aloe Vera Bio-Pflanzensaft naturtrüb | 100% naturtrüber Aloe Vera-Saft | Aus kontrolliert biologischem Anbau | Ungefiltert & vegan | Frischer Geschmack | 3 x 490 ml,92,132,13,623.37,14.13,98.28
+  - [8,]: B07SRD8C3L,Curcuma Tropfen (20 ml),91,164,29,214.63,31.87,12.77
+  - [8,]: B007Q0ZUTS,"Arnika Creme | Natürliche Sport- und Massagecreme | Mit wohltuendem Wärme-Effekt | Vor und nach dem Sport geeignet |Bei Muskelkater, Verspannungen oder bei kalten Füßen | Vegan",88,119,22,323.86,25,96.36
+  - [8,]: B0056EPNZC,hübner® Zahncreme mild | Ohne Schaumbildner & Konservierungsstoffe | Mit natürlichem Pfefferminzöl für frischen Atem | Sanfte Zahnpflege mit Silicium & Meersalz | 50 ml,82,118,6,44.55,14.64,160
+  - [8,]: B0BRXSW8JR,sovita Bein Balsam mit Rosskastanie & Rotem Weinlaub | durchblutungsfördernd & vitalisierend für müde Beine | kühlende Pflege mit Pflanzenextrakten | vegan & ohne Silikone | 100 ml | 1x Tube,79,108,1,8.95,1.27,46.39
+  - [8,]: B0CP29P4CB,sovita Venen Kapseln | Venenfunktion | Hochwertige Extrakte | 120 Kapseln,78,102,5,94.88,12.82,200
+  - [8,]: B00KKGDU60,Sovita Visiofit Premium Kapseln mit Zink und Lutein | Nahrungsergänzungsmittel für die Augen | 90 Kapseln,77,100,6,175.68,7.79,97.87
+  - [8,]: B007Q0YGHA,"Hübner Zahncreme Karies-Schutz | Mit bakterienhemmenden Wirkstoffen der Salbei-Pflanze| Ohne zugesetztes Fluorid, Pfefferminzöl und Menthol | Frei von Konservierungsmitteln und Schaumbildnern | Vegan",76,97,28,242.91,36.84,83.52
+  - [8,]: B00KKGESMA,Eisen plus Vitamin C Kapseln | Unterstützung für Blutbildung & Immunsystem | Synergistische Wirkung für Eisenaufnahme & Zellschutz | vegan & pflanzlich | 150 Kapseln,74,102,13,173.79,35.13,200
+  - [8,]: B08BRY9PJS,Hübner Silicea Hair Repair Duo | Shampoo & Spray Set | Für strapaziertes Haar | Mit Biotin & Silicium,74,96,14,250.72,18.92,100
+  - [8,]: B00K7ZUPWQ,"sovita Magnesium Opti 250 | 250 mg Magnesium pro Tablette | Unterstützung für Muskeln, Nerven & Energiestoffwechsel | Vegan & gut verträglich | Entwickelt in Deutschland | 90 Tabletten",71,99,16,184.2,22.54,95.6
+  - [8,]: B00KKGD94I,"Biotin 5 mg N Tabletten | Für Haut, Haare und Nägel - Vitaminpräparat zur Vorbeugung eines Biotin-Mangels | 150 Tabletten",66,98,13,187.48,39.39,200
+  - [8,]: B084GQDW2T,"Hübner arthoro Hagebutte | In BIO Qualität | Pflanzliches Nahrungsergänzungsmittel zur Gesunderhaltung von Knochen und Knorpeln | 100 % Bio-Hagebutten mit Vitamin C |Vegan, ohne Gluten und Lactose",66,90,23,413,34.85,96.2
+  - [8,]: B00D4BZO9E,Nachtkerzen-Öl Kapseln 500mg | Zur Ergänzung der Haut- und Körperpflege von innen und bei Allergien | Enthält mehrfach ungesättigte Omega-6-Fettsäuren | Praktische Kapsel-Form | Vegan,63,77,13,219.82,20.63,94.59
+  - [8,]: B0G1C9XXJG,violila Q10 Kapseln mit 100 mg Coenzym Q10 aus natürlicher Quelle | Hochdosiert | Für Zellenergie & bewusste Lebensphasen | Ohne unnötige Zusatzstoffe | Vegan & gut verträglich | 60 Kapseln,63,74,13,311.27,20.63,98.63
+  - [8,]: B09L4P5TRN,"Hübner Hustenbonbons BIO | Wohltuend für Hals & Atemwege | Mit Kräutern, Menthol & Waldhonig | Natürliches Aroma aus Fenchel, Anis & Eukalyptus | Vegetarisch & lactosefrei | 75 g",62,81,7,34.93,11.29,82.86
+  - [8,]: B07XDWMGDX,"sovita Kalium Opti 400 Kapseln | Hochdosiert 400 mg | Unterstützt Nerven, Muskeln & Blutdruck | Elektrolythaushalt & Muskelkontraktion | Vegan & ohne Zusatzstoffe | 120 Kapseln",61,75,6,95.7,9.84,94.03
+  - [8,]: B0F1DJLWCT,Hübner Vitamin B12 Direktsticks Mit hochdosiertem Vitamin-B12 und wertvollen Eiweißbausteinen für mehr geistige und körperliche Energie und weniger Müdigkeit und Erschöpfung,59,69,30,389.77,50.85,100
+  - [8,]: B004GL40FA,"Donath BIO Vollfrucht Granatapfel ungesüßt | Fein vermahlene Granatapfelkerne mit fruchtig-säuerlichem Geschmack | Vegan und frei von Alkohol, Gluten und Lactose",56,68,9,88.71,16.07,76.92
+  - [8,]: B0F1V8K9H4,violila Magnesium Bisglycinat Kapseln I 300 mg elementares Magnesium pro Tagesdosis I Muskelfunktion Nervensystem Energiestoffwechsel I Müdigkeit Ermüdung I vegan HPMC I 120 Kapseln,56,80,31,294.05,55.36,81.08
+  - [8,]: B0BNHZT7YR,"sovita Zinkbisglycinat + L-Histidin Kapseln | Unterstützung des Immunsystems | Hoch bioverfügbares Zink zur Unterstützung von Immunsystem, Zellschutz, Haut, Haaren & Nägeln, vegan, 90 Kapseln",55,67,13,128.93,23.64,100
+  - [8,]: B004GKYX0S,Aloe Vera Tagescreme | Feuchtigkeitscreme für Gesicht | 30% Aloe Vera Extrakt | Mit Panthenol & Cocos-Extrakten | Schnelles Einziehen | Sanfte Pflege für alle Hauttypen | Make-up Grundlage | 50 ml,54,63,26,254.66,48.15,87.5
+  - [8,]: B01G4QAA1M,"Hübner Basis Balance Mineralstoffe aktiv, 250g",53,66,2,28.01,3.77,96.61
+  - [8,]: B0D9BC1BDH,"NEX Hype Elektrolytes I 900mg Natrium täglich I Hochdosierte Elektrolyte ohne Zucker I Keto u. Vegan I 30 Portionen I Natrium, Kalium & Magnesium vor u. nach dem Sport",53,64,7,97.87,13.21,100
+  - [8,]: B0G1C91FKM,"violila Vitamin C Plus Zink Kapseln | 500 mg Vitamin C + 10 mg Zink pro Kapsel | Für Immunsystem, Zellschutz & Kollagenbildung | Hochdosiert, vegan & ohne unnötige Zusatzstoffe | 60 Kapseln",53,55,8,143.02,15.09,100
+  - [8,]: B08YWBPJDD,Lavendel Lotion | beruhigende Wirkung auf Körper & Geist | 200 ml,51,62,2,19.88,3.92,87.72
+  - [8,]: B0F1V82MV4,violila Ashwagandha KSM-66 Kapseln I Withania somnifera Vollspektrum Wurzelextrakt I 300 mg je Kapsel I 15 mg Withanolide I vegan HPMC Kapselhülle ohne Zusätze I 180 Kapseln,51,62,13,259.3,25.49,98.31
+  - [8,]: B0776ZTLPL,hübner - Gefäß-Aktiv® - Pulver - 3x360g -,48,59,13,1347.76,27.08,48.15
+  - [8,]: B00K7ZYGSK,"sovita Grünlippmuschel Kapseln | Mit Kupfer, Vitamin C, E & B-Vitaminen | Hochwertiges Grünlippmuschelpulver aus Neuseeland | Unterstützung für Bindegewebe & Immunsystem | 120 Kapseln",47,78,11,252.43,23.4,72.86
+  - [8,]: B007TIUAQK,"Sovita Weihrauch-Balsam, entspannende und kühlende Pflege für Haut und Muskeln, mit Boswellia serreta, 100ml",45,58,7,69.64,15.56,86.79
+  - [8,]: B0G6MVJTJS,"sovita Knochen & Knorpel |Glucosamin Chondroitin Kapseln mit Teufelskralle, Astaxanthin, Vitamin C, E, B2, Zink, Selen & Mangan | Für Knorpel, Knochen & Zellschutz | Gelenk-Komplex vegan | 120 Kapseln",42,56,6,114.46,14.29,100
+  - [8,]: B004GKHR4M,DONATH Vollfrucht Sanddorn ungesüßt 500 ml,40,53,36,260.94,90,51.02
+  - [8,]: B0711YQX24,"sovita Kräuterbad Lavendel – wohltuender Badezusatz mit Lavendelduft zur Entspannung bei Stress & innerer Unruhe | für Massage- & Sprudelbad geeignet | ohne Parabene, Silikone, PEG | 20 Anwendungen",38,52,7,52.43,18.42,95.83
+  - [8,]: B0DV5FY476,"sovita KSM-66® Ashwagandha Wurzelextrakt 300 mg – Hochwertiges Adaptogen zur Stressbewältigung, Energie & mentale Klarheit, 15 mg Withanolide, vegan",38,51,8,162.7,21.05,100
+  - [8,]: B0G1C1HCN6,violila Ginkgo Kapseln mit 70 mg Ginkgo biloba Trockenextrakt | Standardisiert auf Flavonglycoside & Terpenlactone | Pflanzlich & vegan | Für geistige Klarheit & Durchblutung | 90 Kapseln,38,41,10,118.95,26.32,100
+  - [8,]: B0050H94GY,hübner® Eisen Vital 250ml | Nährstoffreicher Trinksaft | Unterstützt die Eisenaufnahme,37,47,7,87.49,18.92,88.64
+  - [8,]: B004GO0I5S,DONATH Vollfrucht Sanddorn Acerola+Agavendicksaft 500 ml,34,51,18,180,52.94,87.23
+  - [8,]: B0GH125JK9,"sovita Weissdorn Plus Kapseln | Mit 450mg Weissdornfruchtextrakt & 0,2mg Thiamin (Vitamin B1) zur Unterstützung der Herzfunktion | Pflanzlich & vegan | Für Herz & Kreislauf | 90 Kapseln",34,57,9,152.55,26.47,100
+  - [8,]: B007Q106CS,Hübner Silicea Zahnpasta ohne Menthol | Mineralische Reinigung | Homöopathie-geeignet,33,49,5,35.42,15.15,83.33
+  - [8,]: B0FQVBP1VN,sovita Q10 100 mg Kapseln mit natürlichem Coenzym Q10 | Hochdosiert & vegan zur Unterstützung des Energiestoffwechsels | Ohne tierische Inhaltsstoffe | 60 Kapseln,33,43,8,152.27,24.24,100
+  - [8,]: B01CIWQW6I,Anton Hübner Schwarzkümmelöl-Kapseln (24 g),32,37,4,55.79,12.5,97.06
+  - [8,]: B0FQTYXVSS,"Vitamin D3 + K2 Tabletten | Hochdosiert & synergistisch kombiniert | Für Knochen, Muskeln & Calcium-Stoffwechsel | Vegane Hülle ohne Gelatine | 180 Stück",32,46,5,64.82,31.25,200
+  - [8,]: B0FGDB3Q25,NEX Vitamin D3 + K2 Tabletten I 180 Stück I Vegetarisch 2000 I.E.+ 50µg K2 I Tagesbedarf perfekt dosiert I Knochengesundheit - Knochenaufbau I Calcium I Immunsystem Muskelfunktion Laborgeprüft,31,47,10,114.24,32.26,97.73
+  - [8,]: B002P4TXVG,"Sovita Aloe Vera Creme, Aquabalance 24, leichte Pflege für den natürlichen Feuchtigkeitshaushalt der Haut, 100ml",30,38,7,69.3,23.33,100
+  - [8,]: B0CVRXMQ3V,sovita Vitamin C 500 Plus Zink Kapseln hochdosiert | Mit 500 mg Vitamin C & 10 mg Zink zur Unterstützung des Immunsystems | Vegan | Zellschutz & weniger Müdigkeit | 60 Kapseln,30,44,12,189.6,80,200
+  - [8,]: B0FG8HC5DP,"NEX Magnesium Bisglycinat hochdosiert 300mg | vegan & ohne Zusatzstoffe | besonders gut verträglich | für Muskeln, Nerven & Energie | Chelat-Form | bei Stress & Sport | 240 Kapseln (2)",30,43,2,37.9,6.67,92.31
+  - [8,]: B0G1C53H19,"violila Omega-3 Fischöl Kapseln mit EPA & DHA plus Vitamin E | Für Herzfunktion, Gehirn & Sehkraft | Zellschutz durch natürliches Vitamin E | Hochdosiert | Reines Fischöl |120 Kapseln",29,34,6,59.7,20.69,100
+  - [8,]: B0FGQ29YGQ,"sovita Flora Opti Kapseln | 100 Mrd. KBE mit 23 probiotischen Bakterienstämmen & Akazienfaser | mit Vitamin B2 & B6 für Immunsystem, Darm & Schleimhäute | 90 Kapseln (1)",28,38,5,79.75,17.86,100
+  - [8,]: B0FQV2478S,sovita Knoblauch Kapseln mit ABG10+® Extrakt aus fermentiertem schwarzem Knoblauch | Geruchsneutral & standardisiert auf S-Allylcystein | Hohe Bioverfügbarkeit | 90 Kapseln (1),28,34,5,84.89,17.86,90.91
+  - [8,]: B01NCWSP6L,Vitamin E Opti 400 Kapseln | Hochdosiert mit 400 I.E. mit Vitamin E pro Kapsel | Zellschutz vor oxidativem Stress | Unterstützung bei Umweltbelastung & unausgewogener Ernährung | 120 Kapseln,26,26,3,56.85,23.07,200
+  - [8,]: B0FG8K7582,"NEX Magnesium Bisglycinat hochdosiert 300mg | vegan & ohne Zusatzstoffe | besonders gut verträglich | für Muskeln, Nerven & Energie | Chelat-Form | bei Stress & Sport | 540 Kapseln",26,41,5,139.75,19.23,51.43
+  - [8,]: B007Q42V50,"Sovita Care Apfelessig Plus Kapseln, 90 St",24,24,1,14.18,4.17,60
+  - [8,]: B00KKGEUH8,Sovita Calcium + D3 Tabletten | Für Knochenerhalt & normale Calciumaufnahme | 800 mg Calcium + 5 µg D3 pro Tag | Wachstumsphase | Sport | Senioren | 100 Tabletten,23,30,4,42.92,17.39,100
+  - [8,]: B0F9LHRQTG,"sovita Leber Komplex Kapseln | mit Artischockenextrakt, Mariendistelextrakt & Cholin | Silymarin & Cynarin aus Pflanzenextrakten | vegane Leberunterstützung mit Mikronährstoffen für den Stoffwechsel",23,30,6,89.96,26.09,100
+  - [8,]: B0G4N8G8WQ,"sovita Spitzwegerich Sirup | Pflanzlicher Spitzwegerich Extrakt mit Aucubin | 1,6 g Spitzwegerichextrakt pro Tagesdosis | Frischer Geschmack mit Pfefferminzöl | Veganer Spitzwegerich Sirup",23,28,2,5.9,8.7,92.31
+  - [8,]: B00K7ZYCW0,"sovita Magnesium Calcium Tabletten für Muskeln, Knochen & Energiestoffwechsel | Mit 240 mg Magnesium & 400 mg Calcium pro Tagesdosis | Vegan & gut verträglich | 120 Tabletten",22,28,5,74.92,22.73,96.43
+  - [8,]: B00KKGERBM,Schwarzkümmelöl plus Kapseln | Mit den wertvollen ungesättigten Fettsäuren Linolsäure und Ölsäure | Nahrungsergänzungsmittel | 180 Kapseln,22,30,11,236,100,200
+  - [8,]: B0G2YBNL8G,"sovita Grünlippmuschel Balsam | Mit Menthol, Kampfer & ätherischen Ölen zur wohltuenden Hautpflege | Jojobaöl, Kokosöl & Vitamin B3 für geschmeidige Haut | Kühlend beim Einmassieren | Hautfreundlich &",22,23,1,10.95,4.55,100
+  - [8,]: B0FGD8FXS1,NEX Beauty Essentials Kapseln I Hirseextrakt 300 mg Miliacin 3 mg I Biotin Selen Kupfer I Zellschutz oxidativer Stress I Piperin 2 mg I vegan ohne Farbstoffe Konservierungsmittel I 90 Kapseln,19,25,3,39.24,15.79,90.48
+  - [8,]: B0G3XHKXCC,sovita Hyaluron Elixier mit Niacinamid gegen Falten | intensive Feuchtigkeitspflege mit Hyaluronsäure für straffe Haut | Anti-Aging Ampullen | 30 x 3 ml,18,21,3,117.68,16.67,95
+  - [8,]: B007Q13L4I,hübner Biotin Intensiv | 30 Tabletten | Förderung von Haar- & Nagelwachstum | Vitamin H,17,19,6,101.7,35.29,66.67
+  - [8,]: B0F1V8RV28,violila Haar Komplex Kapseln 120 Kapseln - Haare Haut Nägel - Hirseextrakt Miliacin - Biotin Selen Kupfer - Piperin Schwarzer Pfeffer Extrakt - vegan,17,22,1,13,5.88,100
+  - [8,]: B0FQV4532J,"sovita Vitamin B12 hochdosiert 200 µg Methylcobalamin | Vegan & laktosefrei | Unterstützung für Nerven, Energie & Blutbildung | Nur 1 Tablette täglich | 120 Tabletten",17,24,8,95.6,47.06,95.65
+  - [8,]: B0F1V7NPQQ,violila Eisen Vitamin C Kapseln I 5 mg Eisen 20 mg Vitamin C I Blutbildung Hämoglobin Sauerstofftransport I Energiestoffwechsel Müdigkeit Immunsystem I Eisenaufnahme I vegan 150 Kapseln,16,22,4,50.14,25,100
+  - [8,]: B0FGDMNNJN,NEX Omega-3 Kapseln Fischöl | 528 mg EPA & 351 mg DHA pro Tagesdosis | mit 30 mg natürlichem Vitamin E | Zellschutz & Herzfunktion | ohne Zusatzstoffe | 120 Kapseln (2),16,24,1,18.85,6.25,90.91
+  - [8,]: B0FLDRZRLM,sovita Astaxanthin 8 mg hochdosiert aus Mikroalge Haematococcus pluvialis | Natürliches Carotinoid aus Algen | Vegan & ohne Zusatzstoffe | Laborgeprüft | Antioxidative Eigenschaften | 120 Kapseln,16,16,4,78.45,50,200
+  - [8,]: B00Q1ILDTM,sovita Schwarzkümmelöl | kaltgepresst & nativ | 100% reines Nigella sativa Öl | reich an Linol- & Ölsäure | würzig-pfeffriger Geschmack | 100 ml,15,17,3,38.97,20,100
+  - [8,]: B0FG8FTGJC,"NEX Magnesium Bisglycinat hochdosiert 300mg | vegan & ohne Zusatzstoffe | besonders gut verträglich | für Muskeln, Nerven & Energie | Chelat-Form | bei Stress & Sport | 240 Kapseln (4)",15,17,1,37.95,6.67,47.06
+  - [8,]: B0FGD99RGT,"NEX Vitamin D3 + K2 Tabletten | 50 µg D3 & 100 µg K2 pro Tablette | für Knochen, Muskelfunktion & Calciumstoffwechsel | hochergiebig & vegetarisch | 540 Tabletten",15,18,1,12.95,6.67,61.11
+  - [8,]: B0FP592LZ4,"hübner Wärme Balsam 100 ml | Wärmende Pflege für Muskeln & Gelenke | Mit Grünlippmuschel, Menthol, Lavendelöl & Weihrauch | Wohltuende Massagecreme bei Verspannung & Muskelermüdung |",15,18,3,48.18,20,94.12
+  - [8,]: B0FQTXWHT7,"sovita Haar Komplex Kapseln mit Hirseextrakt & Biotin | Mit Kupfer, Selen & Schwarzem Pfeffer zur Unterstützung von Haaren, Haut & Bindegewebe | Nahrungsergänzung | 90 Kapseln",15,19,2,27.95,13.33,88.24
+  - [8,]: B00KKGDZZQ,"sovita Folsäure plus | mit Vitamin B6, B3 und Vitamin B12 | mit höchster Bioverfügbarkeit und geprüfter Qualität | 180 Kapseln | Neues Design",14,21,2,38.72,14.29,100
+  - [8,]: B00WW74MM6,Indische Flohsamenschalen | fein gemahlen zur ballaststoffreichen Ernährung | Lebensmittel | 500 g,13,17,4,79.84,30.77,93.75
+  - [8,]: B07JL91YVQ,"Zink Plus Tabletten | Mit Zink, Biotin & Pantothensäure für Haut, Haare, Nägel & Immunsystem | Unterstützt Energiestoffwechsel & mentale Leistung | Vegan | 1 Tablette täglich | 150 Tabletten",13,22,8,79.58,61.54,100
+  - [8,]: B0FQVD4TSW,sovita Q10 100 mg Kapseln mit natürlichem Coenzym Q10 | Hochdosiert & vegan zur Unterstützung des Energiestoffwechsels | Ohne tierische Inhaltsstoffe | 60 Kapseln (2),13,26,3,44.88,23.08,96.15
+  - [8,]: B0G1C98Y7T,"violila Blutzucker Kapseln | Mit Ceylon-Zimt, Chrom, Zink & B-Vitaminen für Zuckerstoffwechsel & Energie | Vegan & ohne unnötige Zusatzstoffe | 120 Kapseln",13,16,1,18.95,7.69,100
+  - [8,]: B0G4WVNW9V,"sovita aloe vera creme | feuchtigkeitsspendende gesichtspflege mit aloe vera blattsaft | beruhigende tages- und nachtcreme mit süßmandelöl, vitamin e & panthenol | leichte textur 100 ml",13,15,1,11.03,7.69,100
+  - [8,]: B086WD27HL,"OM - Hyaluron Creme - Gesichtscreme - 50 ml - Made in Germany- ohne Parabene, Paraffine, Silikone",10,10,3,121.22,30,60
+  - [8,]: B0CYC7S55Y,sovita Lutein Kapseln für Augengesundheit mit Beta-Carotin & Pflanzenextrakten | Tagetes & Heidelbeer-Extrakt für Sehkraft & Zellfunktion | Nahrungsergänzung | 90 Kapseln,9,11,1,15.95,11.11,100
+  - [8,]: B0G4DT6QSD,NEX Glucomannan 3000mg Täglich Hochdosiert I Sättigungskapseln Konjak Konjakwurzel I 120 Vegane Kapseln I 5-HTP aus Griffonia Extrakt I Paradieskörner I Appetitzügler Hunger Blocker,9,11,1,19.95,11.11,100
+  - [8,]: B00ITIX124,sovita Curcuma Opti Kapseln | Hochdosierter Curcumaextrakt mit Piperin für optimale Bioverfügbarkeit | 120 Kapseln,8,8,3,50.85,37.5,87.5
+  - [8,]: B00Q1IL9QY,"sovita Calcium Opti 800 | 100 Tabletten mit hochdosiertem Calcium | 800 mg pro Tagesdosis | Für Knochen- & Zahngesundheit | Unterstützt Muskeln, Nerven & Blutgerinnung",8,9,1,11.95,12.5,62.5
+  - [8,]: B00Q1ILARW,sovita Nachtkerzenöl-Kapseln | Mit den mehrfach ungesättigten Fettsäuren Linolsäure und Gamma- Linolensäure sowie natürlichem Vitamin E | Nahrungsergänzungsmittel | 180 Kapseln,8,12,1,25.96,12.5,100
+  - [8,]: B0842VVM5B,"OM - Hyaluronsäure Masken - Tuchmaske - 5 Stück - Made in Germany, ohne synthetische Farbstoffe, ohne Tierversuche",8,8,1,34.9,12.5,87.5
+  - [8,]: B0BVQTKVDZ,sovita Ginkgo 70 Kapseln | Hochwertigem Ginkgoextrakt | Veganes Nahrungsergänzungsmittel,8,10,3,29.82,37.5,100
+  - [8,]: B0D9BD1P3G,"NEX Hype Elektrolytes - Hochdosierte Elektrolyt-Sticks nach schweißtreibender Aktivität - nach dem Sport, Fitnesstraining oder Festival | Elektrolyte ohne Zucker | Natrium, Kalium & Magnesium, 3er Set",8,12,2,77.9,25,91.67
+  - [8,]: B00Q1IF2JO,sovita Vitamin D Tabletten | zum Erhalt normaler Knochen | Nahrungsergänzungsmittel | 180 Tabletten,7,8,1,8.95,14.29,100
+  - [8,]: B092DRLFQT,sovita BIO Spirulina Tabletten 500 mg | 100 % reines Spirulina platensis Pulver | Vegan & ohne Zusatzstoffe | Hoher Proteingehalt | Bio-zertifiziert DE-ÖKO-003 | 360 Tabletten,7,10,2,37.62,28.57,100
+  - [8,]: B00KCMKYJS,"sovita Hyaluron Creme | Straffende Tages- & Nachtcreme mit Hyaluronsäure, Konjac Mannan & Milchproteinen | Feuchtigkeitspflege für jeden Hauttyp (50 ml)",6,7,2,45.9,33.33,100
+  - [8,]: B0BP274WS1,sovita Omega 3 Algenöl | Vegane Omega 3 Fettsäuren | 90 Kapseln,6,7,2,39.9,33.33,100
+  - [8,]: B0FJS7F5FN,Sovita OPC Kapseln hochdosiert aus Traubenkernextrakt | 350 mg OPC & 554 mg Polyphenole pro Tagesdosis | vegane Flavonoide aus roten Weintrauben | Made in Germany | 120 Kapseln,5,10,3,66.04,60,88.89
+  - [8,]: B0G1C472J5,"violila Vitamin B12 Opti 200 Kapseln mit 200 µg Methylcobalamin | Hochdosiert & bioverfügbar | Für Energiestoffwechsel, Nervenfunktion & Blutbildung | Ideal bei veganer Ernährung | 120 Kapseln",4,5,1,11.95,25,100
+  - [8,]: B0G4RJV8NT,NEX I Biome Pro Probiotika 90 Kapseln I 1 täglich mit 10 Milliarden KBE I 23 dokumentierte Bakterienkulturen mit Akazienfaser Vitamin B2 B6 I vegan pflanzlich magensaftresistent,4,4,1,19.95,25,100
+  - [8,]: B0FN4F6T99,NEX OPC Kapseln | 583 mg Traubenkernextrakt mit 350 mg OPC & 554 mg Polyphenolen | hochdosiert & vegan | ohne Zusatzstoffe | pflanzliche Antioxidantien aus roten Weintrauben | 120 Kapseln,3,3,1,20.3,33.33,100
+  - [8,]: B071X41JTW,"Ginseng Plus Kapseln mit Vitamin B12 & natürlichem Vitamin E | Panax Ginseng Extrakt mit Ginsenosiden 4,5 mg | Für Energie, geistige Klarheit & Zellschutz | Nahrungsergänzung | 120 Kapseln",2,2,2,29.9,100,100
+  - [8,]: B0F24D16QL,"violila Flora+ Kapseln | Mit 23 Bakterienstämmen, Vitamin B2 & B6 für Schleimhäute, Immunsystem & Energie | 10 Mrd. KBE pro Portion | magensaftresistent | 90 Kapseln",2,2,1,15.95,50,100
+  - [8,]: B0FGD7P86M,"NEX Beauty Essentials Kapseln | Hirseextrakt mit 3 mg Miliacin & 2 mg Piperin | Biotin, Selen & Kupfer für Haare, Haut & Nägel | pflanzlich, vegan & ohne Zusatzstoffe | 90 Kapseln (2)",2,2,1,24.95,50,100
+  - [8,]: B0G4N6198V,NEX Omega-3 Algenöl 300mg DHA + 100mg EPA täglich • 90 Vegan-Kapseln • Hochdosiert Geschmacksneutrale - Aus Mikroalge Fischfrei Gehirn Sehkraft Herz,2,2,1,24.95,50,100
+  - [8,]: B0FQPLWJFG,sovita Lutein Kapseln für Augengesundheit mit Beta-Carotin & Pflanzenextrakten | Tagetes & Heidelbeer-Extrakt für Sehkraft & Zellfunktion | Nahrungsergänzung | 270 Kapseln,1,1,1,44.5,100,100
+  - [8,]: B0G1C4CH23,violila Astaxanthin Kapseln 8 mg | Natürliches Carotinoid aus Haematococcus pluvialis | Hochdosiert aus Mikroalgen | Vegan | Pflanzlich inspiriert | Für hormonelle Balance & Zellschutz |120 Kapseln,0,0,1,20.94,0,0
+`;
+function amzCsv(l){
+  const out=[];let cur="",q=false;
+  for(let i=0;i<l.length;i++){const c=l[i];
+    if(q){if(c==='"'&&l[i+1]==='"'){cur+='"';i++;}else if(c==='\\'&&l[i+1]==='"'){cur+='"';i++;}else if(c==='"')q=false;else cur+=c;}
+    else{if(c==='"')q=true;else if(c===","){out.push(cur);cur="";}else cur+=c;}
+  }
+  out.push(cur);return out;
+}
+function amzParse(data){
+  let rows=[];
+  if(Array.isArray(data))rows=data.slice();
+  else if(typeof data==="string"){
+    for(const line of data.split("\n")){
+      const m=line.match(/^\s*-\s*\[\d+,?\]:\s*(.*)$/);
+      if(m)rows.push(amzCsv(m[1]));
+    }
+  }
+  if(rows.length&&(rows[0][0]==="ASIN"||isNaN(+rows[0][2])))rows=rows.slice(1);
+  return rows.filter(r=>r.length>=8).map(r=>({asin:r[0],title:r[1],sessions:+r[2]||0,pv:+r[3]||0,units:+r[4]||0,rev:+r[5]||0,cvr:+r[6]||0,bb:Math.min(100,+r[7]||0)}));
+}
+function amzClassify(p){
+  const t=[];
+  if(p.units<=2)t.push("dead");
+  if(p.sessions>=100&&p.cvr<10)t.push("cvr");
+  if(p.sessions<50)t.push("traffic");
+  if(p.bb<70)t.push("bb");
+  return t;
+}
+function amzRec(tags){
+  const r=[];
+  if(tags.includes("cvr"))r.push("Listing optimieren (Bilder, Titel, Preis, Reviews)");
+  if(tags.includes("traffic"))r.push("Sichtbarkeit: Keywords/SEO + Sponsored Products");
+  if(tags.includes("bb"))r.push("Buybox: Preis & Versand prüfen");
+  if(tags.includes("dead")&&r.length===0)r.push("Reaktivieren oder auslisten prüfen");
+  return r.join(" · ");
+}
+function amzUnwrap(res){
+  if(res.isError)throw new Error(typeof res.content==="string"?res.content:(res.content&&res.content[0]&&res.content[0].text)||"MCP-Fehler");
+  let p=res.structuredContent;
+  if(!p&&res.content&&res.content[0]&&res.content[0].text){try{p=JSON.parse(res.content[0].text);}catch(e){throw new Error("Antwort nicht lesbar");}}
+  return p;
+}
+const amzSleep=ms=>new Promise(r=>setTimeout(r,ms));
+function amzStatus(msg,err){const s=document.getElementById("amz-status");s.textContent=msg;s.className=err?"err":"";}
+async function amzLoad(){
+  const btn=document.getElementById("amz-refresh"),spin=document.getElementById("amz-spin");
+  btn.disabled=true;spin.style.display="block";
+  const mp=document.getElementById("amz-mp").value,range=document.getElementById("amz-range").value;
+  try{
+    amzStatus("Abfrage läuft — Amazon ist langsam, 2–5 Min…");
+    const q=await window.cowork.callMcpTool("mcp__"+AMZ_SERVER+"__data_query",{
+      ds_id:"ASELL",ds_accounts:mp,fields:AMZ_FIELDS,date_range_type:range,timezone:"Europe/Berlin",max_rows:2000,
+      settings:{report_type:"sales_and_traffic_by_asin",exclude_invalid_accounts:true}});
+    const qp=amzUnwrap(q);
+    const sid=(qp.data&&qp.data.schedule_id)||qp.schedule_id;
+    if(!sid)throw new Error(qp.error||"Keine Schedule-ID");
+    for(let i=0;i<75;i++){
+      await amzSleep(8000);
+      amzStatus("Warte auf Amazon… ("+Math.round((i+1)*8/6)/10+" Min.)");
+      const r=await window.cowork.callMcpTool("mcp__"+AMZ_SERVER+"__get_async_query_results",{schedule_id:sid,compress:true});
+      const rp=amzUnwrap(r);
+      const st=(rp.data&&rp.data.status)||rp.status;
+      if(st==="completed"){
+        const rows=amzParse((rp.data&&rp.data.data)||rp.data);
+        if(!rows.length)throw new Error("Keine Daten für diesen Marktplatz/Zeitraum");
+        AMZ=rows;
+        localStorage.setItem(AMZ_LSKEY,JSON.stringify({ts:Date.now(),mp,range,rows}));
+        amzRender(mp,range,Date.now());
+        amzStatus("✓ "+rows.length+" ASINs geladen");
+        btn.disabled=false;spin.style.display="none";return;
+      }
+      if(st==="failed"||st==="error")throw new Error("Abfrage fehlgeschlagen");
+    }
+    throw new Error("Zeitüberschreitung — später erneut versuchen");
+  }catch(e){amzStatus("Fehler: "+e.message,true);}
+  btn.disabled=false;spin.style.display="none";
+}
+const AMZ_RANGES={last_30_days:"Letzte 30 Tage",last_7_days:"Letzte 7 Tage",last_month:"Letzter Monat",last_90_days:"Letzte 90 Tage"};
+function amzRender(mp,range,ts){
+  const name=(AMZ_MP.find(m=>m[0]===mp)||["","?"])[1];
+  document.getElementById("amz-meta").textContent=name+" · "+(AMZ_RANGES[range]||range)+" · Stand: "+new Date(ts).toLocaleString("de-DE",{dateStyle:"medium",timeStyle:"short"});
+  const sum=k=>AMZ.reduce((a,p)=>a+p[k],0);
+  const rev=sum("rev"),units=sum("units"),sess=sum("sessions");
+  const probs=AMZ.filter(p=>amzClassify(p).length>0).length;
+  const wCvr=sess?AMZ.reduce((a,p)=>a+p.cvr*p.sessions,0)/sess:0;
+  document.getElementById("amz-kpis").innerHTML=`
+    <div class="card stat"><div class="lbl">Umsatz</div><div class="val pos">${eurA(rev)}</div></div>
+    <div class="card stat"><div class="lbl">Einheiten</div><div class="val">${fmt(units)}</div></div>
+    <div class="card stat"><div class="lbl">Sessions</div><div class="val">${fmt(sess)}</div></div>
+    <div class="card stat"><div class="lbl">Ø CVR (gew.)</div><div class="val">${wCvr.toFixed(1)}%</div></div>
+    <div class="card stat"><div class="lbl">ASINs</div><div class="val">${AMZ.length}</div></div>
+    <div class="card stat"><div class="lbl">⚠ Problem-ASINs</div><div class="val neg">${probs}</div></div>`;
+  document.getElementById("h-amz").textContent=eurA(rev);
+  document.getElementById("h-amz-d").textContent=name+" · "+(AMZ_RANGES[range]||range);
+  document.getElementById("h-amzp").textContent=probs;
+  document.getElementById("h-amzp-d").textContent="von "+AMZ.length+" ASINs";
+  amzTable();
+}
+function amzFilter(f,btn){
+  AMZ_FILTER=f;
+  document.querySelectorAll("[data-af]").forEach(b=>b.classList.toggle("on",b===btn));
+  amzTable();
+}
+function amzSort(k){
+  if(AMZ_SORT.key===k)AMZ_SORT.dir*=-1;else{AMZ_SORT.key=k;AMZ_SORT.dir=-1;}
+  amzTable();
+}
+function amzTable(){
+  const q=(document.getElementById("amz-search").value||"").toLowerCase();
+  const dom=AMZ_DOM[document.getElementById("amz-mp").value]||"amazon.de";
+  let rows=AMZ.map(p=>({...p,tags:amzClassify(p)}));
+  if(AMZ_FILTER!=="all")rows=rows.filter(p=>p.tags.includes(AMZ_FILTER));
+  if(q)rows=rows.filter(p=>p.asin.toLowerCase().includes(q)||p.title.toLowerCase().includes(q));
+  rows.sort((a,b)=>(a[AMZ_SORT.key]>b[AMZ_SORT.key]?1:a[AMZ_SORT.key]<b[AMZ_SORT.key]?-1:0)*AMZ_SORT.dir);
+  const ar=k=>AMZ_SORT.key===k?(AMZ_SORT.dir<0?" ↓":" ↑"):"";
+  const bd={dead:'<span class="amz-badge b-dead">Tot</span>',cvr:'<span class="amz-badge b-cvr">CVR</span>',traffic:'<span class="amz-badge b-traffic">Traffic</span>',bb:'<span class="amz-badge b-bb">Buybox</span>'};
+  let html=`<tr><th onclick="amzSort('asin')">ASIN${ar("asin")}</th><th onclick="amzSort('title')">Titel${ar("title")}</th>
+    <th class="num" onclick="amzSort('sessions')">Sessions${ar("sessions")}</th>
+    <th class="num" onclick="amzSort('units')">Einh.${ar("units")}</th>
+    <th class="num" onclick="amzSort('rev')">Umsatz${ar("rev")}</th>
+    <th class="num" onclick="amzSort('cvr')">CVR %${ar("cvr")}</th>
+    <th class="num" onclick="amzSort('bb')">BB %${ar("bb")}</th>
+    <th>Status</th><th>Empfehlung</th></tr>`;
+  html+=rows.map(p=>`<tr>
+    <td><a href="https://www.${dom}/dp/${p.asin}" target="_blank">${p.asin}</a></td>
+    <td class="amz-title" title="${esc(p.title)}">${esc(p.title)}</td>
+    <td class="num">${fmt(p.sessions)}</td><td class="num">${fmt(p.units)}</td>
+    <td class="num">${eurA(p.rev)}</td>
+    <td class="num ${p.cvr<10?"neg":p.cvr>=25?"pos":""}">${p.cvr.toFixed(1)}</td>
+    <td class="num ${p.bb<70?"neg":""}">${p.bb.toFixed(0)}</td>
+    <td>${p.tags.length?p.tags.map(t=>bd[t]).join(""):'<span class="amz-badge b-ok">OK</span>'}</td>
+    <td class="amz-rec">${amzRec(p.tags)}</td></tr>`).join("");
+  if(!rows.length)html+=`<tr><td colspan="9"><div class="empty">Keine Treffer — Live-Daten oben laden</div></td></tr>`;
+  document.getElementById("amz-tbl").innerHTML=html;
+}
+function amzInit(){
+  document.getElementById("amz-mp").innerHTML=AMZ_MP.map(m=>`<option value="${m[0]}">${m[1]}</option>`).join("");
+  let cached=null;
+  try{cached=JSON.parse(localStorage.getItem(AMZ_LSKEY)||"null");}catch(e){}
+  if(cached&&cached.rows&&cached.rows.length){
+    AMZ=cached.rows;
+    document.getElementById("amz-mp").value=cached.mp||"A1PA6795UKMFR9";
+    document.getElementById("amz-range").value=cached.range||"last_30_days";
+    amzRender(cached.mp||"A1PA6795UKMFR9",cached.range||"last_30_days",cached.ts||Date.now());
+  }else if(AMZ_SEED){
+    AMZ=amzParse(AMZ_SEED);
+    amzRender("A1PA6795UKMFR9","last_30_days",new Date("2026-07-19T12:00:00").getTime());
+  }else{
+    amzTable();
+  }
+}
+amzInit();
+
+/* ============ Amazon Maßnahmen-To-Dos (einmalig) ============ */
+function seedAmzTodos(){
+  if(S.amzTodosSeeded)return;
+  const plus=d=>{const x=new Date();x.setDate(x.getDate()+d);return x.getFullYear()+"-"+String(x.getMonth()+1).padStart(2,"0")+"-"+String(x.getDate()).padStart(2,"0");};
+  const T=[
+    // === HOCH: Buybox-Verlierer — Traffic ist da, wir verkaufen nicht ===
+    ["🛒 bite away Two (B0CX5N9X9Z): Buybox zurückholen! 161.000 Sessions, nur 5 Verkäufe. Preis mit Buybox-Gewinner vergleichen, Angebot anpassen","hoch",2],
+    ["🛒 HERPOtherm neo (B0D3H737F8): Buybox nur 6% — Preis & Versandkosten gegen Wettbewerber prüfen","hoch",3],
+    ["🛒 Curcuma Tropfen (B07SRD8C3L): Buybox nur 13% — Preis anpassen oder Angebot prüfen","hoch",3],
+    ["🛒 Automatisches Repricing für alle Buybox-Verlierer (BB <70%) in Seller Central aktivieren (Preise → Preisautomatisierung)","hoch",5],
+    ["🛒 FBM-Artikel mit Buybox-Problem auf FBA/Prime umstellen prüfen (Buybox bevorzugt Prime)","hoch",7],
+    // === MITTEL: Unsichtbare ASINs — Ads & Sichtbarkeit ===
+    ["📣 Sponsored-Products-AUTO-Kampagne je Neuprodukt starten (violila, NEX, sovita Neulistungen) — 5–10 €/Tag, Laufzeit 2 Wochen","mittel",5],
+    ["📣 10%-Coupons auf alle Neuprodukte aktivieren (Werbung → Coupons) — rotes Badge steigert CVR deutlich","mittel",5],
+    ["📣 Amazon Vine für ASINs ohne Bewertungen anmelden (violila & NEX Serie) — erste Reviews sind Verkaufsvoraussetzung","mittel",7],
+    ["🔍 Keywords prüfen: Haupt-Suchbegriff in Titel + Backend-Keywords für alle ASINs mit <50 Sessions ergänzen","mittel",7],
+    ["🖼 A+ Content für violila- und NEX-Produktserien anlegen (Markenregistrierung vorausgesetzt)","mittel",10],
+    ["📣 Nach 2 Wochen: Auto-Kampagnen auswerten → Gewinner-Suchbegriffe in manuelle Kampagne (höheres Gebot), Verlierer als negative Keywords","mittel",19],
+    // === MITTEL: Conversion-Probleme — Traffic da, CVR <10% ===
+    ["📉 Magen-Darm Gel 200ml (B007Q1A0QU): CVR nur 9,3% bei 581 Sessions — Preis je Einheit vs. 500ml-Variante prüfen, Bilder optimieren","mittel",7],
+    ["📉 sovita Bein Balsam (B0BRXSW8JR): CVR 1,3%! Listing komplett prüfen: Hauptbild, Preis, Bewertungen","mittel",7],
+    ["📉 Tiroler Nussöl Alpin LSF 20 (B09TZ18ZV4): CVR 6,9% — Saison nutzen, Listing & Preis checken","mittel",7],
+    // === NIEDRIG: Aufräumen & Routine ===
+    ["🧹 Doppelte NEX-Magnesium-ASINs (240er/540er Varianten) konsolidieren oder auslisten — kannibalisieren sich","niedrig",14],
+    ["🧹 Tote ASINs ohne Reaktivierungs-Strategie bewerten: lohnt Lagerplatz? Sonst auslisten","niedrig",14],
+    ["📅 Wöchentliches ASIN-Review: Dashboard aktualisieren, neue Problem-ASINs prüfen","niedrig",7]
+  ];
+  for(const[txt,prio,days]of T)S.todos.push({id:uid(),text:txt,prio,due:plus(days),done:false});
+  S.amzTodosSeeded=true;save();
+}
+seedAmzTodos();
+
+/* ============ Init ============ */
+document.getElementById("fin-date").value=todayIso();
+document.getElementById("yt-date").value=todayIso();
+document.getElementById("ig-date").value=todayIso();
+renderHome();renderTodos();renderCal();renderFin();renderSnap("yt");renderSnap("ig");renderHabits();renderGoals();
+</script>
+</body>
+</html>
